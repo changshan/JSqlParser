@@ -7,11 +7,10 @@
  * Dual licensed under GNU LGPL 2.1 or Apache License 2.0
  * #L%
  */
-package net.sf.jsqlparser.parser;
+package com.xiaomi.smartql.parser;
 
-public interface ASTNodeAccess {
+public class BaseToken {
 
-    SimpleNode getASTNode();
-
-    void setASTNode(SimpleNode node);
+    public int absoluteBegin = 0;
+    public int absoluteEnd = 0;
 }

@@ -62,6 +62,12 @@ import net.sf.jsqlparser.util.validation.metadata.NamedObject;
  */
 @SuppressWarnings({"PMD.CyclomaticComplexity"})
 public class ExpressionValidator extends AbstractValidator<Expression> implements ExpressionVisitor {
+
+    @Override
+    public void visit(FuzzyValue value) {
+
+    }
+
     @Override
     public void visit(Addition addition) {
         visitBinaryExpression(addition, " + ");

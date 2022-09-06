@@ -98,6 +98,11 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
         select.getSelectBody().accept(this);
     }
 
+    @Override
+    public void visit(FuzzyValue value) {
+
+    }
+
     /**
      * Main entry for this Tool class. A list of found tables is returned.
      */
@@ -127,7 +132,13 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
         if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins()) {
-                join.getRightItem().accept(this);
+                if (join.getRightItem() != null) {
+                    join.getRightItem().accept(this);
+                }
+                List<Column> columnList = join.getUsingColumns();
+                for (Column column : columnList) {
+                    column.accept(this);
+                }
             }
         }
         if (plainSelect.getWhere() != null) {

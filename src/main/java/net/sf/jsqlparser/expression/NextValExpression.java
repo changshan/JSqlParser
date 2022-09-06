@@ -11,7 +11,7 @@ package net.sf.jsqlparser.expression;
 
 import java.util.List;
 import java.util.regex.Pattern;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class NextValExpression extends ASTNodeAccessImpl implements Expression {
 

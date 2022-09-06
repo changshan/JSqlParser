@@ -12,7 +12,7 @@ package net.sf.jsqlparser.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class JsonExpression extends ASTNodeAccessImpl implements Expression {
 

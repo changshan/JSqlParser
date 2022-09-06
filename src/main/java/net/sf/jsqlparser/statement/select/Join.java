@@ -12,7 +12,7 @@ package net.sf.jsqlparser.statement.select;
 import java.util.*;
 
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.schema.Column;
 
 public class Join extends ASTNodeAccessImpl {

@@ -108,6 +108,11 @@ public class ExpressionDeParser extends AbstractDeParser<Expression>
     }
 
     @Override
+    public void visit(FuzzyValue value) {
+
+    }
+
+    @Override
     public void visit(OverlapsCondition overlapsCondition) {
         buffer.append(overlapsCondition.toString());
     }

@@ -7,13 +7,13 @@
  * Dual licensed under GNU LGPL 2.1 or Apache License 2.0
  * #L%
  */
-package net.sf.jsqlparser.parser;
-
-import java.util.ArrayList;
-import java.util.List;
+package com.xiaomi.smartql.parser;
 
 import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractJSqlParser<P> {
 

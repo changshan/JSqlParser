@@ -50,6 +50,11 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     @Override
+    public void visit(FuzzyValue value) {
+
+    }
+
+    @Override
     public void visit(Function function) {
         if (function.getParameters() != null) {
             function.getParameters().accept(this);

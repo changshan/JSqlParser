@@ -9,10 +9,11 @@
  */
 package net.sf.jsqlparser.util.validation;
 
-import java.util.function.Consumer;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statements;
+
+import java.util.function.Consumer;
 
 /**
  * package - private class for {@link Validation} to parse the statements
@@ -46,8 +47,8 @@ final class ParseCapability implements ValidationCapability {
     @Override
     public void validate(ValidationContext context, Consumer<ValidationException> errorConsumer) {
         try {
-            this.parsedStatement = CCJSqlParserUtil.parseStatements(
-                    CCJSqlParserUtil.newParser(statements).withConfiguration(context.getConfiguration()));
+            this.parsedStatement = SmartQLEngine.parseStatements(
+                    SmartQLEngine.newParser(statements).withConfiguration(context.getConfiguration()));
         } catch (JSQLParserException e) {
             errorConsumer.accept(new ParseException("Cannot parse statement: " + e.getMessage(), e));
         }

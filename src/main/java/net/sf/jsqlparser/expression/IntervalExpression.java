@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 import java.util.Objects;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class IntervalExpression extends ASTNodeAccessImpl implements Expression {
 

@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement.select;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class AllColumns extends ASTNodeAccessImpl implements SelectItem, Expression {
 
