@@ -6,11 +6,15 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 
+import java.util.logging.Logger;
+
 /**
  * @author Changshan
  * 2022/9/7
  */
 public class ParserUtil {
+    private static final Logger LOG = Logger.getLogger(ParserUtil.class.getName());
+
     public Expression object2Exp(Object obj) {
         if (obj == null) {
             return null;
@@ -36,6 +40,7 @@ public class ParserUtil {
         try {
             expr = SmartQLEngine.parseExpression(sql);
         } catch (SmartException e) {
+            LOG.fine(e.getMessage());
         }
         return expr;
 
