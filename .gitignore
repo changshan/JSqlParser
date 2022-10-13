@@ -21,3 +21,6 @@
 /nbproject/
 
 /.gradle
+
+
+.DS_Store
