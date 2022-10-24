@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement.alter;
 
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.StatementVisitorAdapter;
 import net.sf.jsqlparser.test.TestUtils;
@@ -44,7 +44,7 @@ public class AlterSystemTest {
     public void testStatementVisitorAdaptor() throws JSQLParserException {
         String sqlStr = "ALTER SYSTEM KILL SESSION '13, 8'";
 
-        CCJSqlParserUtil.parse(sqlStr).accept(new StatementVisitorAdapter());
+        SmartQLEngine.parse(sqlStr).accept(new StatementVisitorAdapter());
     }
 
     /**
@@ -57,7 +57,7 @@ public class AlterSystemTest {
     public void testTableNamesFinder() throws JSQLParserException {
         String sqlStr = "ALTER SYSTEM KILL SESSION '13, 8'";
 
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         List<String> tables = new TablesNamesFinder().getTableList(statement);
         assertEquals(0, tables.size());
     }
@@ -78,7 +78,7 @@ public class AlterSystemTest {
     @Test
     public void testObjectAccess() throws JSQLParserException {
         String sqlStr = "ALTER SYSTEM KILL SESSION '13, 8'";
-        AlterSystemStatement statement = (AlterSystemStatement) CCJSqlParserUtil.parse(sqlStr);
+        AlterSystemStatement statement = (AlterSystemStatement) SmartQLEngine.parse(sqlStr);
 
         assertEquals(AlterSystemOperation.KILL_SESSION, statement.getOperation());
         assertEquals("'13, 8'", statement.getParameters().get(0));

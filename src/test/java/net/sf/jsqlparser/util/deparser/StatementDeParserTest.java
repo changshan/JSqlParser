@@ -14,7 +14,7 @@ import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.IfElseStatement;
@@ -362,14 +362,14 @@ public class StatementDeParserTest {
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     public void shouldUseProvidedDeparsersWhenDeParsingIfThenStatement() throws JSQLParserException {
         String sqlStr = "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin1";
-        IfElseStatement ifElseStatement = (IfElseStatement) CCJSqlParserUtil.parse(sqlStr);
+        IfElseStatement ifElseStatement = (IfElseStatement) SmartQLEngine.parse(sqlStr);
         statementDeParser.deParse(ifElseStatement);
     }
 
     @Test
     public void testIssue1500AllColumns() throws JSQLParserException {
         String sqlStr = "select count(*) from some_table";
-        Select select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        Select select = (Select) SmartQLEngine.parse(sqlStr);
         PlainSelect selectBody = (PlainSelect) select.getSelectBody();
         selectBody.accept(new SelectDeParser());
     }
@@ -377,7 +377,7 @@ public class StatementDeParserTest {
     @Test
     public void testIssue1500AllTableColumns() throws JSQLParserException {
         String sqlStr = "select count(a.*) from some_table a";
-        Select select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        Select select = (Select) SmartQLEngine.parse(sqlStr);
         PlainSelect selectBody = (PlainSelect) select.getSelectBody();
         selectBody.accept(new SelectDeParser());
     }

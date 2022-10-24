@@ -12,7 +12,7 @@ package net.sf.jsqlparser.statement.comment;
 import java.io.StringReader;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import static net.sf.jsqlparser.test.TestUtils.*;
@@ -25,7 +25,7 @@ public class CommentTest {
     @Test
     public void testCommentTable() throws JSQLParserException {
         String statement = "COMMENT ON TABLE table1 IS 'comment1'";
-        Comment comment = (Comment) CCJSqlParserUtil.parse(new StringReader(statement));
+        Comment comment = (Comment) SmartQLEngine.parse(new StringReader(statement));
         Table table = comment.getTable();
         assertEquals("table1", table.getName());
         assertEquals("comment1", comment.getComment().getValue());
@@ -35,7 +35,7 @@ public class CommentTest {
     @Test
     public void testCommentTable2() throws JSQLParserException {
         String statement = "COMMENT ON TABLE schema1.table1 IS 'comment1'";
-        Comment comment = (Comment) CCJSqlParserUtil.parse(new StringReader(statement));
+        Comment comment = (Comment) SmartQLEngine.parse(new StringReader(statement));
         Table table = comment.getTable();
         assertEquals("schema1", table.getSchemaName());
         assertEquals("table1", table.getName());
@@ -57,7 +57,7 @@ public class CommentTest {
     @Test
     public void testCommentColumn() throws JSQLParserException {
         String statement = "COMMENT ON COLUMN table1.column1 IS 'comment1'";
-        Comment comment = (Comment) CCJSqlParserUtil.parse(new StringReader(statement));
+        Comment comment = (Comment) SmartQLEngine.parse(new StringReader(statement));
         Column column = comment.getColumn();
         assertEquals("table1", column.getTable().getName());
         assertEquals("column1", column.getColumnName());
@@ -87,7 +87,7 @@ public class CommentTest {
 
     @Test
     public void testCommentTableColumnDiffersIssue984() throws JSQLParserException {
-        Comment comment = (Comment) CCJSqlParserUtil.parse("COMMENT ON COLUMN myTable.myColumn is 'Some comment'");
+        Comment comment = (Comment) SmartQLEngine.parse("COMMENT ON COLUMN myTable.myColumn is 'Some comment'");
         assertThat(comment.getTable()).isNull();
         assertThat(comment.getColumn().getColumnName()).isEqualTo("myColumn");
         assertThat(comment.getColumn().getTable().getFullyQualifiedName()).isEqualTo("myTable");
@@ -95,7 +95,7 @@ public class CommentTest {
 
     @Test
     public void testCommentTableColumnDiffersIssue984_2() throws JSQLParserException {
-        Comment comment = (Comment) CCJSqlParserUtil.parse("COMMENT ON COLUMN mySchema.myTable.myColumn is 'Some comment'");
+        Comment comment = (Comment) SmartQLEngine.parse("COMMENT ON COLUMN mySchema.myTable.myColumn is 'Some comment'");
         assertThat(comment.getTable()).isNull();
         assertThat(comment.getColumn().getColumnName()).isEqualTo("myColumn");
         assertThat(comment.getColumn().getTable().getFullyQualifiedName()).isEqualTo("mySchema.myTable");
@@ -106,7 +106,7 @@ public class CommentTest {
     @Test
     public void testCommentOnView() throws JSQLParserException {
         String statement = "COMMENT ON VIEW myschema.myView IS 'myComment'";
-        Comment comment = (Comment) CCJSqlParserUtil.parse(statement);
+        Comment comment = (Comment) SmartQLEngine.parse(statement);
         assertThat(comment.getTable()).isNull();
         assertThat(comment.getColumn()).isNull();
         assertThat(comment.getView().getFullyQualifiedName()).isEqualTo("myschema.myView");

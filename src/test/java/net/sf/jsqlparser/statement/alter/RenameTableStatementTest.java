@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement.alter;
 
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.StatementVisitorAdapter;
@@ -61,7 +61,7 @@ public class RenameTableStatementTest {
     public void testStatementVisitorAdaptor() throws JSQLParserException {
         String sqlStr = "RENAME oldTableName TO newTableName";
 
-        CCJSqlParserUtil.parse(sqlStr).accept(new StatementVisitorAdapter());
+        SmartQLEngine.parse(sqlStr).accept(new StatementVisitorAdapter());
     }
 
     /**
@@ -74,7 +74,7 @@ public class RenameTableStatementTest {
     public void testTableNamesFinder() throws JSQLParserException {
         String sqlStr = "RENAME oldTableName TO newTableName";
 
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         List<String> tables = new TablesNamesFinder().getTableList(statement);
         assertEquals(2, tables.size());
         assertTrue(tables.contains("oldTableName"));

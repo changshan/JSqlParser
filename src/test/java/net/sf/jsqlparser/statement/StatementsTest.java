@@ -9,23 +9,22 @@
  */
 package net.sf.jsqlparser.statement;
 
+import com.xiaomi.smartql.parser.ParseException;
+import com.xiaomi.smartql.parser.SmartQLEngine;
+import com.xiaomi.smartql.parser.SmartQLParser;
+import com.xiaomi.smartql.parser.StringProvider;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.ParseException;
-import net.sf.jsqlparser.parser.StringProvider;
 import net.sf.jsqlparser.statement.select.Select;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StatementsTest {
 
     @Test
     public void testStatements() throws JSQLParserException {
         String sqls = "select * from mytable; select * from mytable2;";
-        Statements parseStatements = CCJSqlParserUtil.parseStatements(sqls);
+        Statements parseStatements = SmartQLEngine.parseStatements(sqls);
 
         assertEquals("SELECT * FROM mytable;\nSELECT * FROM mytable2;\n", parseStatements.toString());
 
@@ -36,7 +35,7 @@ public class StatementsTest {
     @Test
     public void testStatementsProblem() throws JSQLParserException {
         String sqls = ";;select * from mytable;;select * from mytable2;;;";
-        Statements parseStatements = CCJSqlParserUtil.parseStatements(sqls);
+        Statements parseStatements = SmartQLEngine.parseStatements(sqls);
 
         assertEquals("SELECT * FROM mytable;\nSELECT * FROM mytable2;\n", parseStatements.toString());
 
@@ -50,7 +49,7 @@ public class StatementsTest {
         // String sqls = "select * from mytable; select * from;";
         String sqls = "select * from mytable; select from;";
 
-        CCJSqlParser parser = new CCJSqlParser(new StringProvider(sqls));
+        SmartQLParser parser = new SmartQLParser(new StringProvider(sqls));
         parser.setErrorRecovery(true);
         Statements parseStatements = parser.Statements();
 
@@ -64,7 +63,7 @@ public class StatementsTest {
     @Test
     public void testStatementsErrorRecovery2() throws JSQLParserException, ParseException {
         String sqls = "select * from1 table;";
-        CCJSqlParser parser = new CCJSqlParser(new StringProvider(sqls));
+        SmartQLParser parser = new SmartQLParser(new StringProvider(sqls));
         parser.setErrorRecovery(true);
         Statements parseStatements = parser.Statements();
 
@@ -80,7 +79,7 @@ public class StatementsTest {
         // String sqls = "select * from mytable; select * from;select * from mytable2";
         String sqls = "select * from mytable; select from;select * from mytable2";
 
-        CCJSqlParser parser = new CCJSqlParser(new StringProvider(sqls));
+        SmartQLParser parser = new SmartQLParser(new StringProvider(sqls));
         parser.setErrorRecovery(true);
         Statements parseStatements = parser.Statements();
 

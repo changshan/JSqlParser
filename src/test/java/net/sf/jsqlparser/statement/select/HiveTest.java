@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import static net.sf.jsqlparser.test.TestUtils.*;
@@ -31,7 +31,7 @@ public class HiveTest {
                 + "LEFT SEMI JOIN\n"
                 + "    Othertable\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
 
         System.out.println(statement.toString());
 

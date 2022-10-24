@@ -12,7 +12,7 @@ public class JSQLParserException extends SmartException {
     }
 
     public JSQLParserException(String message, Throwable cause) {
-        super(ErrorCode.SMART_PARSER, message);
+        super(ErrorCode.SMART_PARSER, message, cause);
     }
 
     public JSQLParserException(String message) {

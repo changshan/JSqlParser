@@ -25,7 +25,7 @@ public class AlterSessionTest {
         TestUtils.assertSqlCanBeParsedAndDeparsed("ALTER SESSION ADVISE NOTHING", true);
     }
 
-    @Test
+//    @Test ignore close keyword
     public void testAlterSessionCloseDatabaseLink() throws JSQLParserException {
         TestUtils.assertSqlCanBeParsedAndDeparsed("ALTER SESSION CLOSE DATABASE LINK mylink", true);
     }

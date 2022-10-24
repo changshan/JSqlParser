@@ -15,7 +15,7 @@ import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -31,7 +31,7 @@ public class AdaptersTest {
     @Test
     public void testAdapters() throws JSQLParserException {
         String sql = "SELECT * FROM MYTABLE WHERE COLUMN_A = :paramA AND COLUMN_B <> :paramB";
-        Statement stmnt = CCJSqlParserUtil.parse(sql);
+        Statement stmnt = SmartQLEngine.parse(sql);
 
         final Stack<Pair<String, String>> params = new Stack<Pair<String, String>>();
         stmnt.accept(new StatementVisitorAdapter() {

@@ -12,7 +12,7 @@ package net.sf.jsqlparser.statement.create;
 import java.io.StringReader;
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import static net.sf.jsqlparser.test.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

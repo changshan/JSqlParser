@@ -11,7 +11,7 @@ package net.sf.jsqlparser.util.cnfexpression;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Disabled;
@@ -36,9 +36,9 @@ public class CNFTest {
      */
     @Test
     public void test1() throws Exception {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "NOT ((1.2 < 2.3 OR 3.5 = 4.6) AND (1.1 <> 2.5 OR 8.0 >= 7.2))");
-        Expression expected = CCJSqlParserUtil.parseCondExpression(
+        Expression expected = SmartQLEngine.parseCondExpression(
                 "(NOT 1.2 < 2.3 OR NOT 1.1 <> 2.5) AND (NOT 1.2 < 2.3 OR NOT 8.0 >= 7.2) AND"
                 + " (NOT 3.5 = 4.6 OR NOT 1.1 <> 2.5) AND (NOT 3.5 = 4.6 OR NOT 8.0 >= 7.2)");
         Expression result = CNFConverter.convertToCNF(expr);
@@ -63,10 +63,10 @@ public class CNFTest {
      */
     @Test
     public void test2() throws Exception {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "((NOT (NOT 1.1 >= 2.3 OR 3.3 < 4.5)) OR "
                 + "(S.A LIKE '\"%%%\"' AND S.B = '\"orz\"'))");
-        Expression expected = CCJSqlParserUtil.parseCondExpression(
+        Expression expected = SmartQLEngine.parseCondExpression(
                 "(1.1 >= 2.3 OR S.A LIKE '\"%%%\"') AND (1.1 >= 2.3 OR S.B = '\"orz\"')"
                 + " AND (NOT 3.3 < 4.5 OR S.A LIKE '\"%%%\"') AND (NOT 3.3 < 4.5 OR S.B = '\"orz\"')");
         Expression result = CNFConverter.convertToCNF(expr);
@@ -254,11 +254,11 @@ public class CNFTest {
      */
     @Test
     public void test3() throws Exception {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "(3.0 >= 4.0 AND 5.0 <= 6.0) OR "
                 + "(((7.0 < 8.0 AND 9.0 > 10.0) AND 11.0 = 12.0) OR "
                 + "NOT (13.0 <> 14.0 OR (15.0 = 16.0 AND (17.0 = 18.0 OR 19.0 > 20.0))))");
-        Expression expected = CCJSqlParserUtil.parseCondExpression(
+        Expression expected = SmartQLEngine.parseCondExpression(
                 "(3.0 >= 4.0 OR 7.0 < 8.0 OR NOT 13.0 <> 14.0) AND "
                 + "(3.0 >= 4.0 OR 7.0 < 8.0 OR NOT 15.0 = 16.0 OR NOT 17.0 = 18.0) AND "
                 + "(3.0 >= 4.0 OR 7.0 < 8.0 OR NOT 15.0 = 16.0 OR NOT 19.0 > 20.0) AND "
@@ -295,8 +295,8 @@ public class CNFTest {
      */
     @Test
     public void test4() throws Exception {
-        Expression expr = CCJSqlParserUtil.parseCondExpression("NOT S.D > {d '2017-03-25'}");
-        Expression expected = CCJSqlParserUtil.parseCondExpression("NOT S.D > {d '2017-03-25'}");
+        Expression expr = SmartQLEngine.parseCondExpression("NOT S.D > {d '2017-03-25'}");
+        Expression expected = SmartQLEngine.parseCondExpression("NOT S.D > {d '2017-03-25'}");
         Expression result = CNFConverter.convertToCNF(expr);
         assertEquals(expected.toString(), result.toString());
     }
@@ -321,10 +321,10 @@ public class CNFTest {
      */
     @Test
     public void test5() throws Exception {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "NOT ((NOT (S.A > 3.5 AND S.B < 4)) OR "
                 + "(S.C LIKE '\"%%\"' OR S.D = {t '12:04:34'}))");
-        Expression expected = CCJSqlParserUtil.parseCondExpression(
+        Expression expected = SmartQLEngine.parseCondExpression(
                 "S.A > 3.5 AND S.B < 4 AND NOT S.C LIKE '\"%%\"' "
                 + "AND NOT S.D = {t '12:04:34'}");
         Expression result = CNFConverter.convertToCNF(expr);
@@ -333,7 +333,7 @@ public class CNFTest {
 
     @Test
     public void testStackOverflowIssue1576() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "((3.0 >= 4.0 AND 5.0 <= 6.0) OR "
                 + "(7.0 < 8.0 AND 9.0 > 10.0) OR "
                 + "(11.0 = 11.0 AND 19.0 > 20.0) OR "
@@ -357,7 +357,7 @@ public class CNFTest {
     @Test
     @Disabled
     public void testStackOverflowIssue1576_veryLarge() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "((3.0 >= 4.0 AND 5.0 <= 6.0) OR "
                 + "(7.0 < 8.0 AND 9.0 > 10.0) OR "
                 + "(11.0 = 11.0 AND 19.0 > 20.0) OR "
@@ -384,7 +384,7 @@ public class CNFTest {
     
     @Test
     public void testStackOverflowIssue1576_2() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "((3.0 >= 4.0 AND 5.0 <= 6.0) OR "
                 + "(7.0 < 8.0 AND 9.0 > 10.0) OR "
                 + "(11.0 = 11.0 AND 19.0 > 20.0) OR "

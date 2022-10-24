@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement.analyze;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.Test;
 

@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -245,7 +245,7 @@ public class JsonFunctionTest {
     @Test
     public void testJavaMethods() throws JSQLParserException {
         String expressionStr = "JSON_OBJECT( KEY 'foo' VALUE bar FORMAT JSON, 'foo':bar, 'foo':bar ABSENT ON NULL WITHOUT UNIQUE KEYS)";
-        JsonFunction jsonFunction = (JsonFunction) CCJSqlParserUtil.parseExpression(expressionStr);
+        JsonFunction jsonFunction = (JsonFunction) SmartQLEngine.parseExpression(expressionStr);
 
         Assertions.assertEquals(JsonFunctionType.OBJECT, jsonFunction.getType());
         Assertions.assertNotEquals(jsonFunction.withType(JsonFunctionType.POSTGRES_OBJECT), jsonFunction.getType());

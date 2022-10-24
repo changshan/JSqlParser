@@ -11,7 +11,7 @@ package net.sf.jsqlparser.expression.mysql;
 
 import java.util.Arrays;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.StatementVisitorAdapter;
@@ -37,10 +37,10 @@ public class MySqlSqlCalcFoundRowsTest {
         String sqlCalcFoundRowsContainingSql = "SELECT SQL_CALC_FOUND_ROWS * FROM TABLE";
         String generalSql = "SELECT * FROM TABLE";
 
-        accept(CCJSqlParserUtil.parse(sqlCalcFoundRowsContainingSql), ref);
+        accept(SmartQLEngine.parse(sqlCalcFoundRowsContainingSql), ref);
         assertTrue(ref.sqlCalcFoundRows);
 
-        accept(CCJSqlParserUtil.parse(generalSql), ref);
+        accept(SmartQLEngine.parse(generalSql), ref);
         assertFalse(ref.sqlCalcFoundRows);
 
         Statement parsed = assertSqlCanBeParsedAndDeparsed(sqlCalcFoundRowsContainingSql);

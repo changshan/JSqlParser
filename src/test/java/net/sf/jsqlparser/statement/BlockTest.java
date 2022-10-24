@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class BlockTest {
      */
     @Test
     public void testGetStatements() throws JSQLParserException {
-        Statements stmts = CCJSqlParserUtil.parseStatements("begin\nselect * from feature;\nend");
+        Statements stmts = SmartQLEngine.parseStatements("begin\nselect * from feature;\nend");
         assertEquals("BEGIN\n"
                 + "SELECT * FROM feature;\n"
                 + "END;\n", stmts.toString());
@@ -34,7 +34,7 @@ public class BlockTest {
 
     @Test
     public void testBlock2() throws JSQLParserException {
-        Statements stmts = CCJSqlParserUtil.parseStatements("begin\n"
+        Statements stmts = SmartQLEngine.parseStatements("begin\n"
                 + "update table1 set a = 'xx' where b = 'condition1';\n"
                 + "update table1 set a = 'xx' where b = 'condition2';\n"
                 + "end;");
@@ -48,7 +48,7 @@ public class BlockTest {
 
     @Test
     public void testBlock3() throws JSQLParserException {
-        Statements stmts = CCJSqlParserUtil.parseStatements("begin\nselect * from feature;\nend");
+        Statements stmts = SmartQLEngine.parseStatements("begin\nselect * from feature;\nend");
         Block block = (Block) stmts.getStatements().get(0);
         assertFalse(block.getStatements().getStatements().isEmpty());
     }

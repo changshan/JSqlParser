@@ -11,12 +11,10 @@ package net.sf.jsqlparser.statement.select;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.xiaomi.smartql.parser.*;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserDefaultVisitor;
-import net.sf.jsqlparser.parser.CCJSqlParserTreeConstants;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.SimpleNode;
-import net.sf.jsqlparser.parser.Token;
+
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statement;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +32,7 @@ public class SelectASTTest {
     public void testSelectASTColumn() throws JSQLParserException {
         String sql = "SELECT  a,  b FROM  mytable  order by   b,  c";
         StringBuilder b = new StringBuilder(sql);
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         Select select = (Select) stmt;
         PlainSelect ps = (PlainSelect) select.getSelectBody();
         for (SelectItem item : ps.getSelectItems()) {
@@ -56,9 +54,9 @@ public class SelectASTTest {
     @Test
     public void testSelectASTNode() throws JSQLParserException {
         String sql = "SELECT  a,  b FROM  mytable  order by   b,  c";
-        SimpleNode node = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode node = (SimpleNode) SmartQLEngine.parseAST(sql);
         node.dump("*");
-        assertEquals(CCJSqlParserTreeConstants.JJTSTATEMENT, node.getId());
+        assertEquals(SmartQLParserTreeConstants.JJTSTATEMENT, node.getId());
     }
 
     private Token subSelectStart;
@@ -67,13 +65,13 @@ public class SelectASTTest {
     @Test
     public void testSelectASTNodeSubSelect() throws JSQLParserException {
         String sql = "SELECT * FROM  mytable  where 0<(select count(*) from mytable2)";
-        SimpleNode node = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode node = (SimpleNode) SmartQLEngine.parseAST(sql);
         node.dump("*");
-        assertEquals(CCJSqlParserTreeConstants.JJTSTATEMENT, node.getId());
-        node.jjtAccept(new CCJSqlParserDefaultVisitor() {
+        assertEquals(SmartQLParserTreeConstants.JJTSTATEMENT, node.getId());
+        node.jjtAccept(new SmartQLParserDefaultVisitor() {
             @Override
             public Object visit(SimpleNode node, Object data) {
-                if (node.getId() == CCJSqlParserTreeConstants.JJTSUBSELECT) {
+                if (node.getId() == SmartQLParserTreeConstants.JJTSUBSELECT) {
                     subSelectStart = node.jjtGetFirstToken();
                     subSelectEnd = node.jjtGetLastToken();
                     return super.visit(node, data);
@@ -93,7 +91,7 @@ public class SelectASTTest {
     public void testSelectASTColumnLF() throws JSQLParserException {
         String sql = "SELECT  a,  b FROM  mytable \n order by   b,  c";
         StringBuilder b = new StringBuilder(sql);
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         Select select = (Select) stmt;
         PlainSelect ps = (PlainSelect) select.getSelectBody();
         for (SelectItem item : ps.getSelectItems()) {
@@ -116,7 +114,7 @@ public class SelectASTTest {
     public void testSelectASTCommentLF() throws JSQLParserException {
         String sql = "SELECT  /* testcomment */ \n a,  b FROM  -- testcomment2 \n mytable \n order by   b,  c";
         StringBuilder b = new StringBuilder(sql);
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         Select select = (Select) stmt;
         PlainSelect ps = (PlainSelect) select.getSelectBody();
         for (SelectItem item : ps.getSelectItems()) {
@@ -139,7 +137,7 @@ public class SelectASTTest {
     public void testSelectASTCommentCRLF() throws JSQLParserException {
         String sql = "SELECT  /* testcomment */ \r\n a,  b FROM  -- testcomment2 \r\n mytable \r\n order by   b,  c";
         StringBuilder b = new StringBuilder(sql);
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         Select select = (Select) stmt;
         PlainSelect ps = (PlainSelect) select.getSelectBody();
         for (SelectItem item : ps.getSelectItems()) {
@@ -161,13 +159,13 @@ public class SelectASTTest {
     @Test
     public void testDetectInExpressions() throws JSQLParserException {
         String sql = "SELECT * FROM  mytable WHERE a IN (1,2,3,4,5,6,7)";
-        SimpleNode node = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode node = (SimpleNode) SmartQLEngine.parseAST(sql);
         node.dump("*");
-        assertEquals(CCJSqlParserTreeConstants.JJTSTATEMENT, node.getId());
-        node.jjtAccept(new CCJSqlParserDefaultVisitor() {
+        assertEquals(SmartQLParserTreeConstants.JJTSTATEMENT, node.getId());
+        node.jjtAccept(new SmartQLParserDefaultVisitor() {
             @Override
             public Object visit(SimpleNode node, Object data) {
-                if (node.getId() == CCJSqlParserTreeConstants.JJTINEXPRESSION) {
+                if (node.getId() == SmartQLParserTreeConstants.JJTINEXPRESSION) {
                     subSelectStart = node.jjtGetFirstToken();
                     subSelectEnd = node.jjtGetLastToken();
                     return super.visit(node, data);
@@ -186,10 +184,10 @@ public class SelectASTTest {
     @Test
     public void testSelectASTExtractWithCommentsIssue1580() throws JSQLParserException {
         String sql = "SELECT  /* testcomment */ \r\n a,  b FROM  -- testcomment2 \r\n mytable \r\n order by   b,  c";
-        SimpleNode root = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode root = (SimpleNode) SmartQLEngine.parseAST(sql);
         List<Token> comments = new ArrayList<>();
 
-        root.jjtAccept(new CCJSqlParserDefaultVisitor() {
+        root.jjtAccept(new SmartQLParserDefaultVisitor() {
             @Override
             public Object visit(SimpleNode node, Object data) {
                 if (node.jjtGetFirstToken().specialToken != null) {
@@ -213,7 +211,7 @@ public class SelectASTTest {
                 + "SELECT order_detail_id, quantity\n"
                 + "/* But ignore this one safely */\n"
                 + "FROM order_details;";
-        SimpleNode root = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode root = (SimpleNode) SmartQLEngine.parseAST(sql);
 
         assertThat(root.jjtGetFirstToken().specialToken.image).isEqualTo("/* I want this comment */");
     }

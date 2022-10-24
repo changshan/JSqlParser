@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ public class SignedExpressionTest {
     @Test
     public void testGetSign() throws JSQLParserException {
         assertThrows(IllegalArgumentException.class,
-                () -> new SignedExpression('*', CCJSqlParserUtil.parseExpression("a")),
+                () -> new SignedExpression('*', SmartQLEngine.parseExpression("a")),
                 "must not work");
 
     }

@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +48,7 @@ public class CloneHelperTest {
                 expressions.stream()
                         .map(expr -> {
                             try {
-                                return CCJSqlParserUtil.parseCondExpression(expr);
+                                return SmartQLEngine.parseCondExpression(expr);
                             } catch (JSQLParserException ex) {
                                 Logger.getLogger(CloneHelperTest.class.getName()).log(Level.SEVERE, null, ex);
                                 return null;

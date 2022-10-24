@@ -11,7 +11,7 @@ package net.sf.jsqlparser.expression;
 
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.StatementVisitorAdapter;
 import net.sf.jsqlparser.test.TestUtils;
@@ -64,10 +64,10 @@ public class OracleNamedFunctionParameterTest {
         String sqlStr
                 = "select r.*, test.numeric_function ( p_1 => r.param1, p_2 => r.param2 ) as resultaat2";
 
-        CCJSqlParserUtil.parse(sqlStr).accept(new StatementVisitorAdapter());
+        SmartQLEngine.parse(sqlStr).accept(new StatementVisitorAdapter());
 
         // alternatively, for the Expression only
-        CCJSqlParserUtil.parseExpression("p_1 => r.param1").accept(new ExpressionVisitorAdapter());
+        SmartQLEngine.parseExpression("p_1 => r.param1").accept(new ExpressionVisitorAdapter());
     }
 
     /**
@@ -81,7 +81,7 @@ public class OracleNamedFunctionParameterTest {
         String sqlStr
                 = "select r.*, test.numeric_function ( p_1 => r.param1, p_2 => r.param2 ) as resultaat2 from test_table";
 
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         List<String> tables = new TablesNamesFinder().getTableList(statement);
         assertEquals(1, tables.size());
         assertTrue(tables.contains("test_table"));

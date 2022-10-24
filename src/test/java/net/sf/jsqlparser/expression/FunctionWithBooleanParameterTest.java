@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -26,43 +26,43 @@ public class FunctionWithBooleanParameterTest {
 
     @Test
     public void testParseOpLowerTotally() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a<b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a<b, c, d)");
         assertEquals("if(a < b, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpLowerOrEqual() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a+x<=b+y, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a+x<=b+y, c, d)");
         assertEquals("if(a + x <= b + y, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpGreaterTotally() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a>b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a>b, c, d)");
         assertEquals("if(a > b, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpGreaterOrEqual() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a>=b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a>=b, c, d)");
         assertEquals("if(a >= b, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpEqual() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a=b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a=b, c, d)");
         assertEquals("if(a = b, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpNotEqualStandard() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a<>b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a<>b, c, d)");
         assertEquals("if(a <> b, c, d)", result.toString());
     }
 
     @Test
     public void testParseOpNotEqualBang() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("if(a!=b, c, d)");
+        Expression result = SmartQLEngine.parseExpression("if(a!=b, c, d)");
         assertEquals("if(a != b, c, d)", result.toString());
     }
 }

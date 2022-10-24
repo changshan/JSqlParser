@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import static net.sf.jsqlparser.test.TestUtils.assertSqlCanBeParsedAndDeparsed;
@@ -32,7 +32,7 @@ public class KSQLTest {
                 + "WITHIN (5 HOURS)\n"
                 + "ON t1.id = t2.id\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
 
         System.out.println(statement.toString());
 
@@ -60,7 +60,7 @@ public class KSQLTest {
                 + "WITHIN (1 MINUTE, 5 MINUTES)\n"
                 + "ON t1.id = t2.id\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
 
         System.out.println(statement.toString());
 
@@ -89,7 +89,7 @@ public class KSQLTest {
                 + "WINDOW HOPPING (SIZE 30 SECONDS, ADVANCE BY 10 MINUTES)\n"
                 + "GROUP BY region.id\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
         System.out.println(statement.toString());
 
         Select select = (Select) statement;
@@ -115,7 +115,7 @@ public class KSQLTest {
                 + "WINDOW SESSION (5 MINUTES)\n"
                 + "GROUP BY region.id\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
         System.out.println(statement.toString());
 
         Select select = (Select) statement;
@@ -139,7 +139,7 @@ public class KSQLTest {
                 + "WINDOW TUMBLING (SIZE 30 SECONDS)\n"
                 + "GROUP BY region.id\n";
 
-        statement = CCJSqlParserUtil.parse(sql);
+        statement = SmartQLEngine.parse(sql);
         System.out.println(statement.toString());
         Select select = (Select) statement;
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -156,7 +156,7 @@ public class KSQLTest {
     @Test
     public void testKSQLEmitChanges() throws Exception {
         String sql = "SELECT * FROM table1 t1 GROUP BY region.id EMIT CHANGES";
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         Select select = (Select) statement;
         PlainSelect selectBody = (PlainSelect) select.getSelectBody();
         assertTrue(selectBody.isEmitChanges());
@@ -166,7 +166,7 @@ public class KSQLTest {
     @Test
     public void testKSQLEmitChangesWithLimit() throws Exception {
         String sql = "SELECT * FROM table1 t1 GROUP BY region.id EMIT CHANGES LIMIT 2";
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         Select select = (Select) statement;
         PlainSelect selectBody = (PlainSelect) select.getSelectBody();
         assertTrue(selectBody.isEmitChanges());

@@ -16,8 +16,8 @@ import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import static net.sf.jsqlparser.test.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -236,7 +236,7 @@ public class UpdateTest {
 
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
 
-        Update update = (Update) CCJSqlParserUtil.parse(sqlStr);
+        Update update = (Update) SmartQLEngine.parse(sqlStr);
         assertEquals(3, update.getUpdateSets().size());
 
         assertEquals(3, update.getUpdateSets().get(0).getColumns().size());
@@ -308,7 +308,7 @@ public class UpdateTest {
 
     @Test
     public void testUpdateSetsIssue1590() throws JSQLParserException {
-        Update update = (Update) CCJSqlParserUtil.parse("update mytable set a=5 where b = 2");
+        Update update = (Update) SmartQLEngine.parse("update mytable set a=5 where b = 2");
         assertEquals(1, update.getUpdateSets().size());
         update.addColumns(new Column("y"));
         update.addExpressions(new DoubleValue("6"));

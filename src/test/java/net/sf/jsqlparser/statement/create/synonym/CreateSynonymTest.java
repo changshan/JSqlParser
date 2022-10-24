@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement.create.synonym;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Synonym;
 import static net.sf.jsqlparser.test.TestUtils.assertSqlCanBeParsedAndDeparsed;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +46,7 @@ public class CreateSynonymTest {
 
     @Test
     public void synonymAttributes() throws Exception {
-        final CreateSynonym createSynonym = (CreateSynonym) CCJSqlParserUtil.parse("CREATE OR REPLACE PUBLIC SYNONYM TBL_TABLE_NAME FOR SCHEMA.T_TBL_NAME");
+        final CreateSynonym createSynonym = (CreateSynonym) SmartQLEngine.parse("CREATE OR REPLACE PUBLIC SYNONYM TBL_TABLE_NAME FOR SCHEMA.T_TBL_NAME");
 
         assertThat(createSynonym.isOrReplace()).isTrue();
         assertThat(createSynonym.isPublicSynonym()).isTrue();

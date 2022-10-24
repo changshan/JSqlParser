@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.NotExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.test.TestUtils;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import net.sf.jsqlparser.util.validation.Validation;
@@ -50,7 +50,7 @@ public class IfElseStatementTest {
                 + "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin2; ELSE CREATE TABLE tOrigin2 (ID VARCHAR (40));\n"
                 + "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin3; ELSE CREATE TABLE tOrigin3 (ID VARCHAR (40));\n";
 
-        Statements result = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements result = SmartQLEngine.parseStatements(sqlStr);
         assertEquals(sqlStr, result.toString());
     }
 
@@ -60,14 +60,14 @@ public class IfElseStatementTest {
                 + "CREATE TABLE tOrigin2 (ID VARCHAR (40));\n"
                 + "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin3; ELSE CREATE TABLE tOrigin3 (ID VARCHAR (40));\n";
 
-        Statements result = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements result = SmartQLEngine.parseStatements(sqlStr);
         assertEquals(sqlStr, result.toString());
     }
 
     @Test
     public void testObjectBuilder() throws JSQLParserException {
-        Statement ifStatement = CCJSqlParserUtil.parse("SELECT * from dual");
-        Statement elseStatement = CCJSqlParserUtil.parse("SELECT * from dual");
+        Statement ifStatement = SmartQLEngine.parse("SELECT * from dual");
+        Statement elseStatement = SmartQLEngine.parse("SELECT * from dual");
 
         IfElseStatement ifElseStatement = new IfElseStatement(new NotExpression(), ifStatement);
         ifElseStatement.setUsingSemicolonForIfStatement(true);
@@ -94,7 +94,7 @@ public class IfElseStatementTest {
     @Test
     public void testTableNames() throws JSQLParserException {
         String sql = "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin1;";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());

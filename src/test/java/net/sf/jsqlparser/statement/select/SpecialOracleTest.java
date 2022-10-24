@@ -21,8 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.xiaomi.smartql.parser.ParseException;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static net.sf.jsqlparser.test.TestUtils.assertSqlCanBeParsedAndDeparsed;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
@@ -266,8 +268,8 @@ public class SpecialOracleTest {
                     String message = ex.getMessage();
 
                     // strip the Exception Class Name from the Message
-                    if (message.startsWith(net.sf.jsqlparser.parser.ParseException.class.getCanonicalName())) {
-                        message = message.substring(net.sf.jsqlparser.parser.ParseException.class.getCanonicalName().length()+2);
+                    if (message.startsWith(ParseException.class.getCanonicalName())) {
+                        message = message.substring(ParseException.class.getCanonicalName().length()+2);
                     }
 
                     int pos = message.indexOf('\n');
@@ -362,7 +364,7 @@ public class SpecialOracleTest {
         for (File file : sqlTestFiles) {
             String sql = FileUtils.readFileToString(file, Charset.forName("UTF-8"));
             try {
-                CCJSqlParserUtil.parse(sql);
+                SmartQLEngine.parse(sql);
                 LOG.log(Level.FINE, "EXPECTED SUCCESS: {0}", file.getName());
             } catch (JSQLParserException ex) {
                 regressionFiles.add(file.getName());

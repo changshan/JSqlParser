@@ -9,21 +9,12 @@
  */
 package net.sf.jsqlparser.test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.xiaomi.smartql.parser.Node;
+import com.xiaomi.smartql.parser.SmartQLEngine;
+import com.xiaomi.smartql.parser.SmartQLParser;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.OracleHint;
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.Node;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -37,10 +28,15 @@ import net.sf.jsqlparser.util.deparser.StatementDeParser;
 import org.apache.commons.lang3.builder.MultilineRecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -90,8 +86,8 @@ public class TestUtils {
      * @throws JSQLParserException
      */
     public static Statement assertSqlCanBeParsedAndDeparsed(String statement, boolean laxDeparsingCheck,
-            Consumer<CCJSqlParser> consumer) throws JSQLParserException {
-        Statement parsed = CCJSqlParserUtil.parse(statement, consumer);
+            Consumer<SmartQLParser> consumer) throws JSQLParserException {
+        Statement parsed = SmartQLEngine.parse(statement, consumer);
         assertStatementCanBeDeparsedAs(parsed, statement, laxDeparsingCheck);
         return parsed;
     }
@@ -293,7 +289,7 @@ public class TestUtils {
     }
 
     public static void assertExpressionCanBeParsedAndDeparsed(String expressionStr, boolean laxDeparsingCheck) throws JSQLParserException {
-        Expression expression = CCJSqlParserUtil.parseExpression(expressionStr);
+        Expression expression = SmartQLEngine.parseExpression(expressionStr);
         assertEquals(buildSqlString(expressionStr, laxDeparsingCheck),
                 buildSqlString(expression.toString(), laxDeparsingCheck));
     }
@@ -304,7 +300,7 @@ public class TestUtils {
             assertSqlCanBeParsedAndDeparsed(sql, true);
         }
 
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         if (statement instanceof Select) {
             Select stmt = (Select) statement;
             if (stmt.getSelectBody() instanceof PlainSelect) {

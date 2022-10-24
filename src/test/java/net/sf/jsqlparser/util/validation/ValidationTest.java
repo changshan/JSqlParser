@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.util.validation.feature.DatabaseType;
@@ -39,7 +39,7 @@ public class ValidationTest extends ValidationTestAsserts {
     @Test
     public void testValidationWithStatementValidator() throws JSQLParserException {
         String sql = "SELECT * FROM tab1, tab2 WHERE tab1.id (+) = tab2.ref";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
 
         StatementValidator validator = new StatementValidator();
         validator.setContext(new ValidationContext()
@@ -93,7 +93,7 @@ public class ValidationTest extends ValidationTestAsserts {
     public void testWithValidationOnlyParse2() throws JSQLParserException {
 
         String sql = "SELECT * FROM tab1, tab2 WHERE value XOR other_value";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         StatementValidator validator = new StatementValidator();
         validator.setContext(new ValidationContext()
                 .setCapabilities(Arrays.asList(DatabaseType.SQLSERVER, DatabaseType.MYSQL)));

@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.select.Select;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class UnsupportedStatementTest {
         Assertions.assertThrowsExactly(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                CCJSqlParserUtil.parse(sqlStr, parser -> parser.withUnsupportedStatements(false) );
+                SmartQLEngine.parse(sqlStr, parser -> parser.withUnsupportedStatements(false) );
             }
         });
     }
@@ -37,7 +37,7 @@ public class UnsupportedStatementTest {
     public void testUnsupportedStatementsFirstInBlock() throws JSQLParserException {
         String sqlStr = "This is an unsupported statement; Select * from dual; Select * from dual;";
 
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(true));
+        Statements statements = SmartQLEngine.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(true));
         Assertions.assertEquals(3, statements.getStatements().size());
         Assertions.assertInstanceOf(UnsupportedStatement.class, statements.getStatements().get(0));
         Assertions.assertInstanceOf(Select.class, statements.getStatements().get(1));
@@ -46,7 +46,7 @@ public class UnsupportedStatementTest {
         Assertions.assertThrowsExactly(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                CCJSqlParserUtil.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(false) );
+                SmartQLEngine.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(false) );
             }
         });
     }
@@ -55,7 +55,7 @@ public class UnsupportedStatementTest {
     public void testUnsupportedStatementsMiddleInBlock() throws JSQLParserException {
         String sqlStr = "Select * from dual; This is an unsupported statement; Select * from dual;";
 
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(true));
+        Statements statements = SmartQLEngine.parseStatements(sqlStr, parser -> parser.withUnsupportedStatements(true));
         Assertions.assertEquals(3, statements.getStatements().size());
 
         Assertions.assertInstanceOf(Select.class, statements.getStatements().get(0));

@@ -9,16 +9,17 @@
  */
 package net.sf.jsqlparser.util.deparser;
 
+import com.xiaomi.smartql.parser.SimpleNode;
+import com.xiaomi.smartql.parser.SmartQLEngine;
+import com.xiaomi.smartql.parser.SmartQLParserDefaultVisitor;
+import com.xiaomi.smartql.parser.SmartQLParserTreeConstants;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserDefaultVisitor;
-import net.sf.jsqlparser.parser.CCJSqlParserTreeConstants;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.SimpleNode;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.view.CreateView;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -58,7 +59,7 @@ public class CreateViewDeParserTest {
         selectDeParser.setExpressionVisitor(expressionDeParser);
 
         CreateViewDeParser instance = new CreateViewDeParser(b, selectDeParser);
-        CreateView vc = (CreateView) CCJSqlParserUtil.
+        CreateView vc = (CreateView) SmartQLEngine.
                 parse("CREATE VIEW test AS SELECT a, b FROM mytable");
         instance.deParse(vc);
 
@@ -71,16 +72,16 @@ public class CreateViewDeParserTest {
     public void testCreateViewASTNode() throws JSQLParserException {
         String sql = "CREATE VIEW test AS SELECT a, b FROM mytable";
         final StringBuilder b = new StringBuilder(sql);
-        SimpleNode node = (SimpleNode) CCJSqlParserUtil.parseAST(sql);
+        SimpleNode node = (SimpleNode) SmartQLEngine.parseAST(sql);
         node.dump("*");
-        assertEquals(CCJSqlParserTreeConstants.JJTSTATEMENT, node.getId());
+        assertEquals(SmartQLParserTreeConstants.JJTSTATEMENT, node.getId());
 
-        node.jjtAccept(new CCJSqlParserDefaultVisitor() {
+        node.jjtAccept(new SmartQLParserDefaultVisitor() {
             int idxDelta = 0;
 
             @Override
             public Object visit(SimpleNode node, Object data) {
-                if (CCJSqlParserTreeConstants.JJTCOLUMN == node.getId()) {
+                if (SmartQLParserTreeConstants.JJTCOLUMN == node.getId()) {
                     b.insert(node.jjtGetFirstToken().beginColumn - 1 + idxDelta, '"');
                     idxDelta++;
                     b.insert(node.jjtGetLastToken().endColumn + idxDelta, '"');

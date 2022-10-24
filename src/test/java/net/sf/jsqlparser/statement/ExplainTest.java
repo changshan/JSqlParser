@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static net.sf.jsqlparser.test.TestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ public class ExplainTest {
 
     @Test
     public void getOption_returnsValues() throws JSQLParserException {
-        ExplainStatement explain = (ExplainStatement) CCJSqlParserUtil.parse("EXPLAIN VERBOSE FORMAT JSON BUFFERS FALSE SELECT * FROM mytable");
+        ExplainStatement explain = (ExplainStatement) SmartQLEngine.parse("EXPLAIN VERBOSE FORMAT JSON BUFFERS FALSE SELECT * FROM mytable");
 
         assertThat(explain.getOption(ExplainStatement.OptionType.ANALYZE)).isNull();
         assertThat(explain.getOption(ExplainStatement.OptionType.VERBOSE)).isNotNull();
@@ -65,7 +65,7 @@ public class ExplainTest {
         ExplainStatement.Option buffers = explain.getOption(ExplainStatement.OptionType.BUFFERS);
         assertThat(buffers).isNotNull().extracting(ExplainStatement.Option::getValue).isEqualTo("FALSE");
 
-        explain = (ExplainStatement) CCJSqlParserUtil.parse("EXPLAIN SELECT * FROM mytable");
+        explain = (ExplainStatement) SmartQLEngine.parse("EXPLAIN SELECT * FROM mytable");
         assertThat(explain.getOption(ExplainStatement.OptionType.ANALYZE)).isNull();
     }
 }

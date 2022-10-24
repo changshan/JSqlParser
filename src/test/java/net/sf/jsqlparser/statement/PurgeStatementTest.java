@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement;
 
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.test.TestUtils;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import net.sf.jsqlparser.util.validation.ValidationTestAsserts;
@@ -49,7 +49,7 @@ public class PurgeStatementTest {
     public void testStatementVisitorAdaptor() throws JSQLParserException {
         String sqlStr = "PURGE TABLE testtable";
 
-        CCJSqlParserUtil.parse(sqlStr).accept(new StatementVisitorAdapter());
+        SmartQLEngine.parse(sqlStr).accept(new StatementVisitorAdapter());
     }
 
     /**
@@ -62,7 +62,7 @@ public class PurgeStatementTest {
     public void testTableNamesFinder() throws JSQLParserException {
         String sqlStr = "PURGE TABLE testtable";
 
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         List<String> tables = new TablesNamesFinder().getTableList(statement);
         assertEquals(1, tables.size());
         assertTrue(tables.contains("testtable"));
@@ -84,7 +84,7 @@ public class PurgeStatementTest {
     @Test
     public void testObjectAccess() throws JSQLParserException {
         String sqlStr = "PURGE TABLESPACE my_table_space USER cfe";
-        PurgeStatement purgeStatement = (PurgeStatement) CCJSqlParserUtil.parse(sqlStr);
+        PurgeStatement purgeStatement = (PurgeStatement) SmartQLEngine.parse(sqlStr);
         purgeStatement.setUserName("common");
 
         assertEquals(PurgeObjectType.TABLESPACE, purgeStatement.getPurgeObjectType());

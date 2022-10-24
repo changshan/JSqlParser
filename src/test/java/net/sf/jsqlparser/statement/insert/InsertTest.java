@@ -17,8 +17,8 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.MultiExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -519,10 +519,10 @@ public class InsertTest {
                         "AS (SELECT  1 , 2 , 3 )\n" +
                         "insert into test\n" +
                         "select * from a";
-        Insert insert = (Insert) CCJSqlParserUtil.parse( sqlStr );
+        Insert insert = (Insert) SmartQLEngine.parse( sqlStr );
 
-        Expression whereExpression = CCJSqlParserUtil.parseExpression("a=1", false);
-        Expression valueExpression = CCJSqlParserUtil.parseExpression("b/2", false);
+        Expression whereExpression = SmartQLEngine.parseExpression("a=1", false);
+        Expression valueExpression = SmartQLEngine.parseExpression("b/2", false);
 
         InsertConflictTarget conflictTarget = new InsertConflictTarget("a", null, null, null);
         insert.setConflictTarget(conflictTarget);

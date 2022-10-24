@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement.merge;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.Statement;
 import static net.sf.jsqlparser.test.TestUtils.*;
 import org.assertj.core.api.Assertions;
@@ -37,7 +37,7 @@ public class MergeTest {
                 + "  INSERT (B.employee_id, B.bonus)\n"
                 + "  VALUES (E.employee_id, E.salary * 0.05)  ";
 
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
 
         System.out.println(statement.toString());
 
@@ -151,7 +151,7 @@ public class MergeTest {
                 + "      SYSDATE\n"
                 + "    )\n";
 
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         assertSqlCanBeParsedAndDeparsed(sql, true);
     }
 
@@ -210,7 +210,7 @@ public class MergeTest {
                 + "\n"
                 + "    WHERE  b.status != 'VALID'\n";
 
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         assertSqlCanBeParsedAndDeparsed(sql, true);
 
         Merge merge = (Merge) statement;

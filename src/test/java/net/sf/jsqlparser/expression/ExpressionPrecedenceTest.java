@@ -12,7 +12,7 @@ package net.sf.jsqlparser.expression;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.operators.arithmetic.BitwiseAnd;
 import net.sf.jsqlparser.expression.operators.arithmetic.Concat;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ public class ExpressionPrecedenceTest {
 
     @Test
     public void testGetSign() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("1&2||3");
+        Expression expr = SmartQLEngine.parseExpression("1&2||3");
         assertTrue(expr instanceof Concat);
         assertTrue(((Concat) expr).getLeftExpression() instanceof BitwiseAnd);
         assertTrue(((Concat) expr).getRightExpression() instanceof LongValue);

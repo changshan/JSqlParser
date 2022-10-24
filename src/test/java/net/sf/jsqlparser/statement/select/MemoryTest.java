@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement.select;
 
 import java.io.StringReader;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
 
 public class MemoryTest {

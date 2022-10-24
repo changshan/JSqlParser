@@ -17,8 +17,8 @@ import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.OracleHint;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.DescribeStatement;
@@ -377,7 +377,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testExpr() throws JSQLParserException {
         String sql = "mycol in (select col2 from mytable)";
-        Expression expr = CCJSqlParserUtil.parseCondExpression(sql);
+        Expression expr = SmartQLEngine.parseCondExpression(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(expr);
         assertEquals(1, tableList.size());
@@ -391,7 +391,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testOracleHint() throws JSQLParserException {
         String sql = "select --+ HINT\ncol2 from mytable";
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         final OracleHint[] holder = new OracleHint[1];
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder() {
 
@@ -420,7 +420,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testGetTableListIssue284() throws Exception {
         String sql = "SELECT NVL( (SELECT 1 FROM DUAL), 1) AS A FROM TEST1";
-        Select selectStatement = (Select) CCJSqlParserUtil.parse(sql);
+        Select selectStatement = (Select) SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(selectStatement);
         assertEquals(2, tableList.size());
@@ -430,7 +430,7 @@ public class TablesNamesFinderTest {
 
     @Test
     public void testUpdateGetTableListIssue295() throws JSQLParserException {
-        Update statement = (Update) CCJSqlParserUtil.parse(
+        Update statement = (Update) SmartQLEngine.parse(
                 "UPDATE component SET col = 0 WHERE (component_id,ver_num) IN (SELECT component_id,ver_num FROM component_temp)");
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(statement);
@@ -444,7 +444,7 @@ public class TablesNamesFinderTest {
         String sql = "MERGE INTO employees e  USING hr_records h  ON (e.id = h.emp_id) WHEN MATCHED THEN  UPDATE SET e.address = h.address  WHEN NOT MATCHED THEN    INSERT (id, address) VALUES (h.emp_id, h.address);";
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 
-        Merge parsed = (Merge) CCJSqlParserUtil.parse(sql);
+        Merge parsed = (Merge) SmartQLEngine.parse(sql);
         List<String> tableList = tablesNamesFinder.getTableList(parsed);
         assertEquals(2, tableList.size());
         assertEquals("employees", tableList.get(0));
@@ -460,7 +460,7 @@ public class TablesNamesFinderTest {
     public void testGetTableListForMergeUsingQuery() throws Exception {
         String sql = "MERGE INTO employees e USING (SELECT * FROM hr_records WHERE start_date > ADD_MONTHS(SYSDATE, -1)) h  ON (e.id = h.emp_id)  WHEN MATCHED THEN  UPDATE SET e.address = h.address WHEN NOT MATCHED THEN INSERT (id, address) VALUES (h.emp_id, h.address)";
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-        List<String> tableList = tablesNamesFinder.getTableList(CCJSqlParserUtil.parse(sql));
+        List<String> tableList = tablesNamesFinder.getTableList(SmartQLEngine.parse(sql));
         assertEquals(2, tableList.size());
         assertEquals("employees", tableList.get(0));
         assertEquals("hr_records", tableList.get(1));
@@ -494,7 +494,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCaseWhenSubSelect() throws JSQLParserException {
         String sql = "select case (select count(*) from mytable2) when 1 then 0 else -1 end";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -504,7 +504,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCaseWhenSubSelect2() throws JSQLParserException {
         String sql = "select case when (select count(*) from mytable2) = 1 then 0 else -1 end";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -514,7 +514,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCaseWhenSubSelect3() throws JSQLParserException {
         String sql = "select case when 1 = 2 then 0 else (select count(*) from mytable2) end";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -524,7 +524,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testExpressionIssue515() throws JSQLParserException {
         TablesNamesFinder finder = new TablesNamesFinder();
-        List<String> tableList = finder.getTableList(CCJSqlParserUtil.parseCondExpression("SOME_TABLE.COLUMN = 'A'"));
+        List<String> tableList = finder.getTableList(SmartQLEngine.parseCondExpression("SOME_TABLE.COLUMN = 'A'"));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("SOME_TABLE"));
     }
@@ -546,7 +546,7 @@ public class TablesNamesFinderTest {
     public void testMySQLValueListExpression() throws JSQLParserException {
         String sql = "SELECT * FROM TABLE1 WHERE (a, b) = (c, d)";
         TablesNamesFinder finder = new TablesNamesFinder();
-        List<String> tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
+        List<String> tableList = finder.getTableList(SmartQLEngine.parse(sql));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("TABLE1"));
     }
@@ -555,7 +555,7 @@ public class TablesNamesFinderTest {
     public void testSkippedSchemaIssue600() throws JSQLParserException {
         String sql = "delete from schema.table where id = 1";
         TablesNamesFinder finder = new TablesNamesFinder();
-        List<String> tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
+        List<String> tableList = finder.getTableList(SmartQLEngine.parse(sql));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("schema.table"));
     }
@@ -564,7 +564,7 @@ public class TablesNamesFinderTest {
     public void testCommentTable() throws JSQLParserException {
         String sql = "comment on table schema.table is 'comment1'";
         TablesNamesFinder finder = new TablesNamesFinder();
-        List<String> tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
+        List<String> tableList = finder.getTableList(SmartQLEngine.parse(sql));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("schema.table"));
     }
@@ -573,7 +573,7 @@ public class TablesNamesFinderTest {
     public void testCommentColumn() throws JSQLParserException {
         String sql = "comment on column schema.table.column1 is 'comment1'";
         TablesNamesFinder finder = new TablesNamesFinder();
-        List<String> tableList = finder.getTableList(CCJSqlParserUtil.parse(sql));
+        List<String> tableList = finder.getTableList(SmartQLEngine.parse(sql));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("schema.table"));
     }
@@ -599,7 +599,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testBetween() throws JSQLParserException {
         String sql = "mycol BETWEEN (select col2 from mytable) AND (select col3 from mytable2)";
-        Expression expr = CCJSqlParserUtil.parseCondExpression(sql);
+        Expression expr = SmartQLEngine.parseCondExpression(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(expr);
         assertEquals(2, tableList.size());
@@ -611,7 +611,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testRemoteLink() throws JSQLParserException {
         String sql = "select * from table1@remote";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -621,7 +621,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCreateSequence_throwsException() throws JSQLParserException {
         String sql = "CREATE SEQUENCE my_seq";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTableList(stmt)).isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("Finding tables from CreateSequence is not supported");
@@ -630,7 +630,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testAlterSequence_throwsException() throws JSQLParserException {
         String sql = "ALTER SEQUENCE my_seq";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTableList(stmt)).isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("Finding tables from AlterSequence is not supported");
@@ -639,7 +639,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCreateSynonym_throwsException() throws JSQLParserException {
         String sql = "CREATE SYNONYM foo FOR bar";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTableList(stmt)).isInstanceOf(UnsupportedOperationException.class)
                 .hasMessage("Finding tables from CreateSynonym is not supported");
@@ -647,7 +647,7 @@ public class TablesNamesFinderTest {
 
     @Test
     public void testNPEIssue1009() throws JSQLParserException {
-        Statement stmt = CCJSqlParserUtil.parse(" SELECT * FROM (SELECT * FROM biz_fund_info WHERE tenant_code = ? AND ((ta_code, manager_code) IN ((?, ?)) OR department_type IN (?)))");
+        Statement stmt = SmartQLEngine.parse(" SELECT * FROM (SELECT * FROM biz_fund_info WHERE tenant_code = ? AND ((ta_code, manager_code) IN ((?, ?)) OR department_type IN (?)))");
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 
         assertThat(tablesNamesFinder.getTableList(stmt)).containsExactly("biz_fund_info");
@@ -656,7 +656,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testAtTimeZoneExpression() throws JSQLParserException {
         String sql = "SELECT DATE(date1 AT TIME ZONE 'UTC' AT TIME ZONE 'australia/sydney') AS another_date FROM mytbl";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -666,7 +666,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testUsing() throws JSQLParserException {
         String sql = "DELETE A USING B.C D WHERE D.Z = 1";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(2, tableList.size());
@@ -677,7 +677,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testJsonFunction() throws JSQLParserException {
         String sql = "SELECT JSON_ARRAY(  1, 2, 3 ) FROM mytbl";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());
@@ -687,7 +687,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testJsonAggregateFunction() throws JSQLParserException {
         String sql = "SELECT JSON_ARRAYAGG( (SELECT * from dual) FORMAT JSON) FROM mytbl";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(2, tableList.size());
@@ -703,7 +703,7 @@ public class TablesNamesFinderTest {
                 + "WHERE department_id = 110 "
                 + "CONNECT BY PRIOR employee_id = manager_id";
 
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         List<String> tableList = tablesNamesFinder.getTableList(stmt);
         assertEquals(1, tableList.size());

@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement.create;
 
 import java.util.Arrays;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.create.function.CreateFunction;
 import net.sf.jsqlparser.statement.create.procedure.CreateProcedure;
 import static net.sf.jsqlparser.test.TestUtils.assertDeparse;
@@ -36,7 +36,7 @@ public class CreateFunctionalStatementTest {
 
     @Test
     public void createFunctionLong() throws JSQLParserException {
-        CreateFunction stm = (CreateFunction) CCJSqlParserUtil.parse("CREATE FUNCTION fun(query_from_time date) RETURNS TABLE(foo double precision, bar double precision)\n"
+        CreateFunction stm = (CreateFunction) SmartQLEngine.parse("CREATE FUNCTION fun(query_from_time date) RETURNS TABLE(foo double precision, bar double precision)\n"
                 + "    LANGUAGE plpgsql\n"
                 + "    AS $$\n"
                 + "      BEGIN\n"
@@ -62,7 +62,7 @@ public class CreateFunctionalStatementTest {
 
     @Test
     public void createProcedureLong() throws JSQLParserException {
-        CreateProcedure stm = (CreateProcedure) CCJSqlParserUtil.parse("CREATE PROCEDURE remove_emp (employee_id NUMBER) AS\n"
+        CreateProcedure stm = (CreateProcedure) SmartQLEngine.parse("CREATE PROCEDURE remove_emp (employee_id NUMBER) AS\n"
                 + "   tot_emps NUMBER;\n"
                 + "   BEGIN\n"
                 + "      DELETE FROM employees\n"

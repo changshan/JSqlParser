@@ -11,7 +11,7 @@ package net.sf.jsqlparser.statement.drop;
 
 import java.io.StringReader;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import static net.sf.jsqlparser.test.TestUtils.*;

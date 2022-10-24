@@ -17,7 +17,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
@@ -35,7 +35,7 @@ public class SelectUtilsTest {
      */
     @Test
     public void testAddExpr() throws JSQLParserException {
-        Select select = (Select) CCJSqlParserUtil.parse("select a from mytable");
+        Select select = (Select) SmartQLEngine.parse("select a from mytable");
         SelectUtils.addExpression(select, new Column("b"));
         assertEquals("SELECT a, b FROM mytable", select.toString());
 
@@ -49,7 +49,7 @@ public class SelectUtilsTest {
 
     @Test
     public void testAddJoin() throws JSQLParserException {
-        Select select = (Select) CCJSqlParserUtil.parse("select a from mytable");
+        Select select = (Select) SmartQLEngine.parse("select a from mytable");
         final EqualsTo equalsTo = new EqualsTo();
         equalsTo.setLeftExpression(new Column("a"));
         equalsTo.setRightExpression(new Column("b"));

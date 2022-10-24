@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.test.TestUtils;
@@ -49,7 +49,7 @@ public class LimitExpressionTest {
     @Test
     public void testMethods() throws JSQLParserException {
         String sqlStr = "SELECT * FROM tmp3 LIMIT 5 OFFSET 3";
-        Select select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        Select select = (Select) SmartQLEngine.parse(sqlStr);
 
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
 
@@ -63,7 +63,7 @@ public class LimitExpressionTest {
         Assertions.assertNotNull(plainSelect.getOffset().getOffset(LongValue.class));
 
         sqlStr = "SELECT * FROM tmp3 LIMIT ALL";
-        select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        select = (Select) SmartQLEngine.parse(sqlStr);
         plainSelect = (PlainSelect) select.getSelectBody();
 
         AllValue allValue = plainSelect.getLimit().getRowCount(AllValue.class);
