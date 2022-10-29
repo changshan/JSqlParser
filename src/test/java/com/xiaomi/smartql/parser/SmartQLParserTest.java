@@ -1,8 +1,9 @@
-package com.xiaomi.smart.parser;
+package com.xiaomi.smartql.parser;
 
 import com.xiaomi.smartql.parser.SmartQLEngine;
 import com.xiaomi.smartql.parser.SmartQLParser;
 import com.xiaomi.smartql.parser.Token;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +13,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLParserTest {
+    
+        @Test
+        public void testDigital_0() {
+        String sql = "select abc.1123abc from abc";
+        SmartQLParser parser=SmartQLEngine.newParser(sql);
+        parser.getNextToken();
+        try {
+            SmartQLEngine.parse(sql);
+        } catch (JSQLParserException e) {
+            throw new RuntimeException(e);
+        }
+        assertTrue(Boolean.TRUE);
+    }
 
+        @Test
+        public void testDigital_1() {
+        String sql = "select (SUM(ads_appstore_shurufa_di.dau)) `A_11561_135_1628671995672`, (SUM(ads_appstore_shurufa_di.7_wakeup_dau)) `A_11561_234_1628671995677`, (SUM(ads_appstore_shurufa_di.14_wakeup_dau)) `A_11561_151_1628671995682` from ads_appstore_shurufa_di   group by `A_11561_63_1628672025663`;";
+        try {
+            SmartQLEngine.parse(sql);
+        } catch (JSQLParserException e) {
+            throw new RuntimeException(e);
+        }
+        assertTrue(Boolean.TRUE);
+    }
 
     @Test
     public void testDigitalField() throws Exception {
