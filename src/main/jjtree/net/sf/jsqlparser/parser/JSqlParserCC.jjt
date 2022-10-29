@@ -130,7 +130,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_ADVISE:"ADVISE">
 |   <K_AGAINST:"AGAINST">
 |   <K_ALGORITHM: "ALGORITHM">
-|   <K_ALL:"ALL">
+/*|   <K_ALL:"ALL"> */
 |   <K_ALTER:"ALTER">
 |   <K_ANALYZE:"ANALYZE">
 |   <K_AND:"AND">
@@ -401,6 +401,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_TYPE:"TYPE">
 |   <K_UNBOUNDED: "UNBOUNDED">
 |   <K_UNION:"UNION">
+|   <K_UNION_ALL:("UNION")(" ")+("ALL")>
 |   <K_UNIQUE:"UNIQUE">
 |   <K_UNLOGGED: "UNLOGGED">
 |   <K_UNPIVOT:"UNPIVOT">
@@ -905,7 +906,7 @@ ResetStatement Reset(): {
     Token all;
 }
 {
-    <K_RESET> ( LOOKAHEAD(2) <K_DATETIMELITERAL> <K_ZONE> {name = "Time Zone"; } | name = RelObjectName() | all = <K_ALL> {name = all.image; } )
+    <K_RESET> ( LOOKAHEAD(2) <K_DATETIMELITERAL> <K_ZONE> {name = "Time Zone"; } | name = RelObjectName() /*| all = <K_ALL> {name = all.image; } */)
     { reset = new ResetStatement(name); }
     { return reset; }
 }
@@ -1898,7 +1899,7 @@ String RelObjectNameExt():
   String result=null;
 }
 {
-    ( result=RelObjectName() | tk=<K_ALL> | tk=<K_ANY>  | tk=<K_SOME> | tk=<K_LEFT> | tk=<K_RIGHT> | tk=<K_SET>
+    ( result=RelObjectName() /*| tk=<K_ALL> */| tk=<K_ANY>  | tk=<K_SOME> | tk=<K_LEFT> | tk=<K_RIGHT> | tk=<K_SET>
         | tk=<K_DOUBLE> | tk=<K_IF> | tk=<K_IIF> | tk=<K_OPTIMIZE> | tk=<K_LIMIT>
         | tk=<K_OFFSET> | tk=<K_PROCEDURE> | tk=<K_PUBLIC>
         | tk=<K_CASEWHEN> | tk=<K_IN> | tk=<K_GROUPING>  )
@@ -2023,9 +2024,9 @@ PlainSelect PlainSelect() #PlainSelect:
     [ LOOKAHEAD(2) first = First() { plainSelect.setFirst(first); } ]
 
     [ LOOKAHEAD(2)
-        ( <K_ALL>
+        ( /*<K_ALL>
         |
-            (
+            */(
                 <K_DISTINCT> { Distinct distinct = new Distinct(); plainSelect.setDistinct(distinct); }
                     [ LOOKAHEAD(2) "ON" "(" distinctOn=SelectItemsList()  { plainSelect.getDistinct().setOnSelectItems(distinctOn); } ")" ]
             )
@@ -2108,7 +2109,7 @@ SelectBody SetOperationList() #SetOperationList: {
     (("(" select=SelectBody() ")" { bracket=true;} )
                     | ( select=PlainSelect() | select=Values() ) { bracket=false;} ) {selects.add(select);brackets.add(bracket); }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_UNION_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
         | <K_EXCEPT> { operations.add(new ExceptOp()); }
@@ -2191,7 +2192,7 @@ SelectBody SetOperationListWithoutIntialSelect(FromItem fromItem) #SetOperationL
         brackets.add(true);
     }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_UNION_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
         | <K_EXCEPT> { operations.add(new ExceptOp()); }
@@ -3750,7 +3751,7 @@ Expression AnyComparisonExpression() :
     ItemsList simpleExpressionList;
 }
 {
- (<K_ANY> { anyType = AnyType.ANY; } | <K_SOME> { anyType = AnyType.SOME; } | <K_ALL> { anyType = AnyType.ALL; } )
+ (<K_ANY> { anyType = AnyType.ANY; } | <K_SOME> { anyType = AnyType.SOME; } /*| <K_ALL> */{ anyType = AnyType.ALL; } )
     "("
 
     // if the next block looks alike an ExpressionList without Brackets, then parse as List
@@ -4015,7 +4016,7 @@ Expression PrimaryExpression() #PrimaryExpression:
 
         | retval=ConnectByRootOperator()
 
-        | LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); }
+        /*| LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); } */
 
         | LOOKAHEAD(2, {!interrupted}) retval=Column()
 
@@ -4848,7 +4849,7 @@ Function InternalFunction(Function retval) :
 {
     funcName = RelObjectNameList()
 
-    "(" [ [ LOOKAHEAD(2)(<K_DISTINCT> { retval.setDistinct(true); } | <K_ALL> { retval.setAllColumns(true); } | <K_UNIQUE> { retval.setUnique(true); }) ]
+    "(" [ [ LOOKAHEAD(2)(<K_DISTINCT> { retval.setDistinct(true); } /* | <K_ALL> { retval.setAllColumns(true); } */ | <K_UNIQUE> { retval.setUnique(true); }) ]
         ( LOOKAHEAD(4)
             "*" { expr1 = new AllColumns(); expressionList = new ExpressionList(expr1).withUsingBrackets(false); }
             |
