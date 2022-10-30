@@ -13,28 +13,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLParserTest {
-    
-        @Test
-        public void testDigital_0() {
+
+    @Test
+    public void testDigital_0() throws Exception {
         String sql = "select abc.1123abc from abc";
-        SmartQLParser parser=SmartQLEngine.newParser(sql);
+        SmartQLParser parser = SmartQLEngine.newParser(sql);
         parser.getNextToken();
-        try {
-            SmartQLEngine.parse(sql);
-        } catch (JSQLParserException e) {
-            throw new RuntimeException(e);
-        }
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
-        @Test
-        public void testDigital_1() {
+    @Test
+    public void testDigital_1() throws Exception {
         String sql = "select (SUM(ads_appstore_shurufa_di.dau)) `A_11561_135_1628671995672`, (SUM(ads_appstore_shurufa_di.7_wakeup_dau)) `A_11561_234_1628671995677`, (SUM(ads_appstore_shurufa_di.14_wakeup_dau)) `A_11561_151_1628671995682` from ads_appstore_shurufa_di   group by `A_11561_63_1628672025663`;";
-        try {
-            SmartQLEngine.parse(sql);
-        } catch (JSQLParserException e) {
-            throw new RuntimeException(e);
-        }
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
@@ -516,7 +508,7 @@ public class SmartQLParserTest {
 
 
     /**
-     *
+     * 特殊字符"%�%"
      */
     @Test
     public void test9() throws Exception {
@@ -646,9 +638,9 @@ public class SmartQLParserTest {
                 "WHERE `date`>=''\n" +
                 "AND product_id='1630659810998'\n" +
                 "AND is_session=1\n" +
-                "GROUPBY `date`,hour,advertiser_id,creative_id\n" +
+                "GROUP BY date,hour,advertiser_id,creative_id\n" +
                 ") t1\n" +
-                "INNERJOIN\n" +
+                "INNER JOIN\n" +
                 "(\n" +
                 "SELECT game_id\n" +
                 ",media_station\n" +
@@ -661,9 +653,9 @@ public class SmartQLParserTest {
                 "AND dp_package_name!=''\n" +
                 ") t2\n" +
                 "ON t1.advertiser_id=t2.advertiser_id AND t1.creative_id=t2.creative_id\n" +
-                "INNERJOIN game_info_all t3\n" +
+                "INNER JOIN game_info_all t3\n" +
                 "ON t2.package_name=t3.package_name\n" +
-                "LEFTJOIN\n" +
+                "LEFT JOIN\n" +
                 "(\n" +
                 "SELECT date\n" +
                 ",concat(str_to_date(cast(date AS string),'%Y%m%d'),' ',lpad(cast(hour AS string),2,'0')) AS hour\n" +
@@ -674,17 +666,17 @@ public class SmartQLParserTest {
                 ",SUM(click) AS click\n" +
                 ",SUM(conversions) AS conversions\n" +
                 "FROM ads_media_report_data_hour\n" +
-                "WHERE date>=${date}\n" +
+                "WHERE date>=''\n" +
                 "AND data_type='CREATIVITY'\n" +
-                "GROUPBY `date`,hour,advertiser_id,creative_id\n" +
+                "GROUP BY `date`,hour,advertiser_id,creative_id\n" +
                 ") t4\n" +
-                "ON t1.date=t4.dateAND t1.hour=t4.hourAND t1.advertiser_id=t4.advertiser_id AND t1.creative_id=t4.creative_id\n" +
-                "GROUPBY t1.date,t1.hour,t2.package_name,t2.deeplink_app_name,t3.app_id,t1.advertiser_id\n" +
+                "ON t1.date=t4.date AND t1.hour=t4.hour AND t1.advertiser_id=t4.advertiser_id AND t1.creative_id=t4.creative_id\n" +
+                "GROUP BY t1.date,t1.hour,t2.package_name,t2.deeplink_app_name,t3.app_id,t1.advertiser_id\n" +
                 ") grow\n" +
-                "LEFTJOIN p_media_account\n" +
-                "ON grow.date=p_media_account.dateAND grow.advertiser_id=p_media_account.account_id\n" +
-                "WHERE p_media_account.date>=${date}\n" +
-                "GROUPBY grow.date,grow.hour,grow.package_name,grow.deeplink_app_name,grow.app_id\n" +
+                "LEFT JOIN p_media_account\n" +
+                "ON grow.date=p_media_account.date AND grow.advertiser_id=p_media_account.account_id\n" +
+                "WHERE p_media_account.date>=''\n" +
+                "GROUP BY grow.date,grow.hour,grow.package_name,grow.deeplink_app_name,grow.app_id\n" +
                 "), base AS\n" +
                 "(\n" +
                 "SELECT polaris.date\n" +
@@ -710,10 +702,10 @@ public class SmartQLParserTest {
                 ",SUM(new_active_cnt) AS new_active_cnt\n" +
                 ",SUM(iaa_income1/100000) AS iaa_income1\n" +
                 "FROM ads_emi_postback_realtime_statistics\n" +
-                "WHERE dt>=${date}\n" +
-                "GROUPBY dt,hour,package_name\n" +
+                "WHERE dt>=''\n" +
+                "GROUP BY dt,hour,package_name\n" +
                 ") emi\n" +
-                "ON polaris.date=emi.dt AND polaris.hour=emi.hourAND polaris.package_name=emi.package_name\n" +
+                "ON polaris.date=emi.dt AND polaris.hour=emi.hour AND polaris.package_name=emi.package_name\n" +
                 ")\n" +
                 "SELECT date\n" +
                 ",hour\n" +
@@ -793,18 +785,19 @@ public class SmartQLParserTest {
     }
 
 
-    /**
-     * broadcase
-     */
-    @Test
-    public void test12() throws Exception {
-        SmartQLParser parser= SmartQLEngine.newParser("SELECT abc,edf from abc union all (select edf,addf from efg)");
-        Token tk=null;
-       do{
-           tk=parser.getNextToken();
-           System.out.println(tk.toString());
 
-        }while(StringUtils.isNotEmpty(tk.toString()));
+    @Test
+    public void test() throws Exception {
+        String sql="SELECT abc,edf from abc union all (select edf,addf from efg)";
+        SmartQLParser parser = SmartQLEngine.newParser(sql);
+        Token tk = null;
+        do {
+            tk = parser.getNextToken();
+            System.out.println(tk.toString());
+
+        } while (StringUtils.isNotEmpty(tk.toString()));
+
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 }

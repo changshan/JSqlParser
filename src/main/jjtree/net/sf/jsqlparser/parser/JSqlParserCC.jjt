@@ -2109,7 +2109,8 @@ SelectBody SetOperationList() #SetOperationList: {
     (("(" select=SelectBody() ")" { bracket=true;} )
                     | ( select=PlainSelect() | select=Values() ) { bracket=false;} ) {selects.add(select);brackets.add(bracket); }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_UNION_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_DISTINCT> { union.setDistinct(true); } ])
+        | <K_UNION_ALL> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); union.setAll(true); }
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
         | <K_EXCEPT> { operations.add(new ExceptOp()); }
@@ -2192,7 +2193,8 @@ SelectBody SetOperationListWithoutIntialSelect(FromItem fromItem) #SetOperationL
         brackets.add(true);
     }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_UNION_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [  <K_DISTINCT> { union.setDistinct(true); } ])
+        | <K_UNION_ALL> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); union.setAll(true); }
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
         | <K_EXCEPT> { operations.add(new ExceptOp()); }
