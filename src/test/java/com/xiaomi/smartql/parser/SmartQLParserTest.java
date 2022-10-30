@@ -1,9 +1,5 @@
 package com.xiaomi.smartql.parser;
 
-import com.xiaomi.smartql.parser.SmartQLEngine;
-import com.xiaomi.smartql.parser.SmartQLParser;
-import com.xiaomi.smartql.parser.Token;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import org.apache.commons.lang3.StringUtils;
