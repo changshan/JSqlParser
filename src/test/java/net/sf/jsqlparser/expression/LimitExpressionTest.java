@@ -9,8 +9,8 @@
  */
 package net.sf.jsqlparser.expression;
 
-import net.sf.jsqlparser.JSQLParserException;
 import com.xiaomi.smartql.parser.SmartQLEngine;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.test.TestUtils;

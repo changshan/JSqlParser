@@ -15,3 +15,4 @@ from v$backup_piece bp)
 
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on 3 Jun 2022, 18:48:09
+--@FAILURE: Encountered unexpected token: "union all" <K_UNION_ALL> recorded first on Nov 1, 2022 2:19:16 AM

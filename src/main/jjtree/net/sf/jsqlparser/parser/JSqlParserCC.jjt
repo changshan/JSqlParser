@@ -1,11 +1,5 @@
 /*
- * #%L
- * JSQLParser library
- * %%
- * Copyright (C) 2004 - 2021 JSQLParser
- * %%
- * Dual licensed under GNU LGPL 2.1 or Apache License 2.0
- * #L%
+ * hajacked from jsqlparser
  */
 
 options {
@@ -130,7 +124,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_ADVISE:"ADVISE">
 |   <K_AGAINST:"AGAINST">
 |   <K_ALGORITHM: "ALGORITHM">
-/*|   <K_ALL:"ALL"> */
+/*|   <K_ALL:"ALL">*/
 |   <K_ALTER:"ALTER">
 |   <K_ANALYZE:"ANALYZE">
 |   <K_AND:"AND">
@@ -2109,7 +2103,7 @@ SelectBody SetOperationList() #SetOperationList: {
     (("(" select=SelectBody() ")" { bracket=true;} )
                     | ( select=PlainSelect() | select=Values() ) { bracket=false;} ) {selects.add(select);brackets.add(bracket); }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [<K_DISTINCT> { union.setDistinct(true); } ])
         | <K_UNION_ALL> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); union.setAll(true); }
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
@@ -2193,7 +2187,7 @@ SelectBody SetOperationListWithoutIntialSelect(FromItem fromItem) #SetOperationL
         brackets.add(true);
     }
     ( LOOKAHEAD(2)
-        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [  <K_DISTINCT> { union.setDistinct(true); } ])
+        ((<K_UNION> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); } [ <K_DISTINCT> { union.setDistinct(true); } ])
         | <K_UNION_ALL> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); union.setAll(true); }
         | <K_INTERSECT> { operations.add(new IntersectOp()); }
         | <K_MINUS> { operations.add(new MinusOp()); }
@@ -3753,7 +3747,7 @@ Expression AnyComparisonExpression() :
     ItemsList simpleExpressionList;
 }
 {
- (<K_ANY> { anyType = AnyType.ANY; } | <K_SOME> { anyType = AnyType.SOME; } /*| <K_ALL> */{ anyType = AnyType.ALL; } )
+ (<K_ANY> { anyType = AnyType.ANY; } | <K_SOME> { anyType = AnyType.SOME; } /*| <K_ALL> { anyType = AnyType.ALL; }*/ )
     "("
 
     // if the next block looks alike an ExpressionList without Brackets, then parse as List
@@ -4018,7 +4012,7 @@ Expression PrimaryExpression() #PrimaryExpression:
 
         | retval=ConnectByRootOperator()
 
-        /*| LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); } */
+        /*| LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); }*/
 
         | LOOKAHEAD(2, {!interrupted}) retval=Column()
 
@@ -4851,7 +4845,7 @@ Function InternalFunction(Function retval) :
 {
     funcName = RelObjectNameList()
 
-    "(" [ [ LOOKAHEAD(2)(<K_DISTINCT> { retval.setDistinct(true); } /* | <K_ALL> { retval.setAllColumns(true); } */ | <K_UNIQUE> { retval.setUnique(true); }) ]
+    "(" [ [ LOOKAHEAD(2)(<K_DISTINCT> { retval.setDistinct(true); } /*| <K_ALL> { retval.setAllColumns(true); } */| <K_UNIQUE> { retval.setUnique(true); }) ]
         ( LOOKAHEAD(4)
             "*" { expr1 = new AllColumns(); expressionList = new ExpressionList(expr1).withUsingBrackets(false); }
             |
@@ -6277,23 +6271,23 @@ AlterSystemStatement AlterSystemStatement():
             "DISCONNECT" "SESSION" { operation = AlterSystemOperation.DISCONNECT_SESSION; }
         )
         |
-        ( 
+        (
             "KILL SESSION" { operation = AlterSystemOperation.KILL_SESSION; }
         )
         |
-        ( 
+        (
             "SWITCH" { operation = AlterSystemOperation.SWITCH; }
         )
         |
-        ( 
+        (
             "SUSPEND" { operation = AlterSystemOperation.SUSPEND; }
         )
         |
-        ( 
+        (
             "RESUME" { operation = AlterSystemOperation.RESUME; }
         )
         |
-        ( 
+        (
             "QUIESCE" "RESTRICTED" { operation = AlterSystemOperation.QUIESCE; }
         )
         |
@@ -6301,19 +6295,19 @@ AlterSystemStatement AlterSystemStatement():
             "UNQUIESCE" { operation = AlterSystemOperation.UNQUIESCE; }
         )
         |
-        ( 
+        (
             "SHUTDOWN" { operation = AlterSystemOperation.SHUTDOWN; }
         )
         |
-        ( 
+        (
             "REGISTER" { operation = AlterSystemOperation.REGISTER; }
         )
         |
-        ( 
+        (
             "SET" { operation = AlterSystemOperation.SET; }
         )
         |
-        ( 
+        (
             "RESET" { operation = AlterSystemOperation.RESET; }
         )
     )
@@ -6362,14 +6356,14 @@ RollbackStatement RollbackStatement():
     <K_ROLLBACK> { rollbackStatement = new RollbackStatement(); }
     [ <K_WORK> { rollbackStatement.setUsingWorkKeyword(true); } ]
     [   (
-            <K_TO> [ <K_SAVEPOINT> { rollbackStatement.setUsingSavepointKeyword(true); }]  
+            <K_TO> [ <K_SAVEPOINT> { rollbackStatement.setUsingSavepointKeyword(true); }]
                 token=<S_IDENTIFIER> { rollbackStatement.setSavepointName(token.image); }
         )
         |
         (
             <K_FORCE> token=<S_CHAR_LITERAL> { rollbackStatement.setForceDistributedTransactionIdentifier(token.image); }
         ) ]
-    
+
     {
         return rollbackStatement;
     }

@@ -9,10 +9,11 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.expression.AllValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class Limit extends ASTNodeAccessImpl {
 
@@ -105,6 +106,11 @@ public class Limit extends ASTNodeAccessImpl {
     }
 
     public <E extends Expression> E getRowCount(Class<E> type) {
-        return type.cast(getRowCount());
+        Expression exp = getRowCount();
+        if (exp instanceof LongValue) {
+            return type.cast(getRowCount());
+        } else {
+            return (E) new AllValue();
+        }
     }
 }
