@@ -33,7 +33,11 @@ public class Limit extends ASTNodeAccessImpl {
     }
 
     public void setRowCount(Expression l) {
-        rowCount = l;
+        if (l.toString().equalsIgnoreCase("ALL")) {
+            rowCount = new AllValue();
+        } else {
+            rowCount = l;
+        }
     }
 
     @Deprecated

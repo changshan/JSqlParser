@@ -265,7 +265,7 @@ public class SpecialOracleTest {
                     success++;
                     recordSuccessOnSourceFile(file);
                 } catch (JSQLParserException ex) {
-                    String message = ex.getMessage();
+                        String message = ex.getMessage();
 
                     // strip the Exception Class Name from the Message
                     if (message.startsWith(ParseException.class.getCanonicalName())) {
