@@ -11,7 +11,7 @@ package net.sf.jsqlparser.expression.operators.relational;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * A "BETWEEN" expr1 expr2 statement

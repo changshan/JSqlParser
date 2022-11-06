@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * Represents the database type for a {@code SEQUENCE}

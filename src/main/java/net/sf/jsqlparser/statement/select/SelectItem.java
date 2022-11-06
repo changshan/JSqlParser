@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import com.xiaomi.smartql.parser.ASTNodeAccess;
+import net.sf.jsqlparser.parser.ASTNodeAccess;
 
 public interface SelectItem extends ASTNodeAccess {
 

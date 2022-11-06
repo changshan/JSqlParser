@@ -20,7 +20,7 @@ import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.StringValue;
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.schema.Column;
 
 public class FullTextSearch extends ASTNodeAccessImpl implements Expression {

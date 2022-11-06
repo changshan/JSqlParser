@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * A '?' in a statement or a ?&lt;number&gt; e.g. ?4

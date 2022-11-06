@@ -1,4 +1,6 @@
-package com.xiaomi.smartql.parser;
+package net.sf.jsqlparser.parser;
+
+import com.xiaomi.smartql.parser.SimpleNode;
 
 public class ASTNodeAccessImpl implements ASTNodeAccess {
 

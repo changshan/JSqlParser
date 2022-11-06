@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 import java.sql.Timestamp;
 import java.util.Objects;

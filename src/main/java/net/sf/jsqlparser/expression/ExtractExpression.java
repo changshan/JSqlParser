@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * Extract value from date/time expression. The name stores the part - name to get from the

@@ -25,6 +25,7 @@ PARSER_BEGIN(SmartQLParser)
 
 package com.xiaomi.smartql.parser;
 
+import net.sf.jsqlparser.parser.*;
 import net.sf.jsqlparser.parser.feature.*;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;

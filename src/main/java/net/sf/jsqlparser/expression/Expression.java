@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 import net.sf.jsqlparser.Model;
-import com.xiaomi.smartql.parser.ASTNodeAccess;
+import net.sf.jsqlparser.parser.ASTNodeAccess;
 
 public interface Expression extends ASTNodeAccess, Model {
 
