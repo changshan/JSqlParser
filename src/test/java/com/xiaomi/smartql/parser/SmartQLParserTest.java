@@ -10,11 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLParserTest {
 
+    private void printToken(SmartQLParser parser){
+        Token tk = null;
+        do {
+            tk = parser.getNextToken();
+            System.out.println(tk.toString());
+
+        } while (StringUtils.isNotEmpty(tk.toString()));
+    }
+
     @Test
     public void testDigital_0() throws Exception {
         String sql = "select abc.1123abc from abc";
-        SmartQLParser parser = SmartQLEngine.newParser(sql);
-        parser.getNextToken();
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -203,25 +210,39 @@ public class SmartQLParserTest {
 
 
     /**
+     * interval后参数分隔符","
      * @throws Exception
      */
     @Test
     public void test6() throws Exception {
         SmartQLEngine.parse("SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
-                "date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 0 month) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
+                "date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval, extract(\n" +
+                "day from now()) day),interval, 0, month) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
                 "FROM\n" +
                 "(\n" +
-                "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 1 month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
+                "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval, extract(\n" +
+                "day from now()) day),interval, 1, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
                 ") WIN,\n" +
                 " (\n" +
-                "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 0 month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
+                "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval, extract(\n" +
+                "day from now()) day),interval, 0, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
                 ") REV\n" +
                 "where WIN.S2 = REV.S2 AND WIN.S3 = REV.S3) sql_model_virtual_table_new_13104_1581 WHERE 1=1 GROUP BY 产品线 HAVING  SUM(与上个月的用量变化) > 50000)orderBy_nested ORDER BY A_13104_324_1631695157575 desc LIMIT 5000");
         assertTrue(Boolean.TRUE);
     }
+
+
+    @Test
+    public void test6_1() throws Exception{
+        String sql="SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'), interval, extract(\n" +
+                "day from now()), day), interval, 1, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3";
+        SmartQLParser parser= SmartQLEngine.newParser(sql);
+//        printToken(parser);
+        SmartQLEngine.parse(sql);
+
+        System.out.println("11");
+    }
+
 
 
     /**
@@ -783,7 +804,7 @@ public class SmartQLParserTest {
 
 
     @Test
-    public void test() throws Exception {
+    public void test1() throws Exception {
         String sql="SELECT abc,edf from abc union all (select edf,addf from efg)";
         SmartQLParser parser = SmartQLEngine.newParser(sql);
         Token tk = null;
@@ -1089,7 +1110,7 @@ public class SmartQLParserTest {
      */
     @Test
     public void testTemp() throws Exception {
-        String sql="";
+        String sql="select * from abc";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
