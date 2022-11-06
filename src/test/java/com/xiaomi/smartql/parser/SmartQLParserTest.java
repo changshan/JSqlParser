@@ -796,4 +796,304 @@ public class SmartQLParserTest {
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
+
+    /**
+     * keyword "row"
+     * @throws Exception
+     */
+    @Test
+    public void test12() throws Exception {
+        String sql="WITH t_domain_total AS(\n" +
+                "    SELECT\n" +
+                "        date,\n" +
+                "        indicator_name,\n" +
+                "        indicator_pv AS indicator_pv_sum\n" +
+                "    FROM\n" +
+                "        dss_negative_feedback_indicator\n" +
+                "    where\n" +
+                "        device_name='miai'\n" +
+                "        and indicator_name in ('repeat_intention')\n" +
+                "        and domain='all'\n" +
+                "),\n" +
+                "\n" +
+                "t_domain_v as (\n" +
+                "SELECT\n" +
+                "    *\n" +
+                "FROM\n" +
+                "(\n" +
+                "SELECT\n" +
+                "    *,\n" +
+                "    row_number() over(PARTITION BY domain order by date desc) as rank\n" +
+                "FROM(\n" +
+                "SELECT\n" +
+                "    --concat(substr(date,1,4),'-',if(weekofyear(date)<10,concat('0',weekofyear(date)),weekofyear(date))) as date,\n" +
+                "    date,\n" +
+                "    domain,\n" +
+                "    indicator_name,\n" +
+                "    indicator_pv,\n" +
+                "    indicator_pv_week,\n" +
+                "    indicator_value,\n" +
+                "    indicator_value_week,\n" +
+                "    influnce_value,\n" +
+                "    influnce_value_week,\n" +
+                "    influnce_nums,\n" +
+                "    influnce_nums_week,\n" +
+                "    indicator_nums,\n" +
+                "    indicator_nums_week,\n" +
+                "    domain_rate_week\n" +
+                "FROM\n" +
+                "(\n" +
+                "SELECT\n" +
+                "    date,\n" +
+                "    domain,\n" +
+                "    case \n" +
+                "    when indicator_name='repeat_intention' then '重说'\n" +
+                "    else '其他'\n" +
+                "    end as indicator_name,\n" +
+                "    indicator_pv,\n" +
+                "     avg(1.0*indicator_pv) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS indicator_pv_week,\n" +
+                "    indicator_value,\n" +
+                "     avg(1.0*indicator_value) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS indicator_value_week,\n" +
+                "    influnce_value,\n" +
+                "     avg(1.0*influnce_value) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS influnce_value_week,\n" +
+                "    influnce_nums,\n" +
+                "     avg(1.0*influnce_nums) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS influnce_nums_week,\n" +
+                "    indicator_nums,\n" +
+                "     avg(1.0*indicator_nums) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS indicator_nums_week,\n" +
+                "    avg(1.0*domain_rate) OVER(PARTITION BY domain,indicator_name ORDER BY date  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS domain_rate_week\n" +
+                "FROM(\n" +
+                "SELECT\n" +
+                "    concat(substr(t1.date,1,4),'-',substr(t1.date,5,2),'-',substr(t1.date,7,2)) as date,\n" +
+                "    domain,\n" +
+                "    indicator_pv,\n" +
+                "    t1.indicator_name,\n" +
+                "    round(indicator_pv/expose_pv,4) as indicator_value,\n" +
+                "    round(indicator_pv/server_pv,4) as influnce_value,\n" +
+                "    round(indicator_pv/server_pv*10000,2) as influnce_nums,\n" +
+                "    round(indicator_pv/expose_pv*10000,2) as indicator_nums,\n" +
+                "    round(1.0*indicator_pv/indicator_pv_sum,4) as domain_rate\n" +
+                "FROM\n" +
+                "    dss_negative_feedback_indicator t1 LEFT JOIN t_domain_total t2 ON t1.date=t2.date and t1.indicator_name=t2.indicator_name\n" +
+                "where\n" +
+                "    device_name='miai'\n" +
+                "    and t1.indicator_name in ('repeat_intention')\n" +
+                ") t\n" +
+                ")  t1\n" +
+                "where\n" +
+                "    pmod(datediff(date, '1920-01-01') - 3, 7)=4\n" +
+                ") t\n" +
+                ") t2\n" +
+                "where rank<=24\n" +
+                "),\n" +
+                "t_std as (\n" +
+                "    SELECT\n" +
+                "        concat(substr(date,1,4),'-',substr(date,5,2),'-',substr(date,7,2)) as date,\n" +
+                "        domain,\n" +
+                "        std,\n" +
+                "        average\n" +
+                "    FROM\n" +
+                "        ads_user_repeat_rate_std_inc_d\n" +
+                "    where\n" +
+                "        device_name='miai'\n" +
+                ")\n" +
+                "SELECT\n" +
+                "    t1.date as date1,\n" +
+                "    t2.date as date2,\n" +
+                "    t1.domain,\n" +
+                "    t1.domain_rate_week as domain_rate_week1,\n" +
+                "    t2.domain_rate_week as domain_rate_week2,\n" +
+                "    t1.indicator_value_week as indicator_value_week1,\n" +
+                "    t2.indicator_value_week as indicator_value_week2,\n" +
+                "    t3.std*0.7 as std,\n" +
+                "    t3.average as average,\n" +
+                "    concat(round(100.0*t3.average,2),'%','(', round(100.0*t3.std*0.7,2),'%',')') as ma30,\n" +
+                "    case when t2. indicator_value_week>t3.average+t3.std*0.7*2 and t2. indicator_value_week<t3.average+t3.std*0.7*3 THEN '偏高(超过2σ)'\n" +
+                "    when t2. indicator_value_week>t3.average+t3.std*0.7*3 THEN '异常(超过3σ)'\n" +
+                "    else '正常' end as is_exception\n" +
+                "FROM\n" +
+                "    t_domain_v as t1  join t_domain_v as t2 on t1.domain=t2.domain\n" +
+                "    left join t_std t3 ON t1.date=t3.date and t1.domain=t3.domain\n" +
+                "where\n" +
+                "    t1.date!=t2.date\n" +
+                "\n" +
+                "\n";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+
+
+    /**
+     * keyword LATERAL
+     * @throws Exception
+     */
+    @Test
+    public void test13() throws Exception {
+        String sql="select t0.*,t1.*\n" +
+                "from \n" +
+                "(select distinct \n" +
+                "adId,\n" +
+                "videourl,\n" +
+                "`素材类型`,\n" +
+                "`标题`,\n" +
+                "customerId,\n" +
+                "companyName,\n" +
+                "campaignId,\n" +
+                "campaignName,\n" +
+                "groupId,\n" +
+                "groupName,\n" +
+                "creativeName,\n" +
+                "appId,\n" +
+                "`app名称`,\n" +
+                "accountIndustry,\n" +
+                "accountIndustryName,\n" +
+                "accountSecondIndustry,\n" +
+                "accountSecondIndustryName,\n" +
+                "placementtype,\n" +
+                "stage,\n" +
+                " get_json_object(imgmaterials, '$.id') id,\n" +
+                " get_json_object(imgmaterials, '$.type') tp,\n" +
+                " get_json_object(imgmaterials, '$.url') imgurl\n" +
+                "from\n" +
+                "(select \n" +
+                "adId,\n" +
+                "imgurl,\n" +
+                "regexp_replace(video, '\"|\\\\[|\\\\]', '')as videourl,\n" +
+                "if(video is null or video='',if(img is null or img='','','图片'),'视频')`素材类型`,\n" +
+                "get_json_object(text,'$.title')`标题`,\n" +
+                "customerId,\n" +
+                "companyName,\n" +
+                "campaignId,\n" +
+                "campaignName,\n" +
+                "groupId,\n" +
+                "groupName,\n" +
+                "creativeName,\n" +
+                "appId,\n" +
+                "get_json_object(product,'$.app_name.zh_CN')`app名称`,\n" +
+                "accountIndustry,\n" +
+                "accountIndustryName,\n" +
+                "accountSecondIndustry,\n" +
+                "accountSecondIndustryName,\n" +
+                "placementtype,\n" +
+                "stage,\n" +
+                "split(\n" +
+                "              regexp_replace(\n" +
+                "                regexp_extract (imgmaterials, '(\\\\[)(.*?)(\\\\])', 2),\n" +
+                "                '\\\\},\\\\{',\n" +
+                "                '\\\\}|\\\\{'\n" +
+                "              ),\n" +
+                "              '\\\\|'\n" +
+                "            ) as a_list\n" +
+                "from miuiads.miui_ad_info lateral view explode(split(img,',')) t as imgurl\n" +
+                "where imgmaterials!=''\n" +
+                "and imgurl != 'undefined'\n" +
+                ")a lateral view explode(a_list) a_list_tab as imgmaterials\n" +
+                ")t1\n" +
+                "left join\n" +
+                "(select a.*,b.`新增激活`,b.`当日激活`,b.`新增当日激活`,b.`打点次留`,b.`当日次留`,b.`新增次留`,b.`新增当日次留`,\n" +
+                "c.`ocpc激活`,c.`ocpc注册`,c.`ocpc留存`,c.`ocpc新增激活`,c.`ocpc召回`,c.`ocpc拉活`\n" +
+                "from\n" +
+                "(select from_unixtime(cast(ts/1000 as bigint),'yyyy-MM-dd') `日期`,\n" +
+                "ad_id,\n" +
+                "trigger_id,\n" +
+                "tagid,\n" +
+                "dspType,\n" +
+                "dsp,\n" +
+                "sum(e_view)`计费曝光`,\n" +
+                "sum(e_click)`计费点击`,\n" +
+                "sum(fee)/100000 `效果收入`,\n" +
+                "sum(e_start_download)`开始下载`,\n" +
+                "sum(e_end_download)`下载成功`,\n" +
+                "sum(e_start_install)`开始安装`,\n" +
+                "sum(e_install)`安装成功`,\n" +
+                "sum(if(action_type='APP_ACTIVE',1,0))`打点激活`\n" +
+                "from miuiads.stats_billing_multi_media\n" +
+                "where date=${date}\n" +
+                "and bot_type <= 0\n" +
+                "and bot_type_value <= 0\n" +
+                "and dspType='effect'\n" +
+                "group by from_unixtime(cast(ts/1000 as bigint),'yyyy-MM-dd'),\n" +
+                "ad_id,\n" +
+                "trigger_id,\n" +
+                "tagid,\n" +
+                "dspType,\n" +
+                "dsp)a \n" +
+                "left join \n" +
+                "(select adId,\n" +
+                "triggerId,\n" +
+                "tagId,\n" +
+                "\tsum(newActive)`新增激活`,\n" +
+                "\tsum(dayActive)`当日激活`,\n" +
+                "\tsum(newDayActive)`新增当日激活`,\n" +
+                "\tsum(retention2)`打点次留`,\n" +
+                "\tsum(dayRetention2)`当日次留`,\n" +
+                "\tsum(newRetention2)`新增次留`,\n" +
+                "\tsum(newDayRetention2)`新增当日次留`\n" +
+                "from miuiads.dwm_ad_active_retention_d\n" +
+                "where date=${date}\n" +
+                "group by adId,\n" +
+                "triggerId,\n" +
+                "tagId)b on (a.trigger_id=b.triggerId and a.tagid=b.tagId)\n" +
+                "left join\n" +
+                "(select \n" +
+                "adId,\n" +
+                "triggerId,\n" +
+                "tagId,\n" +
+                "\tsum(if(convType=1,1,0))`ocpc激活`,\n" +
+                "\tsum(if(convType=2,1,0)) `ocpc注册`,\n" +
+                "\tsum(if(convType=3,1,0))`ocpc留存`,\n" +
+                "\tsum(if(convType=5,1,0))`ocpc新增激活`,\n" +
+                "\tsum(if(convType=10009,1,0))`ocpc召回`,\n" +
+                "\tsum(if(convType=10013,1,0)) `ocpc拉活`,\n" +
+                "\tsum(if(convType=9,1,0)) `ocpc首次拉活`\n" +
+                "from miuiads.dwm_ad_convert_data_d\n" +
+                "where date=${date}\n" +
+                "group by adId,\n" +
+                "triggerId,\n" +
+                "tagId\n" +
+                ")c on (a.trigger_id=c.triggerId and a.tagid=c.tagId)\n" +
+                ")t0 on (t0.ad_id=t1.adId)";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+
+    /**
+     * testcase模版
+     * @throws Exception
+     */
+    @Test
+    public void test14() throws Exception {
+        String sql="select event_day,\n" +
+                "SUM(origin_gain)/100/SUM(query_dau) as ARPU\n" +
+                "from miuiads.media_publisher_stat\n" +
+                "where date<=`20220101`\n" +
+                "--and source_name='第三方APP'\n" +
+                "and package_name in ('com.phonefangdajing.word','com.cssq.key','com.highmultiple.glass','com.happy.walker','com.moji.mjweather','com.shucha.find','cn.etouch.ecalendar','com.shyz.toutiao','com.clandroidxpe.pvctsspeed','com.cssq.walker','com.qianniu.dingwei','com.xqz.gao.qing.fdj','com.csxx.walker','com.cssq.wifi','com.shucha.jiejing','com.calendar2345','com.nineton.weatherforecast','com.ooyun.zongapp','cn.nineton.recordpro','com.textmagnification.king','com.kidguard360.parent','com.ffwei.d3map','com.zzlllll.mbh','com.keliandong.location','com.fubixing.fbxweather','com.kuxiong.phonelocation','com.nowcasting.activity','com.mengbinhe.earthmap','com.droi.adocker.pro','com.cssq.weather','com.jinyufen.d3qqmap','com.bnywl.weixing','com.hd.chargePlatform','com.bee.weathesafety','com.flakesnet.teleprompter','com.chif.weather','com.shanzhi.clicker','com.fnmei.gqwxjj','cn.xiuying.photoeditor.free','com.hudun.androidrecorder','com.position.radar','com.zgzx.weather','com.boniu.saomiaoquannengwang','com.weather.gorgeous','com.qianniu.earth','com.ajxun.sjzw','com.axiny.skdw','com.sdx.widget','com.growth.fgcalfun','com.radara.location','com.qsdwl.bxtq','com.graphic.enlarge','com.bianfeng.place','com.protect.family','com.flakesnet.kuaidingwei','com.ark.beautyweather.cn','com.example.android_youth','com.wifidashi.crack','com.xldposition.app.oledu','com.ai.face.play','com.qiguan.handwnl','com.splingsheng.ringtone','com.beidoujie.main','com.wifikey.wn','com.guangying.ai.solid','com.lml.phantomwallpaper','com.ai.faceshow','com.aikanqua.main','com.example.zqyears_java','com.zxhl.phonelocation','com.nixiang.faces','com.zxym.qqgqjj','com.supertuwen.tool','com.map.world.streetview','com.xunrui.duokai_box','com.moji.calendar','com.maiya.weather'\n" +
+                "--3月8日新增4个包名\n" +
+                "'com.fzandroiduz.usbctsoptic.bp','com.powerful.magnifier','com.ubestkid.beilehu.android','com.mampod.ergedd',\n" +
+                "--3月25日新增3个包名\n" +
+                "'com.ark.careweather.cn','com.omnipotent.clean.expert','com.muhandroidlyf.rsuctsratio',\n" +
+                "--4月22日新增3个包名\n" +
+                "'com.ezlandroidpcd.brctseasy','com.mvideoc.qp','com.oqandroidtxz.hjctstech',\n" +
+                "--6月30日新增\n" +
+                "'com.snda.lantern.wifilocating','com.tianqiyubao2345','com.tianqi2345','com.browser2345','com.app3600eyes','com.app360eyes','com.qihoo.cleandroid_cn','com.geek.weathergj365','com.leaf.image.video.download','com.snda.wifilocating','com.shawn.nfcwriter','coding.yu.pythoncompiler.new','com.tony.usbcamera.molink','com.zdtc.ue.school','com.sagasoft.myreader','com.msc.tasker','com.hainanyksg.ynxx','com.boost.yidianclean.ydql','com.one.click.ido.screenshot','com.syid.measure','com.xiaoniu.master.cleanking','com.iodkols.onekeylockscreen','com.simi.screenlock','com.suyanapps.tuner','com.earn.zysx','com.idotools.qrcode','lf.example.wubi','com.geek.xgweather','com.wjp.gzhread','com.syido.weightpad','com.dotools.note','com.hodanet.charge','com.android.nwctsiu.dkhctstech','cn.ffxivsc','com.lmiot.autotool','com.almighty.speedy.king.app','com.omnipotent.clean.expert','com.neicunjiasu.boost.clean.ncjszs','com.boost.clean.ncjsql.cleaner','com.congbing.nonglin','com.mvtrail.mi.soundmeter','com.syido.decibel','com.github.crazyorr.interestcalculator','com.zhuoyue.cleaner.qingli.zyql','com.geek.jk.calendar.app','com.geek.jk.weather','com.jklight.weather','com.geek.jk.weather.jishi','com.huakaihualuo.pianpianbuyouji.musicarc','com.pd.dbmeter','com.supertuwen.tool','com.xunruifairy.wallpaper','com.sunnight.weather.wqtq','com.ibox.flashlight','com.ltt.compass','com.ibox.calculators','com.weatherday','com.cc.haokan.browser','com.syido.timer','com.likerain.weather.rytq','com.xiaoqiangiot','com.jimi.xsbrowser','io.iftech.android.box','cn.mediaio.mediaio','com.wtkj.app.clicker','com.fzandroiduz.usbctsoptic.bp','com.weatherfz2345','com.qiangli.cleaner.qlql','com.jy.recorder','com.Kingdee.Express','com.yueclean.toolcleaner','com.nasoft.socmark','com.hodanet.radiator','com.lich.lichlotter','com.jimi.zrwnl','com.ancda.parents','com.eternity.appstream','com.phonefangdajing.word','com.mhh.daytimeplay','com.geek.zwweather','com.geek.xycalendar','com.hyww.wisdomtree','com.zhineng.boost.qingli.znyhzs','com.franchise.booster.cn4.cube.clay','com.smartguard.qingli.cleaner.tool','com.icoolme.android.weather','com.shenyaocn.android.barmaker','com.nxtech.app.booster','com.tidy.trash.cleaner','com.jeejen.family','com.limited.cleaner.app','com.smkj.formatconverter','com.shenmi.jiuguan','com.maoxiaodan.fingerttest','com.sea.seaweatherapp','com.shyz.toutiao','com.hellogeek.cleanking','com.gangclub.gamehelper','com.bmx.apackage','com.aicleanyouhua.toolcleaner','com.i13.love.cleaner.tools','com.cleanmaster.mguard_cn','dian.chi','com.isyezon.kbatterydoctor','per.zhj.seefunc','com.xiaoniu.aidou','com.geek.jk.weather.fission','net.joydao.spring2011','com.furui.weather.happy','com.accurate.weather.local','com.xitong.cleaner.xtyhzs','cn.tools123.nettools','org.daai.netcheck','com.cylloveghj.metronomeplus','com.pd.metronome','com.huajiao.app.browser','com.mushroom.app.browser','cn.mediaio.rotate','com.pd.tongxuetimer','com.account.professor','com.geek.luck.calendar.app','com.yitong.weather','com.super.ss.phone.cleaner','com.mywallpaper.customizechanger','com.qujianpan.client','com.qujianpan.client.fast','com.xunlei.downloadprovider','com.lmiot.xyclick','com.hellogeek.iheshui','com.tiqiaa.icontrol','com.mvtrail.metaldetector.cn','com.jinpai.cleaner.qingli.jpql','com.Mqwjo.FCRby','cn.jiyihezi.happi123','com.readily.calculators','com.jijia.sjwnl','com.dongchu.yztq','com.geek.hxcalendar','com.mmc.fengshui.pass','cn.wind.speed.booster.cleaner','com.highmultiple.glass')\n" +
+                "group by event_day";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+    /**
+     * testcase模版
+     * @throws Exception
+     */
+    @Test
+    public void testTemp() throws Exception {
+        String sql="";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+
+
 }
