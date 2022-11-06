@@ -10,7 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLParserTest {
 
-    private void printToken(SmartQLParser parser){
+    /**
+     * 打印token
+     * @param sql
+     */
+    private void printToken(String sql){
+        SmartQLParser parser=SmartQLEngine.newParser(sql);
         Token tk = null;
         do {
             tk = parser.getNextToken();
@@ -20,14 +25,14 @@ public class SmartQLParserTest {
     }
 
     @Test
-    public void testDigital_0() throws Exception {
+    public void testNum() throws Exception {
         String sql = "select abc.1123abc from abc";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
     @Test
-    public void testDigital_1() throws Exception {
+    public void testNum_1() throws Exception {
         String sql = "select (SUM(ads_appstore_shurufa_di.dau)) `A_11561_135_1628671995672`, (SUM(ads_appstore_shurufa_di.7_wakeup_dau)) `A_11561_234_1628671995677`, (SUM(ads_appstore_shurufa_di.14_wakeup_dau)) `A_11561_151_1628671995682` from ads_appstore_shurufa_di   group by `A_11561_63_1628672025663`;";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
