@@ -27,6 +27,7 @@ public class SmartQLParserTest {
     @Test
     public void testNum() throws Exception {
         String sql = "select abc.1123abc from abc";
+        printToken(sql);
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -766,11 +767,12 @@ public class SmartQLParserTest {
 
 
     /**
-     * broadcase
+     * broadcast
+     * 通过Holdor 函数来解决，即通过holdor占位符做最后替换
      */
     @Test
     public void test11() throws Exception {
-        SmartQLEngine.parse("SELECT if(retain2_cnt>0,from_unixtime(basetime,'%Y%m%d'),dt) AS date\n" +
+        String sql="SELECT if(retain2_cnt>0,from_unixtime(basetime,'%Y%m%d'),dt) AS date\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H'),hour) AS hour\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H:%i'),minute) AS minute\n" +
                 ",tagid\n" +
@@ -801,8 +803,10 @@ public class SmartQLParserTest {
                 ",iaa_income/100000 as iaa_income\n" +
                 ",iaa_income1/100000 as iaa_income1\n" +
                 "FROM ads_emi_postback_realtime_statistics t1\n" +
-                "LEFT JOIN [broadcast] game_info_all t2\n" +
-                "ON t1.package_name=t2.package_name");
+                "LEFT JOIN holdor('[broadcast]') game_info_all t2\n" +
+                "ON t1.package_name=t2.package_name";
+        printToken(sql);
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
@@ -1010,10 +1014,10 @@ public class SmartQLParserTest {
                 "              ),\n" +
                 "              '\\\\|'\n" +
                 "            ) as a_list\n" +
-                "from miuiads.miui_ad_info lateral view explode(split(img,',')) t as imgurl\n" +
+                "from miuiads.miui_ad_info lateral view value('explode(split(img,','))') t as imgurl\n" +
                 "where imgmaterials!=''\n" +
                 "and imgurl != 'undefined'\n" +
-                ")a lateral view explode(a_list) a_list_tab as imgmaterials\n" +
+                ")a lateral view value('explode(a_list) a_list_tab') as imgmaterials\n" +
                 ")t1\n" +
                 "left join\n" +
                 "(select a.*,b.`新增激活`,b.`当日激活`,b.`新增当日激活`,b.`打点次留`,b.`当日次留`,b.`新增次留`,b.`新增当日次留`,\n" +
@@ -1085,7 +1089,7 @@ public class SmartQLParserTest {
 
 
     /**
-     * testcase模版
+     * 问题原因，缺少",",'com.fzandroiduz.usbctsoptic.bp'
      * @throws Exception
      */
     @Test
@@ -1097,7 +1101,7 @@ public class SmartQLParserTest {
                 "--and source_name='第三方APP'\n" +
                 "and package_name in ('com.phonefangdajing.word','com.cssq.key','com.highmultiple.glass','com.happy.walker','com.moji.mjweather','com.shucha.find','cn.etouch.ecalendar','com.shyz.toutiao','com.clandroidxpe.pvctsspeed','com.cssq.walker','com.qianniu.dingwei','com.xqz.gao.qing.fdj','com.csxx.walker','com.cssq.wifi','com.shucha.jiejing','com.calendar2345','com.nineton.weatherforecast','com.ooyun.zongapp','cn.nineton.recordpro','com.textmagnification.king','com.kidguard360.parent','com.ffwei.d3map','com.zzlllll.mbh','com.keliandong.location','com.fubixing.fbxweather','com.kuxiong.phonelocation','com.nowcasting.activity','com.mengbinhe.earthmap','com.droi.adocker.pro','com.cssq.weather','com.jinyufen.d3qqmap','com.bnywl.weixing','com.hd.chargePlatform','com.bee.weathesafety','com.flakesnet.teleprompter','com.chif.weather','com.shanzhi.clicker','com.fnmei.gqwxjj','cn.xiuying.photoeditor.free','com.hudun.androidrecorder','com.position.radar','com.zgzx.weather','com.boniu.saomiaoquannengwang','com.weather.gorgeous','com.qianniu.earth','com.ajxun.sjzw','com.axiny.skdw','com.sdx.widget','com.growth.fgcalfun','com.radara.location','com.qsdwl.bxtq','com.graphic.enlarge','com.bianfeng.place','com.protect.family','com.flakesnet.kuaidingwei','com.ark.beautyweather.cn','com.example.android_youth','com.wifidashi.crack','com.xldposition.app.oledu','com.ai.face.play','com.qiguan.handwnl','com.splingsheng.ringtone','com.beidoujie.main','com.wifikey.wn','com.guangying.ai.solid','com.lml.phantomwallpaper','com.ai.faceshow','com.aikanqua.main','com.example.zqyears_java','com.zxhl.phonelocation','com.nixiang.faces','com.zxym.qqgqjj','com.supertuwen.tool','com.map.world.streetview','com.xunrui.duokai_box','com.moji.calendar','com.maiya.weather'\n" +
                 "--3月8日新增4个包名\n" +
-                "'com.fzandroiduz.usbctsoptic.bp','com.powerful.magnifier','com.ubestkid.beilehu.android','com.mampod.ergedd',\n" +
+                ",'com.fzandroiduz.usbctsoptic.bp','com.powerful.magnifier','com.ubestkid.beilehu.android','com.mampod.ergedd',\n" +
                 "--3月25日新增3个包名\n" +
                 "'com.ark.careweather.cn','com.omnipotent.clean.expert','com.muhandroidlyf.rsuctsratio',\n" +
                 "--4月22日新增3个包名\n" +

@@ -173,7 +173,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_COSTS: "COSTS">
 |   <K_CREATE:"CREATE">
 |   <K_CROSS:"CROSS">
-/*|   <K_CURRENT: "CURRENT">*/
+|   <K_CURRENT: "CURRENT">
 |   <K_CYCLE:"CYCLE">
 /*|   <K_DATABASE:"DATABASE">*/
 |   <K_DECLARE: "DECLARE">
@@ -457,7 +457,7 @@ TOKEN : /* Date/Time with time zones */
 
 TOKEN : /* Numeric Constants */
 {
-   < S_DOUBLE: ((<S_LONG>)? "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
+   < S_DOUBLE: ((<S_LONG>) "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
             |
             <S_LONG> "." (["e","E"] (["+", "-"])? <S_LONG>)?
             |
@@ -1912,7 +1912,7 @@ String RelObjectNameExt2():
   String result=null;
 }
 {
-    ( result=RelObjectNameExt() | tk=<K_FROM> | tk=<K_SELECT> /*| tk=<K_CURRENT>*/ )
+    ( result=RelObjectNameExt() | tk=<K_FROM> | tk=<K_SELECT> | tk=<K_CURRENT> )
     {
         if (tk!=null) result=tk.image;
         return result;
@@ -4003,7 +4003,7 @@ Expression PrimaryExpression() #PrimaryExpression:
         //| LOOKAHEAD(2) retval=RowConstructor()
 
         // support timestamp expressions
-        /*| (token=<K_TIME_KEY_EXPR> | token=<K_CURRENT>) { retval = new TimeKeyExpression(token.image); }*/
+        | (/*token=<K_TIME_KEY_EXPR> | */token=<K_CURRENT>) { retval = new TimeKeyExpression(token.image); }
 
         | LOOKAHEAD(2, {!interrupted}) retval=DateTimeLiteralExpression()
 
@@ -4554,8 +4554,8 @@ WindowOffset WindowOffset():
 			<K_UNBOUNDED> (<K_PRECEDING> { offset.setType(WindowOffset.Type.PRECEDING); } |
 											<K_FOLLOWING> { offset.setType(WindowOffset.Type.FOLLOWING); } )
 		)
-		/*|
-		LOOKAHEAD(2) ( <K_CURRENT> <K_ROW> { offset.setType(WindowOffset.Type.CURRENT); } )*/
+		|
+		LOOKAHEAD(2) ( <K_CURRENT> <K_ROW> { offset.setType(WindowOffset.Type.CURRENT); } )
 		|
 		( expr = SimpleExpression() {
 			offset.setType(WindowOffset.Type.EXPR);
