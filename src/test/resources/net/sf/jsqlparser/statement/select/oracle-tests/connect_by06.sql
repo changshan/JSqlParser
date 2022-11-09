@@ -16,3 +16,5 @@ select last_name "Employee", connect_by_root last_name "Manager",
    
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 14, 2021 9:00:57 PM
+--@FAILURE: Encountered unexpected token: "connect" "CONNECT" recorded first on Nov 10, 2022 4:02:08 AM
+--@FAILURE: Encountered unexpected token: "level" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

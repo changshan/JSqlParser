@@ -17,3 +17,4 @@ group by tn, ui, (tt || tc)
 order by 1
 
 --@FAILURE: Encountered unexpected token: "group" "GROUP" recorded first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "tt" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

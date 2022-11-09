@@ -43,3 +43,4 @@ select a.probability prob, a.cluster_id cl_id,
 order by prob desc, cl_id asc, conf desc, attr asc, val asc
 
 --@FAILURE: Encountered unexpected token: "(" "(" recorded first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "\nwith" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

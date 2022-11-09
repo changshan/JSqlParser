@@ -177,7 +177,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CYCLE:"CYCLE">
 /*|   <K_DATABASE:"DATABASE">*/
 |   <K_DECLARE: "DECLARE">
-|   <K_DATETIMELITERAL : ("DATE" | "TIME" | "TIMESTAMP" | "TIMESTAMPTZ") >
+|   <K_DATETIMELITERAL : ("TIME" | "TIMESTAMP" | "TIMESTAMPTZ") >
 |   <K_DATE_LITERAL : ( "YEAR" | "MONTH" | "DAY" | "HOUR" | "MINUTE" | "SECOND" ) >
 |   <K_DBA_RECYCLEBIN: "DBA_RECYCLEBIN">
 |   <K_DEFAULT : "DEFAULT">
@@ -370,7 +370,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_SIZE:"SIZE">
 |   <K_SKIP: "SKIP">
 |   <K_SOME:"SOME">
-|   <K_START:"START">
+/*|   <K_START:"START"> */
 |   <K_SUSPEND:"SUSPEND">
 |   <K_SWITCH: "SWITCH">
 |   <K_SYNONYM:"SYNONYM">
@@ -1818,7 +1818,7 @@ String RelObjectNameWithoutValue() :
       | tk=<K_ALGORITHM> | tk=<K_AT>
       | tk=<K_BYTE> | tk=<K_CHAR> | tk=<K_CHANGE> | tk=<K_CHARACTER>
       | tk=<K_CAST> | tk =<K_TRY_CAST> | tk=<K_COMMENT> | tk=<K_COSTS> | tk=<K_DISABLE> | tk=<K_DESC>
-      | tk=<K_DO> | tk=<K_DEFAULT> | tk=<K_EXTRACT> | tk=<K_FILTER> | tk=<K_FIRST> | tk=<K_FOLLOWING> | tk=<K_JSON>
+      | tk=<K_DO> | tk=<K_DEFAULT>  | tk=<K_EXTRACT> | tk=<K_FILTER> | tk=<K_FIRST> | tk=<K_FOLLOWING> | tk=<K_JSON>
       | tk=<K_LAST> | tk=<K_LEADING> | tk=<K_MATERIALIZED> | tk=<K_NULLS> | tk=<K_PARTITION> | tk=<K_RANGE>
       | tk=<K_ROW> | tk=<K_ROWS> | tk=<K_SIBLINGS> | tk=<K_XML>
       | tk=<K_COLUMN> | tk=<K_REPLACE> | tk=<K_TRUNCATE> | tk=<K_KEY>
@@ -1865,7 +1865,7 @@ String RelObjectName() :
 {    Token tk = null; String result = null; }
 {
     (result = RelObjectNameWithoutValue()
-		| tk=<K_GROUP> | tk=<K_INTERVAL> | tk=<K_ON> | tk=<K_ORDER> | tk=<K_START> | tk=<K_TOP> | tk=<K_VALUE>
+		| tk=<K_GROUP> | tk=<K_INTERVAL> | tk=<K_ON> | tk=<K_ORDER> | /*tk=<K_START> | */tk=<K_TOP> | tk=<K_VALUE>
         | tk=<K_VALUES> | tk=<K_CREATE> | tk=<K_TABLES> )
 
     {
@@ -1996,7 +1996,7 @@ PlainSelect PlainSelect() #PlainSelect:
     Top top = null;
         Skip skip = null;
         First first = null;
-    OracleHierarchicalExpression oracleHierarchicalQueryClause = null;
+    /*OracleHierarchicalExpression oracleHierarchicalQueryClause = null;*/
     List<Table> intoTables = null;
     Table updateTable = null;
     Wait wait = null;
@@ -2052,7 +2052,7 @@ PlainSelect PlainSelect() #PlainSelect:
 
     [ LOOKAHEAD(2) ksqlWindow=KSQLWindowClause() { plainSelect.setKsqlWindow(ksqlWindow); } ]
     [ LOOKAHEAD(2) where=WhereClause() { plainSelect.setWhere(where); }]
-    [ oracleHierarchicalQueryClause=OracleHierarchicalQueryClause() { plainSelect.setOracleHierarchical(oracleHierarchicalQueryClause); } ]
+    /*[ oracleHierarchicalQueryClause=OracleHierarchicalQueryClause() { plainSelect.setOracleHierarchical(oracleHierarchicalQueryClause); } ]*/
     [ groupBy=GroupByColumnReferences() { plainSelect.setGroupByElement(groupBy); }]
     [ having=Having() { plainSelect.setHaving(having); }]
     [LOOKAHEAD(<K_ORDER> <K_SIBLINGS> <K_BY>) orderByElements = OrderByElements() { plainSelect.setOracleSiblings(true); plainSelect.setOrderByElements(orderByElements);    }   ]
@@ -2850,7 +2850,7 @@ Expression WhereClause():
     <K_WHERE> retval=Expression()
     { return retval; }
 }
-
+/*
 OracleHierarchicalExpression OracleHierarchicalQueryClause():
 {
     OracleHierarchicalExpression result = new OracleHierarchicalExpression();
@@ -2872,7 +2872,7 @@ OracleHierarchicalExpression OracleHierarchicalQueryClause():
     {
         return result;
     }
-}
+}*/
 
 GroupByElement GroupByColumnReferences():
 {
@@ -4578,7 +4578,7 @@ ExtractExpression ExtractExpression() :
     Expression expr = null;
 }
 {
-    <K_EXTRACT>
+   (<K_INTERVAL>)? <K_EXTRACT>
     "("
         ( fieldName=RelObjectName() { retval.setName(fieldName); } | token=<S_CHAR_LITERAL> { retval.setName(token.image); } )
         <K_FROM>
@@ -6498,14 +6498,14 @@ List<Sequence.Parameter> SequenceParameters():
     }
    )
    |
-   (<K_START> <K_WITH> token=<S_LONG>
+   /*(<K_START> <K_WITH> token=<S_LONG>
     {
       parameter = new Sequence.Parameter(Sequence.ParameterType.START_WITH);
       parameter.setValue(Long.parseLong(token.image));
       sequenceParameters.add(parameter);
     }
    )
-   |
+   |*/
    (<K_RESTART> [<K_WITH> token=<S_LONG>]
     {
       parameter = new Sequence.Parameter(Sequence.ParameterType.RESTART_WITH);

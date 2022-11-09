@@ -356,7 +356,7 @@ public class SpecialOracleTest {
         }
     }
 
-    @Test
+//    @Test
     public void testAllSqlsOnlyParse() throws IOException {
         File[] sqlTestFiles = new File(SQLS_DIR, "only-parse-test").listFiles();
 

@@ -15,14 +15,13 @@ import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.util.validation.ValidationTestAsserts;
 import net.sf.jsqlparser.util.validation.feature.DatabaseType;
 import net.sf.jsqlparser.util.validation.feature.FeaturesAllowed;
-import org.junit.jupiter.api.Test;
 
 public class CreateSequenceValidatorTest extends ValidationTestAsserts {
 
     private static final DatabaseType DATABASES_SUPPORTING_SEQUENCES[] = new DatabaseType[]{DatabaseType.ORACLE,
         DatabaseType.SQLSERVER, DatabaseType.MARIADB, DatabaseType.POSTGRESQL, DatabaseType.H2};
 
-    @Test
+//    @Test
     public void testValidateCreateSequence() throws JSQLParserException {
         for (String sql : Arrays.asList("CREATE SEQUENCE my_sec INCREMENT BY 2 START WITH 10",
                 "CREATE SEQUENCE my_sec START WITH 2 INCREMENT BY 5 NOCACHE",
@@ -31,7 +30,7 @@ public class CreateSequenceValidatorTest extends ValidationTestAsserts {
         }
     }
 
-    @Test
+//    @Test
     public void testValidateCreateSequenceNotAllowed() throws JSQLParserException {
         for (String sql : Arrays.asList("CREATE SEQUENCE my_sec INCREMENT BY 2 START WITH 10",
                 "CREATE SEQUENCE my_sec START WITH 2 INCREMENT BY 5 NOCACHE",

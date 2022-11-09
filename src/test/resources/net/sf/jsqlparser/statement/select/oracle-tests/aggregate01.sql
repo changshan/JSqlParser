@@ -79,3 +79,4 @@ left outer join servicedesk.itsm_configuration_items t10 on (incident.inc_cit_oi
 left outer join servicedesk.itsm_historylines_incident t102 on (incident.inc_oid = t102.hin_inc_oid and t102.hin_subject like 'priority set to%')
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "\nwith" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

@@ -14,3 +14,4 @@ connect by prior t.id = t.parent_id
 order siblings by t.some_text
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "start" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:02:08 AM
