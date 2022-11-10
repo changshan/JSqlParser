@@ -1137,8 +1137,7 @@ public class SmartQLParserTest {
                 "(select app_ver ,region ,date ,sum(total_count) as total ,sum(`start_b_count`) / sum(total_count) as start ,sum(`end_b_count`) / sum(total_count) " +
                 "asend,sum(`radio_b_count`) / sum(total_count) as radio ,sum(`radio2_b_count`) / sum(total_count) as radio2,sum(`seq_b_count`) / sum(total_count) as seq ," +
                 "sum(`protocol_ver_b_count`) / sum(total_count) as protocol_ver from miui_bi_onetrack_usage_count group by app_ver ,region ,date ) sql_model_virtual_table_new_10818_813 " +
-                "WHERE 1 = 1 AND ( region in ('cn')AND app_ver in ('3.6.0' ,'3.4.0')AND date >= 20221031and date < 20221107) LIMIT 5000";
-        printToken(sql);
+                "WHERE 1 = 1 AND ( region in ('cn')AND app_ver in ('3.6.0' ,'3.4.0')AND date >= 20221031 and date < 20221107) LIMIT 5000";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -1312,7 +1311,7 @@ public class SmartQLParserTest {
      */
     @Test
     public void testTemp() throws Exception {
-        String sql = "";
+        String sql = "select * from dual";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
