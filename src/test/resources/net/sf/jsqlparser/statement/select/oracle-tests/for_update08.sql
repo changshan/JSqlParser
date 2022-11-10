@@ -14,3 +14,5 @@ for update of su.up
 order by su.d
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "\nwhere" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM
+--@FAILURE: Encountered unexpected token: "for" "FOR" recorded first on Nov 10, 2022 5:27:18 AM

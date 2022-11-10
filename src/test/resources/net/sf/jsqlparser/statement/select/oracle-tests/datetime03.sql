@@ -12,3 +12,4 @@ timestamp '2009-10-29 01:30:00' at time zone 'us/pacific'from dual
 
 
 --@FAILURE: select timestamp '2009-10-29 01:30:00' at time zone 'us/pacific' from dual recorded first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "at" "AT" recorded first on Nov 10, 2022 4:11:13 AM

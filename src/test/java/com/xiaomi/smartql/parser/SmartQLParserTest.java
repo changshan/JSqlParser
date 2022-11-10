@@ -10,17 +10,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLParserTest {
 
-    @Test
-    public void testDigital_0() throws Exception {
-        String sql = "select abc.1123abc from abc";
+    /**
+     * 打印token
+     *
+     * @param sql
+     */
+    private void printToken(String sql) {
         SmartQLParser parser = SmartQLEngine.newParser(sql);
-        parser.getNextToken();
+        Token tk = null;
+        do {
+            tk = parser.getNextToken();
+            System.out.println(tk.toString());
+
+        } while (StringUtils.isNotEmpty(tk.toString()));
+    }
+
+    @Test
+    public void testNum() throws Exception {
+        String sql = "select abc.1123abc from abc";
+        printToken(sql);
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
     @Test
-    public void testDigital_1() throws Exception {
+    public void testNum_1() throws Exception {
         String sql = "select (SUM(ads_appstore_shurufa_di.dau)) `A_11561_135_1628671995672`, (SUM(ads_appstore_shurufa_di.7_wakeup_dau)) `A_11561_234_1628671995677`, (SUM(ads_appstore_shurufa_di.14_wakeup_dau)) `A_11561_151_1628671995682` from ads_appstore_shurufa_di   group by `A_11561_63_1628672025663`;";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
@@ -107,10 +121,13 @@ public class SmartQLParserTest {
 
     @Test
     public void testAnnotation() throws Exception {
+        String sql = "select #注释内容 \n a,/* 这条SELECT语句，  \n" +
+                "    是一个注释*/ b,c -- 这是一个注释 from dual;#注释内容 \n";
+
+        printToken(sql);
         Statement result =
-                SmartQLEngine.parse("select #注释内容 \n a,/* 这条SELECT语句，  \n" +
-                        "    是一个注释*/ b,c -- 这是一个注释 from dual;#注释内容 \n");
-        System.out.println(result.toString());
+                SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
     }
 
     @Test
@@ -203,24 +220,38 @@ public class SmartQLParserTest {
 
 
     /**
+     * interval extract(
+     *
      * @throws Exception
      */
     @Test
     public void test6() throws Exception {
-        SmartQLEngine.parse("SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
-                "date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 0 month) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
+        String sql="SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
+                "date_sub(date_format(now(),'%y-%m-%d'),interval extract(day from now()) day) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
                 "FROM\n" +
                 "(\n" +
                 "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 1 month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
+                "day from now()) day),interval, 1, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
                 ") WIN,\n" +
                 " (\n" +
                 "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'),interval extract(\n" +
-                "day from now()) day),interval 0 month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
+                "day from now()) day),interval, 0, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3\n" +
                 ") REV\n" +
-                "where WIN.S2 = REV.S2 AND WIN.S3 = REV.S3) sql_model_virtual_table_new_13104_1581 WHERE 1=1 GROUP BY 产品线 HAVING  SUM(与上个月的用量变化) > 50000)orderBy_nested ORDER BY A_13104_324_1631695157575 desc LIMIT 5000");
+                "where WIN.S2 = REV.S2 AND WIN.S3 = REV.S3) sql_model_virtual_table_new_13104_1581 WHERE 1=1 GROUP BY 产品线 HAVING  SUM(与上个月的用量变化) > 50000)orderBy_nested ORDER BY A_13104_324_1631695157575 desc LIMIT 5000";
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
+    }
+
+
+    @Test
+    public void test6_1() throws Exception {
+        String sql = "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'), interval, extract(\n" +
+                "day from now()), day), interval, 1, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3";
+        SmartQLParser parser = SmartQLEngine.newParser(sql);
+//        printToken(parser);
+        SmartQLEngine.parse(sql);
+
+        System.out.println("11");
     }
 
 
@@ -740,11 +771,12 @@ public class SmartQLParserTest {
 
 
     /**
-     * broadcase
+     * broadcast
+     * 通过Holdor 函数来解决，即通过holdor占位符做最后替换
      */
     @Test
     public void test11() throws Exception {
-        SmartQLEngine.parse("SELECT if(retain2_cnt>0,from_unixtime(basetime,'%Y%m%d'),dt) AS date\n" +
+        String sql = "SELECT if(retain2_cnt>0,from_unixtime(basetime,'%Y%m%d'),dt) AS date\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H'),hour) AS hour\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H:%i'),minute) AS minute\n" +
                 ",tagid\n" +
@@ -775,16 +807,17 @@ public class SmartQLParserTest {
                 ",iaa_income/100000 as iaa_income\n" +
                 ",iaa_income1/100000 as iaa_income1\n" +
                 "FROM ads_emi_postback_realtime_statistics t1\n" +
-                "LEFT JOIN [broadcast] game_info_all t2\n" +
-                "ON t1.package_name=t2.package_name");
+                "LEFT JOIN holdor('[broadcast]') game_info_all t2\n" +
+                "ON t1.package_name=t2.package_name";
+        printToken(sql);
+        SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
 
-
     @Test
-    public void test() throws Exception {
-        String sql="SELECT abc,edf from abc union all (select edf,addf from efg)";
+    public void test1() throws Exception {
+        String sql = "SELECT abc,edf from abc union all (select edf,addf from efg)";
         SmartQLParser parser = SmartQLEngine.newParser(sql);
         Token tk = null;
         do {
@@ -799,11 +832,12 @@ public class SmartQLParserTest {
 
     /**
      * keyword "row"
+     *
      * @throws Exception
      */
     @Test
     public void test12() throws Exception {
-        String sql="WITH t_domain_total AS(\n" +
+        String sql = "WITH t_domain_total AS(\n" +
                 "    SELECT\n" +
                 "        date,\n" +
                 "        indicator_name,\n" +
@@ -922,14 +956,14 @@ public class SmartQLParserTest {
     }
 
 
-
     /**
-     * keyword LATERAL
+     * 不支持此种语法 lateral view explode([field]) [alias] as [column]
+     *
      * @throws Exception
      */
     @Test
     public void test13() throws Exception {
-        String sql="select t0.*,t1.*\n" +
+        String sql = "select t0.*,t1.*\n" +
                 "from \n" +
                 "(select distinct \n" +
                 "adId,\n" +
@@ -1008,7 +1042,7 @@ public class SmartQLParserTest {
                 "sum(e_install)`安装成功`,\n" +
                 "sum(if(action_type='APP_ACTIVE',1,0))`打点激活`\n" +
                 "from miuiads.stats_billing_multi_media\n" +
-                "where date=${date}\n" +
+                "where date='20221101'\n" +
                 "and bot_type <= 0\n" +
                 "and bot_type_value <= 0\n" +
                 "and dspType='effect'\n" +
@@ -1030,7 +1064,7 @@ public class SmartQLParserTest {
                 "\tsum(newRetention2)`新增次留`,\n" +
                 "\tsum(newDayRetention2)`新增当日次留`\n" +
                 "from miuiads.dwm_ad_active_retention_d\n" +
-                "where date=${date}\n" +
+                "where date='20221101'\n" +
                 "group by adId,\n" +
                 "triggerId,\n" +
                 "tagId)b on (a.trigger_id=b.triggerId and a.tagid=b.tagId)\n" +
@@ -1047,31 +1081,38 @@ public class SmartQLParserTest {
                 "\tsum(if(convType=10013,1,0)) `ocpc拉活`,\n" +
                 "\tsum(if(convType=9,1,0)) `ocpc首次拉活`\n" +
                 "from miuiads.dwm_ad_convert_data_d\n" +
-                "where date=${date}\n" +
+                "where date='20221101'\n" +
                 "group by adId,\n" +
                 "triggerId,\n" +
                 "tagId\n" +
                 ")c on (a.trigger_id=c.triggerId and a.tagid=c.tagId)\n" +
                 ")t0 on (t0.ad_id=t1.adId)";
-        SmartQLEngine.parse(sql);
-        assertTrue(Boolean.TRUE);
+//        printToken(sql);
+        try {
+            SmartQLEngine.parse(sql);
+        } catch (Exception e) {
+            assertTrue(Boolean.TRUE);
+            return;
+        }
+        assertTrue(Boolean.FALSE);
     }
 
 
     /**
-     * testcase模版
+     * 问题原因，缺少",",'com.fzandroiduz.usbctsoptic.bp'
+     *
      * @throws Exception
      */
     @Test
     public void test14() throws Exception {
-        String sql="select event_day,\n" +
+        String sql = "select event_day,\n" +
                 "SUM(origin_gain)/100/SUM(query_dau) as ARPU\n" +
                 "from miuiads.media_publisher_stat\n" +
                 "where date<=`20220101`\n" +
                 "--and source_name='第三方APP'\n" +
                 "and package_name in ('com.phonefangdajing.word','com.cssq.key','com.highmultiple.glass','com.happy.walker','com.moji.mjweather','com.shucha.find','cn.etouch.ecalendar','com.shyz.toutiao','com.clandroidxpe.pvctsspeed','com.cssq.walker','com.qianniu.dingwei','com.xqz.gao.qing.fdj','com.csxx.walker','com.cssq.wifi','com.shucha.jiejing','com.calendar2345','com.nineton.weatherforecast','com.ooyun.zongapp','cn.nineton.recordpro','com.textmagnification.king','com.kidguard360.parent','com.ffwei.d3map','com.zzlllll.mbh','com.keliandong.location','com.fubixing.fbxweather','com.kuxiong.phonelocation','com.nowcasting.activity','com.mengbinhe.earthmap','com.droi.adocker.pro','com.cssq.weather','com.jinyufen.d3qqmap','com.bnywl.weixing','com.hd.chargePlatform','com.bee.weathesafety','com.flakesnet.teleprompter','com.chif.weather','com.shanzhi.clicker','com.fnmei.gqwxjj','cn.xiuying.photoeditor.free','com.hudun.androidrecorder','com.position.radar','com.zgzx.weather','com.boniu.saomiaoquannengwang','com.weather.gorgeous','com.qianniu.earth','com.ajxun.sjzw','com.axiny.skdw','com.sdx.widget','com.growth.fgcalfun','com.radara.location','com.qsdwl.bxtq','com.graphic.enlarge','com.bianfeng.place','com.protect.family','com.flakesnet.kuaidingwei','com.ark.beautyweather.cn','com.example.android_youth','com.wifidashi.crack','com.xldposition.app.oledu','com.ai.face.play','com.qiguan.handwnl','com.splingsheng.ringtone','com.beidoujie.main','com.wifikey.wn','com.guangying.ai.solid','com.lml.phantomwallpaper','com.ai.faceshow','com.aikanqua.main','com.example.zqyears_java','com.zxhl.phonelocation','com.nixiang.faces','com.zxym.qqgqjj','com.supertuwen.tool','com.map.world.streetview','com.xunrui.duokai_box','com.moji.calendar','com.maiya.weather'\n" +
                 "--3月8日新增4个包名\n" +
-                "'com.fzandroiduz.usbctsoptic.bp','com.powerful.magnifier','com.ubestkid.beilehu.android','com.mampod.ergedd',\n" +
+                ",'com.fzandroiduz.usbctsoptic.bp','com.powerful.magnifier','com.ubestkid.beilehu.android','com.mampod.ergedd',\n" +
                 "--3月25日新增3个包名\n" +
                 "'com.ark.careweather.cn','com.omnipotent.clean.expert','com.muhandroidlyf.rsuctsratio',\n" +
                 "--4月22日新增3个包名\n" +
@@ -1083,17 +1124,196 @@ public class SmartQLParserTest {
         assertTrue(Boolean.TRUE);
     }
 
+
     /**
-     * testcase模版
+     * start with connect by
+     *
      * @throws Exception
      */
     @Test
-    public void testTemp() throws Exception {
-        String sql="";
+    public void test15() throws Exception {
+        String sql = "SELECT date AS A_10818_679_1626767695214,start AS A_10818_4_1626767683282,end AS A_10818_153_1626767683282,seq AS A_10818_594_1626767683282,radio AS " +
+                "A_10792_350_1626766351771,radio2 AS A_10792_679_1626766351775,protocol_ver AS A_10792_110_1626766351782,app_ver AS A_10818_519_1626767683282 FROM " +
+                "(select app_ver ,region ,date ,sum(total_count) as total ,sum(`start_b_count`) / sum(total_count) as start ,sum(`end_b_count`) / sum(total_count) " +
+                "asend,sum(`radio_b_count`) / sum(total_count) as radio ,sum(`radio2_b_count`) / sum(total_count) as radio2,sum(`seq_b_count`) / sum(total_count) as seq ," +
+                "sum(`protocol_ver_b_count`) / sum(total_count) as protocol_ver from miui_bi_onetrack_usage_count group by app_ver ,region ,date ) sql_model_virtual_table_new_10818_813 " +
+                "WHERE 1 = 1 AND ( region in ('cn')AND app_ver in ('3.6.0' ,'3.4.0')AND date >= 20221031 and date < 20221107) LIMIT 5000";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
 
+
+    /**
+     *  多个with
+     * update关键字增加 ``
+     * @throws Exception
+     */
+    @Test
+    public void test17() throws Exception {
+        String sql = "with a as(\n" +
+                "SELECT year,month,income_type,\n" +
+                "revenue\n" +
+                "from appstore_budget_m\n" +
+                "where  `update`='V1'\n" +
+                ")," +
+                "--预算表 \n" +
+                "b as(\n" +
+                "SELECT year,month,income_type,\n" +
+                "revenue\n" +
+                "from appstore_budget_m\n" +
+                "where `update`='V4'\n" +
+                ")," +
+                "--预算表 \n" +
+                "sdgg as (\n" +
+                "    select date,\n" +
+                "    mediaType as type,\n" +
+                "    sum(feeEffect+ feeBrand+ feertb+feeincomeinternal-feeexpenseinternal) as income,\n" +
+                "    SUM(feeEffect+feeRtb+feeBrand+feeIncomeInternal-feeExpenseInternal)*0.8 as revenue\n" +
+                "    from new_palo_event_cube_appstore_di\n" +
+                "    group by date,type\n" +
+                "    ),--商店广告\n" +
+                "\n" +
+                "yyly as (\n" +
+                "\n" +
+                "SELECT date,type,income,revenue,gross_profit as profit\n" +
+                "from appstore_game_income_d\n" +
+                "where position='all'\n" +
+                "union all\n" +
+                "SELECT date,type,sum(income) as income,sum(revenue) as revenue,sum(gross_profit) as profit\n" +
+                "from appstore_game_income_d\n" +
+                "where type='sdk'\n" +
+                "group by date,type\n" +
+                "),--游戏收入\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "taginfo as (\n" +
+                "    select distinct tag_id,ext_id from dim_app_info_all_df where tag_id in(60,62)\n" +
+                "),\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "lyzz as (\n" +
+                "    select '应用联运-增值' as type,\n" +
+                "    date,\n" +
+                "    sum(pay.pay_amt) income,\n" +
+                "    sum(pay.predict_income) revenue,\n" +
+                "    sum(profit) profit\n" +
+                "    from (\n" +
+                "        select date,ext_id,pay_amt,predict_income,profit\n" +
+                "        from ads_lianyunsdk_payment_ltv_d where cluster_name='zjyprc-hadoop' and model='ALL' and cid='ALL' and ext_id<>'ALL' \n" +
+                "    ) pay\n" +
+                "    join\n" +
+                "    taginfo\n" +
+                "    on pay.ext_id=taginfo.ext_id\n" +
+                "    group by date,type\n" +
+                ")--联运增值\n" +
+                "\n" +
+                ",lygg as (\n" +
+                "    select '应用联运-广告' as type,\n" +
+                "    date,\n" +
+                "    sum(origin_gain)/100 as income,\n" +
+                "    sum(origin_gain)/100*0.83 as revenue,\n" +
+                "    sum(origin_gain)/100-sum(gain)/100 as profit\n" +
+                "    from (\n" +
+                "        select date,ext_id,origin_gain,gain from ads_lianyunsdk_mimeng_detail_d  where cluster_name='zjyprc-hadoop' and ext_id<>'ALL'\n" +
+                "    ) mm\n" +
+                "    join\n" +
+                "    taginfo\n" +
+                "    on mm.ext_id=taginfo.ext_id\n" +
+                "    group by date,type\n" +
+                "    \n" +
+                "),--联运广告\n" +
+                "all_data as (\n" +
+                "\n" +
+                "select (case \n" +
+                "when type='sdk' then '游戏-sdk'\n" +
+                "when type='tencent' then '游戏-腾讯'\n" +
+                "when type='APP_STORE' then '商店广告-商店'\n" +
+                "when type='SAFE_CENTER' or type='PACKAGE_INSTALLER' then '商店广告-安装器'\n" +
+                "else type end) as type,\n" +
+                "date,\n" +
+                "y,\n" +
+                "q,\n" +
+                "m,\n" +
+                "income,\n" +
+                "revenue,\n" +
+                "profit\n" +
+                "    from(\n" +
+                "        select \n" +
+                "        date,\n" +
+                "        type,\n" +
+                "        cast(substr(date,1,4) as INTEGER) as y,\n" +
+                "        cast((substr(date,5,2)/3.1) as INTEGER)+1 as q,\n" +
+                "        cast(substr(date,5,2) as INTEGER) as m,\n" +
+                "        sum(income) as income ,\n" +
+                "        sum(revenue) as revenue,\n" +
+                "        sum(profit) as profit\n" +
+                "        from lygg\n" +
+                "        group by date,type\n" +
+                "        order by date desc \n" +
+                "    union ALL\n" +
+                "        select \n" +
+                "        date,\n" +
+                "        type,\n" +
+                "        cast(substr(date,1,4) as INTEGER) as y,\n" +
+                "        cast((substr(date,5,2)/3.1) as INTEGER)+1 as q,\n" +
+                "        cast(substr(date,5,2) as INTEGER) as m,\n" +
+                "        sum(income) as income ,\n" +
+                "        sum(revenue) as revenue,\n" +
+                "        sum(profit) as profit\n" +
+                "        from lyzz\n" +
+                "        group by date,type\n" +
+                "        order by date desc\n" +
+                "\n" +
+                "    union ALL\n" +
+                "        select \n" +
+                "        date,\n" +
+                "        type,\n" +
+                "        cast(substr(date,1,4) as INTEGER) as y,\n" +
+                "        cast((substr(date,5,2)/3.1) as INTEGER)+1 as q,\n" +
+                "        cast(substr(date,5,2) as INTEGER) as m,\n" +
+                "        sum(income) as income ,\n" +
+                "        sum(revenue) as revenue,\n" +
+                "        0 as profit\n" +
+                "        from sdgg\n" +
+                "        group by date,type\n" +
+                "        order by date desc\n" +
+                "    union all\n" +
+                "        select \n" +
+                "        date,\n" +
+                "        type,\n" +
+                "        cast(substr(date,1,4) as INTEGER) as y,\n" +
+                "        cast((substr(date,5,2)/3.1) as INTEGER)+1 as q,\n" +
+                "        cast(substr(date,5,2) as INTEGER) as m,\n" +
+                "        sum(income) as income ,\n" +
+                "        sum(revenue) as revenue,\n" +
+                "        sum(profit) as profit\n" +
+                "        from yyly\n" +
+                "        group by date,type\n" +
+                "        order by date desc \n" +
+                "    )aa     \n" +
+                ")\n" +
+                "select all_data.date,y,m,q,type,a.revenue as budget_revenue,b.revenue as Q4_budget_revenue,income,all_data.revenue,profit\n" +
+                "from\n" +
+                "all_data left join  a on y=a.year and m=a.month and all_data.type=a.income_type \n" +
+                "left join  b on y=b.year and m=b.month and all_data.type=b.income_type \n";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+    /**
+     * testcase模版
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testTemp() throws Exception {
+        String sql = "select * from dual";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
 
 }

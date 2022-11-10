@@ -36,3 +36,4 @@ select a from dual
 
 
 --@FAILURE: Encountered unexpected token: "is" "IS" recorded first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "\nwith" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:14 AM

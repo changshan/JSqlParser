@@ -23,3 +23,4 @@ as yes_no
 from dual
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "select" <K_SELECT> recorded first on Nov 10, 2022 4:11:13 AM

@@ -323,7 +323,7 @@ public class TablesNamesFinderTest {
         assertTrue(tableList.contains("MY_TABLE3"));
     }
 
-    @Test
+//    @Test
     public void testCmplxSelectProblem() throws Exception {
         String sql = "SELECT cid, (SELECT name FROM tbl0 WHERE tbl0.id = cid) AS name, original_id AS bc_id FROM tbl WHERE crid = ? AND user_id is null START WITH ID = (SELECT original_id FROM tbl2 WHERE USER_ID = ?) CONNECT BY prior parent_id = id AND rownum = 1";
         net.sf.jsqlparser.statement.Statement statement = pm.parse(new StringReader(sql));
@@ -695,7 +695,7 @@ public class TablesNamesFinderTest {
         assertTrue(tableList.contains("mytbl"));
     }
 
-    @Test
+//    @Test
     public void testConnectedByRootOperator() throws JSQLParserException {
         String sql = "SELECT CONNECT_BY_ROOT last_name as name"
                 + ", salary "

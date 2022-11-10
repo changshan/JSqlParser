@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 
 public class CastExpression extends ASTNodeAccessImpl implements Expression {

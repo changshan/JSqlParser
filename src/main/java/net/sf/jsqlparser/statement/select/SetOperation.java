@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.statement.select.SetOperationList.SetOperationType;
 
 public abstract class SetOperation extends ASTNodeAccessImpl {

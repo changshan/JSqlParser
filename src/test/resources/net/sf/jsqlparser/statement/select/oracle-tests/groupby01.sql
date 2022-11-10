@@ -18,3 +18,4 @@ select :b3 as l_snap_id , :b2 as p_dbid , :b1 as p_instance_number , nvl(pid, -9
 
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "program" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

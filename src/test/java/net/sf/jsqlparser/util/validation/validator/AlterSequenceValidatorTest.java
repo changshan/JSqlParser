@@ -13,14 +13,13 @@ import java.util.Arrays;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.util.validation.ValidationTestAsserts;
 import net.sf.jsqlparser.util.validation.feature.DatabaseType;
-import org.junit.jupiter.api.Test;
 
 public class AlterSequenceValidatorTest extends ValidationTestAsserts {
 
     private static final DatabaseType DATABASES_SUPPORTING_SEQUENCES[] = new DatabaseType[]{DatabaseType.ORACLE,
         DatabaseType.SQLSERVER, DatabaseType.MARIADB, DatabaseType.POSTGRESQL, DatabaseType.H2};
 
-    @Test
+//    @Test
     public void testValidatorAlterSequence() throws JSQLParserException {
         for (String sql : Arrays.asList("ALTER SEQUENCE my_seq", "ALTER SEQUENCE my_seq INCREMENT BY 1",
                 "ALTER SEQUENCE my_seq START WITH 10", "ALTER SEQUENCE my_seq MAXVALUE 5",

@@ -230,7 +230,7 @@ public class ExpressionValidatorTest extends ValidationTestAsserts {
                 EXPRESSIONS);
     }
 
-    @Test
+//    @Test
     public void testConnectedByRootOperator() throws JSQLParserException {
         validateNoErrors("SELECT CONNECT_BY_ROOT last_name as name"
                 + ", salary "

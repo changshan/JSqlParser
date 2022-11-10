@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
 /**
  * Assignment to a user variable like in select @a = 5.

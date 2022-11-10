@@ -11,7 +11,7 @@ package net.sf.jsqlparser.expression;
 
 import java.util.List;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
+import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
 /**

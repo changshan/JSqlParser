@@ -10,3 +10,4 @@
 with a as (select * from dual order by 1) select * from a
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "\nwith" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:14 AM

@@ -11,3 +11,5 @@ with days as (select (select trunc(sysdate, 'MONTH') from dual) + rownum -1 as d
 select d from days where (trunc(d) - trunc(d,'IW') +1 ) not in (6,7) and d <= last_day(sysdate)
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:07 AM
+--@FAILURE: Encountered unexpected token: "connect" "CONNECT" recorded first on Nov 10, 2022 4:02:16 AM
+--@FAILURE: Encountered unexpected token: "\nwith" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

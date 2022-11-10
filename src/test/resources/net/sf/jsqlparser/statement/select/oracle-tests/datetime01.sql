@@ -10,3 +10,4 @@
 select from_tz(cast(to_date('1999-12-01 11:00:00','yyyy-mm-dd hh:mi:ss') as timestamp), 'america/new_york') at time zone 'america/los_angeles' "west coast time" from dual
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "time" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

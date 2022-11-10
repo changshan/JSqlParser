@@ -39,3 +39,4 @@ and dbin.startup_time = s1.startup_time
 
 
 --@SUCCESSFULLY_PARSED_AND_DEPARSED first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "s1" <S_IDENTIFIER> recorded first on Nov 10, 2022 4:11:13 AM

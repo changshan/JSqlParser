@@ -20,3 +20,4 @@ model
   rules        ( )
 
 --@FAILURE: Encountered unexpected token: "model" <S_IDENTIFIER> recorded first on Aug 3, 2021, 7:20:08 AM
+--@FAILURE: Encountered unexpected token: "key" "KEY" recorded first on Nov 10, 2022 4:11:13 AM
