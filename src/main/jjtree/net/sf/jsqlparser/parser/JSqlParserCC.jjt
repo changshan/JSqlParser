@@ -119,10 +119,10 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 {
     <K_ABSENT: "ABSENT">
 |   <K_ACTION: "ACTION">
-|   <K_ACTIVE: "ACTIVE">
+/*|   <K_ACTIVE: "ACTIVE">*/
 |   <K_ADD:"ADD">
 |   <K_ADVANCE:"ADVANCE">
-|   <K_ADVISE:"ADVISE">
+/*|   <K_ADVISE:"ADVISE">*/
 |   <K_AGAINST:"AGAINST">
 |   <K_ALGORITHM: "ALGORITHM">
 /*|   <K_ALL:"ALL">*/
@@ -1845,7 +1845,7 @@ String RelObjectNameWithoutValue() :
 
       | tk=<K_LINK>
       /* Keywords for ALTER SYSTEM */
-      | tk=<K_LOG> | tk=<K_DUMP> | tk=<K_FLUSH> | tk=<K_ACTIVE> | tk=<K_RESUME> | tk=<K_SWITCH> | tk=<K_SUSPEND>
+      | tk=<K_LOG> | tk=<K_DUMP> | tk=<K_FLUSH> /*| tk=<K_ACTIVE> */| tk=<K_RESUME> | tk=<K_SWITCH> | tk=<K_SUSPEND>
       | tk=<K_ARCHIVE> | tk=<K_QUIESCE> | tk=<K_HISTORY> | tk=<K_SHUTDOWN> | tk=<K_REGISTER> | tk=<K_UNQIESCE>
       | tk=<K_RESTRICTED> | tk=<K_CHECKPOINT> | tk=<K_DISCONNECT>
       | tk=<K_SYSTEM>
@@ -6173,17 +6173,17 @@ AlterSession AlterSession():
 }
 {
     <K_ALTER> <K_SESSION> (
-        (
+        /*(
            <K_ADVISE>   ( <K_COMMIT> { operation = AlterSessionOperation.ADVISE_COMMIT; }
                         | <K_ROLLBACK> { operation = AlterSessionOperation.ADVISE_ROLLBACK; }
                         | <K_NOTHING> { operation = AlterSessionOperation.ADVISE_NOTHING; }
                         )
         )
-        /*|
+        |
         (
             <K_CLOSE> <K_DATABASE> <K_LINK> { operation = AlterSessionOperation.CLOSE_DATABASE_LINK; }
         )
-        */|
+        |*/
         (
             <K_ENABLE>  ( <K_COMMIT> <K_IN> <K_PROCEDURE> { operation = AlterSessionOperation.ENABLE_COMMIT_IN_PROCEDURE; }
                         | <K_GUARD> { operation = AlterSessionOperation.ENABLE_GUARD; }
