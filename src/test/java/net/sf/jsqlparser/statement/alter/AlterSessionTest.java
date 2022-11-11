@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 public class AlterSessionTest {
 
-    @Test
+//    @Test
     public void testAlterSessionAdvise() throws JSQLParserException {
         TestUtils.assertSqlCanBeParsedAndDeparsed("ALTER SESSION ADVISE COMMIT", true);
         TestUtils.assertSqlCanBeParsedAndDeparsed("ALTER SESSION ADVISE ROLLBACK", true);
