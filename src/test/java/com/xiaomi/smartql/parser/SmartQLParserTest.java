@@ -1304,6 +1304,31 @@ public class SmartQLParserTest {
         assertTrue(Boolean.TRUE);
     }
 
+
+    /**
+     * 支持用户自定义变量
+     * @throws Exception
+     */
+    @Test
+    public void test18() throws Exception {
+        String sql = "SELECT a.date,\n" +
+                "       IF (ISNULL(b.cnt),\n" +
+                "           0,\n" +
+                "           b.cnt) AS cnt\n" +
+                "FROM\n" +
+                "  ( SELECT @num := @num + 1, date_format(adddate('2020-09-07', INTERVAL @num DAY), '%Y-%m-%d') AS date\n" +
+                "   FROM job,\n" +
+                "     ( SELECT @num := 0) t\n" +
+                "   WHERE adddate('2020-09-08', INTERVAL DATEDIFF('2013-01-13','2012-10-01') DAY) <= now()\n" +
+                "   ORDER BY date) a\n" +
+                "LEFT JOIN\n" +
+                "  ( SELECT DATE_FORMAT(`create_time`, '%Y-%m-%d') AS date,\n" +
+                "           count(1) AS cnt\n" +
+                "   FROM job_instance\n" +
+                "   GROUP BY DATE_FORMAT(`create_time`, '%Y-%m-%d') ) b ON a.date = b.date";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
     /**
      * sql中包含自定义变量
      */
