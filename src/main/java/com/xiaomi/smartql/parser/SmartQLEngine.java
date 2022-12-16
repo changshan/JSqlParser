@@ -64,6 +64,8 @@ public final class SmartQLEngine {
                     consumer.accept(parser);
                 }
                 statement = parseStatement(parser);
+            }else{
+                throw ex;
             }
         }
         return statement;
