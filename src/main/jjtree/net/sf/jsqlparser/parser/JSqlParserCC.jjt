@@ -435,6 +435,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_XMLTEXT:"XMLTEXT">
 |   <K_YAML:"YAML">
 |   <K_ZONE:"ZONE">
+|   <K_ONE2ONE:("ONE")(" ")+("TO")(" ")+("ONE")>
 }
 
 TOKEN : /* Stuff */
@@ -2722,7 +2723,7 @@ Join JoinerExpression() #JoinerExpression:
 
     [
         (
-            <K_LEFT> { join.setLeft(true); } [ <K_SEMI> { join.setSemi(true); } | <K_OUTER> { join.setOuter(true); } ]
+            <K_LEFT> { join.setLeft(true); } [ <K_SEMI> { join.setSemi(true); } | <K_OUTER> { join.setOuter(true); } | <K_ONE2ONE> { join.setOne2one(true); }]
             |
             (
                 <K_RIGHT> { join.setRight(true); }
@@ -3347,8 +3348,8 @@ Expression RegularCondition() #RegularCondition:
     | token=<OP_NOTEQUALSBANG> { result = new NotEqualsTo(token.image); }
     | "@@" { result = new Matches(); }
     | "~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASESENSITIVE); }
-    | [<K_NOT> { not=true; } ] <K_REGEXP> [ <K_BINARY> { binary=true; } ] { result = new RegExpMySQLOperator(not, binary?RegExpMatchOperatorType.MATCH_CASESENSITIVE:RegExpMatchOperatorType.MATCH_CASEINSENSITIVE); }
-    | <K_RLIKE> [ <K_BINARY> { binary=true; } ] { result = new RegExpMySQLOperator(binary?RegExpMatchOperatorType.MATCH_CASESENSITIVE:RegExpMatchOperatorType.MATCH_CASEINSENSITIVE).useRLike(); }
+    /*| [<K_NOT> { not=true; } ] <K_REGEXP> [ <K_BINARY> { binary=true; } ] { result = new RegExpMySQLOperator(not, binary?RegExpMatchOperatorType.MATCH_CASESENSITIVE:RegExpMatchOperatorType.MATCH_CASEINSENSITIVE); }*/
+    | ([<K_NOT> { not=true; } ] <K_RLIKE>) [ <K_BINARY> { binary=true; } ] { result = new RegExpMySQLOperator(binary?RegExpMatchOperatorType.MATCH_CASESENSITIVE:RegExpMatchOperatorType.MATCH_CASEINSENSITIVE).useRLike(); }
     | "~*" { result = new RegExpMatchOperator(RegExpMatchOperatorType.MATCH_CASEINSENSITIVE); }
     | "!~" { result = new RegExpMatchOperator(RegExpMatchOperatorType.NOT_MATCH_CASESENSITIVE); }
     | "!~*" { result = new RegExpMatchOperator(RegExpMatchOperatorType.NOT_MATCH_CASEINSENSITIVE); }
@@ -4599,7 +4600,7 @@ CastExpression CastExpression():
     boolean    useCastKeyword;
 }
 {
-    <K_CAST>
+   (<K_INTERVAL>)?  <K_CAST>
     "("
     expression=SimpleExpression()
     <K_AS> { retval.setUseCastKeyword(true); }

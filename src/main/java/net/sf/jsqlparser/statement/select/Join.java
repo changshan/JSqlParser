@@ -23,11 +23,14 @@ public class Join extends ASTNodeAccessImpl {
     private boolean natural = false;
     private boolean full = false;
     private boolean inner = false;
+    //hana one to one
+    private boolean one2one=false;
     private boolean simple = false;
     private boolean cross = false;
     private boolean semi = false;
     private boolean straight = false;
     private boolean apply = false;
+
     private FromItem rightItem;
     private final LinkedList<Expression> onExpressions = new LinkedList<>();
     private final LinkedList<Column> usingColumns = new LinkedList<>();
@@ -53,6 +56,19 @@ public class Join extends ASTNodeAccessImpl {
     public Join withInner(boolean b) {
         this.setInner(b);
         return this;
+    }
+
+    public Join withOne2One(boolean b){
+        this.setOne2one(b);
+        return this;
+    }
+
+    public void setOne2one(boolean b){
+        one2one=b;
+    }
+
+    public boolean isOne2one(){
+        return one2one;
     }
 
     public void setInner(boolean b) {
@@ -324,6 +340,8 @@ public class Join extends ASTNodeAccessImpl {
                 builder.append("INNER ");
             } else if (isSemi()) {
                 builder.append("SEMI ");
+            } else if(isOne2one()){
+                builder.append("one to one ");
             }
 
             if (isStraight()) {

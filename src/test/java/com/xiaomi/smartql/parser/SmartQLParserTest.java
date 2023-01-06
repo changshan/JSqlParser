@@ -226,7 +226,7 @@ public class SmartQLParserTest {
      */
     @Test
     public void test6() throws Exception {
-        String sql="SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
+        String sql = "SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
                 "date_sub(date_format(now(),'%y-%m-%d'),interval extract(day from now()) day) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
                 "FROM\n" +
                 "(\n" +
@@ -1143,10 +1143,10 @@ public class SmartQLParserTest {
     }
 
 
-
     /**
-     *  多个with
+     * 多个with
      * update关键字增加 ``
+     *
      * @throws Exception
      */
     @Test
@@ -1307,6 +1307,7 @@ public class SmartQLParserTest {
 
     /**
      * 支持用户自定义变量
+     *
      * @throws Exception
      */
     @Test
@@ -1329,6 +1330,494 @@ public class SmartQLParserTest {
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
+
+
+    /**
+     * one to one join
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test_one2onejoin() throws Exception {
+        String sql = "SELECT\n" +
+                "    AVG(\n" +
+                "        CASE\n" +
+                "            WHEN \"JCQDBZMS_ZH\" = '集中扫描' THEN \"Z_GXJDSX_GN\"\n" +
+                "        END\n" +
+                "    ) + AVG(\n" +
+                "        CASE\n" +
+                "            WHEN \"JCQDBZMS_ZH\" = '集中收单' THEN \"Z_GXJDSX_GN\"\n" +
+                "        END\n" +
+                "    ) + AVG(\n" +
+                "        CASE\n" +
+                "            WHEN \"JCQDBZMS_ZH\" = '影像审核' THEN \"Z_GXJDSX_GN\"\n" +
+                "        END\n" +
+                "    ) + AVG(\n" +
+                "        CASE\n" +
+                "            WHEN \"JCQDBZMS_ZH\" = '共享初审' THEN \"Z_GXJDSX_GN\"\n" +
+                "        END\n" +
+                "    ) + AVG(\n" +
+                "        CASE\n" +
+                "            WHEN \"JCQDBZMS_ZH\" = '共享复审' THEN \"Z_GXJDSX_GN\"\n" +
+                "        END\n" +
+                "    ) AS A_38618_517_1657157758260\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            \"GUID\",\n" +
+                "            \"ZZFLD00001O\",\n" +
+                "            \"Z_QLCJDSX_GN\",\n" +
+                "            \"Z_GXJDSX_GN\",\n" +
+                "            \"JCQDBZMS_ZH\",\n" +
+                "            \"ZZFLD00001S\",\n" +
+                "            \"ZZFLD00001Q\",\n" +
+                "            \"ZZFLD000001\",\n" +
+                "            \"ZZFLD00001V\",\n" +
+                "            \"ZZFLD00002L\",\n" +
+                "            \"CHKLST_ID\",\n" +
+                "            \"CHKLST_DESC\",\n" +
+                "            \"OBJECT_ID\",\n" +
+                "            \"ZJZF_DATE\",\n" +
+                "            \"NAME_LAST\",\n" +
+                "            \"NAME_FIRST\",\n" +
+                "            \"ZZBUSINESSLINE\",\n" +
+                "            substr(CAST(ZJZF_DATE AS varchar), 0, 6) AS ZJZF_MONTH,\n" +
+                "            SLA\n" +
+                "        FROM\n" +
+                "            (\n" +
+                "                SELECT\n" +
+                "                    \"GUID\",\n" +
+                "                    \"ZZFLD00001O\",\n" +
+                "                    \"Z_QLCJDSX_GN\",\n" +
+                "                    \"Z_GXJDSX_GN\",\n" +
+                "                    \"JCQDBZMS_ZH\",\n" +
+                "                    \"ZZFLD00001S\",\n" +
+                "                    \"ZZFLD00001Q\",\n" +
+                "                    \"ZZFLD000001\",\n" +
+                "                    \"ZZFLD00001V\",\n" +
+                "                    \"ZZFLD00002L\",\n" +
+                "                    \"CHKLST_ID\",\n" +
+                "                    \"CHKLST_DESC\",\n" +
+                "                    \"OBJECT_ID\",\n" +
+                "                    \"ZJZF_DATE\",\n" +
+                "                    \"NAME_LAST\",\n" +
+                "                    \"NAME_FIRST\",\n" +
+                "                    \"ZZBUSINESSLINE\",\n" +
+                "                    substr(CAST(ZJZF_DATE AS varchar), 0, 6) AS ZJZF_MONTH\n" +
+                "                FROM\n" +
+                "                    (\n" +
+                "                        SELECT\n" +
+                "                            Item.\"GUID\",\n" +
+                "                            Item.\"ZZFLD00001O\",\n" +
+                "                            Item.\"Z_QLCJDSX_GN\",\n" +
+                "                            Item.\"Z_GXJDSX_GN\",\n" +
+                "                            Item.\"JCQDBZMS_ZH\",\n" +
+                "                            Item.\"ZZFLD00001S\",\n" +
+                "                            Item.\"ZZFLD00001Q\",\n" +
+                "                            Item.\"ZZFLD000001\",\n" +
+                "                            Item.\"ZZFLD00001V\",\n" +
+                "                            Item.\"ZZFLD00002L\",\n" +
+                "                            Item.\"CHKLST_ID\",\n" +
+                "                            Item.\"CHKLST_DESC\",\n" +
+                "                            Item.\"OBJECT_ID\",\n" +
+                "                            Item.\"ZZBUSINESSLINE\",\n" +
+                "                            Header.\"ZJZF_DATE\"\n" +
+                "                        FROM\n" +
+                "                            (\n" +
+                "                                SELECT\n" +
+                "                                    *\n" +
+                "                                FROM\n" +
+                "                                    (\n" +
+                "                                        SELECT\n" +
+                "                                            \"PARENT_ID\" AS \"GUID\",\n" +
+                "                                            \"ZZFLD00001O\",\n" +
+                "                                            \"Z_QLCJDSX_GN\",\n" +
+                "                                            \"Z_GXJDSX_GN\",\n" +
+                "                                            \"JCQDBZMS_ZH\",\n" +
+                "                                            \"ZZFLD00001S\",\n" +
+                "                                            \"ZZFLD00001Q\",\n" +
+                "                                            \"ZZFLD000001\",\n" +
+                "                                            \"ZZFLD00001V\",\n" +
+                "                                            \"ZZFLD00002L\",\n" +
+                "                                            \"CHKLST_ID\",\n" +
+                "                                            \"CHKLST_DESC\",\n" +
+                "                                            \"OBJECT_ID\",\n" +
+                "                                            \"ZZBUSINESSLINE\"\n" +
+                "                                        FROM\n" +
+                "                                            \"SAPHANADB\".\"/BIC/AZDSSF00032\"\n" +
+                "                                        union all\n" +
+                "                                        SELECT\n" +
+                "                                            \"GUID\",\n" +
+                "                                            \"AZCSTEP_ID\",\n" +
+                "                                            \"Z_QLCJDSX_HW\",\n" +
+                "                                            \"Z_GXJDSX_HW\",\n" +
+                "                                            \"JCQDBZMS_ZH\",\n" +
+                "                                            \"PARTNER_ITM\",\n" +
+                "                                            \"PARTNER_FCT\",\n" +
+                "                                            \"ZZFLD000001\",\n" +
+                "                                            \"ZZFLD00001I\",\n" +
+                "                                            \"ZZFLD00001K\",\n" +
+                "                                            \"CHKLST_ID\",\n" +
+                "                                            \"CHKLST_DESC\",\n" +
+                "                                            \"OBJECT_ID\",\n" +
+                "                                            '' AS \"ZZBUSINESSLINE\"\n" +
+                "                                        FROM\n" +
+                "                                            \"SAPHANADB\".\"/BIC/AZDSSF00042\"\n" +
+                "                                        WHERE\n" +
+                "                                            CHKLST_ID = 'CLST0005'\n" +
+                "                                            OR CHKLST_ID = 'CLST0001'\n" +
+                "                                            OR CHKLST_ID = 'CLST0003'\n" +
+                "                                            OR CHKLST_ID = 'CLST0006'\n" +
+                "                                            OR CHKLST_ID = 'CLST0002'\n" +
+                "                                            OR CHKLST_ID = 'CLST0004'\n" +
+                "                                    )\n" +
+                "                            ) AS Item left one to one\n" +
+                "                            join (\n" +
+                "                                SELECT\n" +
+                "                                    *\n" +
+                "                                FROM\n" +
+                "                                    (\n" +
+                "                                        SELECT\n" +
+                "                                            \"PARENT_ID\" AS \"GUID\",\n" +
+                "                                            \"ZZFLD00001O\",\n" +
+                "                                            \"ZZFLD00002L\" AS \"ZJZF_DATE\",\n" +
+                "                                            \"OBJECT_ID\"\n" +
+                "                                        FROM\n" +
+                "                                            \"SAPHANADB\".\"/BIC/AZDSSF00032\"\n" +
+                "                                        union all\n" +
+                "                                        SELECT\n" +
+                "                                            \"GUID\",\n" +
+                "                                            \"AZCSTEP_ID\",\n" +
+                "                                            \"ZZFLD00001K\" AS \"ZJZF_DATE\",\n" +
+                "                                            \"OBJECT_ID\"\n" +
+                "                                        FROM\n" +
+                "                                            \"SAPHANADB\".\"/BIC/AZDSSF00042\"\n" +
+                "                                    )\n" +
+                "                                WHERE\n" +
+                "                                    \"ZZFLD00001O\" = 'STP00106'\n" +
+                "                                    OR \"ZZFLD00001O\" = 'STP00022'\n" +
+                "                            ) AS Header ON Item.\"OBJECT_ID\" = Header.\"OBJECT_ID\"\n" +
+                "                    ) AS A\n" +
+                "                    LEFT JOIN \"SAPHANADB\".\"/BIC/AZESSF00072\" AS B ON A.\"ZZFLD00001S\" = B.\"PARTNER\"\n" +
+                "            ) AS NEW\n" +
+                "            LEFT JOIN (\n" +
+                "                SELECT\n" +
+                "                    \"OBJECT_ID\" AS OBJECTID,\n" +
+                "                    SUM(Z_GXJDSX_GN) AS SLA\n" +
+                "                FROM\n" +
+                "                    \"SAPHANADB\".\"/BIC/AZDSSF00032\"\n" +
+                "                WHERE\n" +
+                "                    ZZFLD00001O = 'STP00102'\n" +
+                "                    OR ZZFLD00001O = 'STP00103'\n" +
+                "                    OR ZZFLD00001O = 'STP00121'\n" +
+                "                    OR ZZFLD00001O = 'STP00115'\n" +
+                "                GROUP by\n" +
+                "                    \"OBJECT_ID\"\n" +
+                "                UNION ALL\n" +
+                "                SELECT\n" +
+                "                    \"OBJECT_ID\",\n" +
+                "                    SUM(Z_GXJDSX_HW) AS SLA\n" +
+                "                FROM\n" +
+                "                    \"SAPHANADB\".\"/BIC/AZDSSF00042\"\n" +
+                "                WHERE\n" +
+                "                    AZCSTEP_ID = 'STP00018'\n" +
+                "                    OR AZCSTEP_ID = 'STP00019'\n" +
+                "                GROUP by\n" +
+                "                    \"OBJECT_ID\"\n" +
+                "            ) AS S ON NEW.\"OBJECT_ID\" = S.\"OBJECTID\"\n" +
+                "    ) sql_model_virtual_table_new_38618_15983\n" +
+                "WHERE\n" +
+                "    1 = 1\n" +
+                "    AND (\n" +
+                "        \"ZJZF_DATE\" >= '20221101'\n" +
+                "        and \"ZJZF_DATE\" < '20221201'\n" +
+                "        AND \"ZZFLD000001\" in ('CN', 'HK', 'TW')\n" +
+                "        AND \"ZZBUSINESSLINE\" not in ('2')\n" +
+                "    )\n" +
+                "LIMIT\n" +
+                "    5000";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+    /**
+     * interval keyword
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test_interval() throws Exception {
+        String sql = "select upload_task_item.id,upload_task_item.batch_id,upload_task_item.slot_id,upload_task_item.source_id,upload_task_item.source_path,upload_task_item.file_count, " +
+                "upload_task_item.file_size, upload_task_item.create_time, case when upload_task_item.status=1 and upload_task_item.create_time<(unix_timestamp()-259200)*1000 " +
+                "then 101 else upload_task_item.status end as status,upload_task_item.timecost, upload_task_item.update_time, from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d') as upload_date, " +
+                "DATE_SUB(from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d'), INTERVAL (case when DAYOFWEEK(from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d'))>=4 THEN " +
+                "DAYOFWEEK(from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d'))-4 ELSE DAYOFWEEK(from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d'))+3 END) DAY) as recent_week, " +
+                "upload_task_item.vechile_type, upload_task_item.vechile_model, upload_task_item.adrn, upload_task_item.data_date, upload_task_batch.sn_id, upload_task_batch.hostname, " +
+                "upload_task_batch.disk_sn, case when sn_id like 'ad.data.uploader.sh.nc4%' then 'nc4' when sn_id like 'ad.data.uploader.bj.m1.0001' then 'm1' else 'c3' end as idc " +
+                "from (select i.* from upload_task_item i, (select source_path, max(id) id from upload_task_item where status !=4 group by source_path) t where i.id=t.id) upload_task_item, " +
+                "upload_task_batch where upload_task_item.batch_id=upload_task_batch.batch_id";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+    /**
+     * not rlike
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test_RLike() throws Exception {
+        String sql = "SELECT\n" +
+                "    A_70606_262_1668537250628,\n" +
+                "    A_70606_568_1668537250628,\n" +
+                "    A_70606_252_1668537250628,\n" +
+                "    A_70606_457_1668537250628,\n" +
+                "    A_70606_353_1668537250628,\n" +
+                "    A_70606_654_1668537250628,\n" +
+                "    A_70606_536_1668537250628,\n" +
+                "    A_70606_329_1668537250628,\n" +
+                "    A_70606_61_1668537250628,\n" +
+                "    A_70606_729_1668537250628,\n" +
+                "    A_70606_258_1668537250628,\n" +
+                "    A_70606_502_1668537250628,\n" +
+                "    A_70606_665_1668537250628,\n" +
+                "    A_70606_106_1668537250628,\n" +
+                "    A_70606_747_1668537250628,\n" +
+                "    A_70606_382_1668537250628\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            stats_date AS A_70606_262_1668537250628,\n" +
+                "            utm_source AS A_70606_568_1668537250628,\n" +
+                "            utm_medium AS A_70606_252_1668537250628,\n" +
+                "            utm_campaign AS A_70606_457_1668537250628,\n" +
+                "            utm_term AS A_70606_353_1668537250628,\n" +
+                "            utm_content AS A_70606_654_1668537250628,\n" +
+                "            utm AS A_70606_536_1668537250628,\n" +
+                "            SUM(uv) AS A_70606_329_1668537250628,\n" +
+                "            SUM(um) AS A_70606_61_1668537250628,\n" +
+                "            attribution_type AS A_70606_729_1668537250628,\n" +
+                "            SUM(placed_ord_cnt) AS A_70606_258_1668537250628,\n" +
+                "            SUM(placed_user_cnt) AS A_70606_502_1668537250628,\n" +
+                "            SUM(placed_goods_amt) AS A_70606_665_1668537250628,\n" +
+                "            SUM(paid_ord_cnt) AS A_70606_106_1668537250628,\n" +
+                "            SUM(paid_user_cnt) AS A_70606_747_1668537250628,\n" +
+                "            SUM(paid_goods_amt) AS A_70606_382_1668537250628\n" +
+                "        FROM\n" +
+                "            (\n" +
+                "                SELECT\n" +
+                "                    stats_date AS \"stats_date\",\n" +
+                "                    split(utm, '\n" +
+                ".') [0] AS \"utm_source\",\n" +
+                "                    split(utm, '\n" +
+                ".') [1] AS \"utm_medium\",\n" +
+                "                    split(utm, '\n" +
+                ".') [2] AS \"utm_campaign\",\n" +
+                "                    split(utm, '\n" +
+                ".') [3] AS \"utm_term\",\n" +
+                "                    split(utm, '\n" +
+                ".') [4] AS \"utm_content\",\n" +
+                "                    CASE\n" +
+                "                        utm\n" +
+                "                        WHEN '-' THEN '全部'\n" +
+                "                        ELSE utm\n" +
+                "                    END AS \"utm\",\n" +
+                "                    attribution_type AS attribution_type,\n" +
+                "                    period_type AS period_type,\n" +
+                "                    sum(uv) AS \"uv\",\n" +
+                "                    sum(um) AS \"um\",\n" +
+                "                    sum(placed_ord_cnt) AS \"placed_ord_cnt\",\n" +
+                "                    sum(placed_user_cnt) AS \"placed_user_cnt\",\n" +
+                "                    sum(placed_goods_amt) AS \"placed_goods_amt\",\n" +
+                "                    sum(paid_ord_cnt) AS \"paid_ord_cnt\",\n" +
+                "                    sum(paid_user_cnt) AS \"paid_user_cnt\",\n" +
+                "                    sum(paid_goods_amt) AS \"paid_goods_amt\"\n" +
+                "                FROM\n" +
+                "                    (\n" +
+                "                        SELECT\n" +
+                "                            t1.stats_date AS stats_date,\n" +
+                "                            t1.utm AS utm,\n" +
+                "                            t1.uv AS uv,\n" +
+                "                            t1.um AS um,\n" +
+                "                            t0.period_type AS period_type,\n" +
+                "                            '正向' AS attribution_type,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.ord_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_ord_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.user_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_user_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.goods_amt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_goods_amt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.ord_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_ord_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.user_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_user_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.goods_amt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_goods_amt\n" +
+                "                        FROM\n" +
+                "                            iceberg_zjyprc_hadoop.nrdc.dm_traffic_endpoint_utm_di t1\n" +
+                "                            CROSS JOIN unnest(array [1, 3, 7, 14]) AS t0(period_type)\n" +
+                "                            LEFT OUTER JOIN iceberg_zjyprc_hadoop.nrdc.dm_sales_utm_attribution_mishop_di t2 ON t1.stats_date = t2.stats_date\n" +
+                "                            AND t1.utm = t2.utm\n" +
+                "                            AND t0.period_type = t2.period_type\n" +
+                "                        WHERE\n" +
+                "                            t1.stats_date >= '2023-01-01'\n" +
+                "                            AND t1.stats_date <= '2023-01-02'\n" +
+                "                            AND t1.endpoint = ''\n" +
+                "                            AND t1.utm NOT RLIKE '\n" +
+                "d'\n" +
+                "                            AND t0.period_type = 1\n" +
+                "                        GROUP BY\n" +
+                "                            1,\n" +
+                "                            2,\n" +
+                "                            3,\n" +
+                "                            4,\n" +
+                "                            5\n" +
+                "                        UNION ALL\n" +
+                "                        SELECT\n" +
+                "                            t1.stats_date AS stats_date,\n" +
+                "                            t1.utm AS utm,\n" +
+                "                            t1.uv AS uv,\n" +
+                "                            t1.um AS um,\n" +
+                "                            t0.period_type AS period_type,\n" +
+                "                            '逆向' AS attribution_type,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.ord_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_ord_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.user_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_user_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'placed' THEN t2.goods_amt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS placed_goods_amt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.ord_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_ord_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.user_cnt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_user_cnt,\n" +
+                "                            coalesce(\n" +
+                "                                sum(\n" +
+                "                                    CASE\n" +
+                "                                        WHEN t2.user_action_type = 'paid' THEN t2.goods_amt\n" +
+                "                                    END\n" +
+                "                                ),\n" +
+                "                                0\n" +
+                "                            ) AS paid_goods_amt\n" +
+                "                        FROM\n" +
+                "                            iceberg_zjyprc_hadoop.nrdc.dm_traffic_endpoint_utm_di t1\n" +
+                "                            CROSS JOIN unnest(array [1, 3, 7, 14]) AS t0(period_type)\n" +
+                "                            LEFT OUTER JOIN iceberg_zjyprc_hadoop.nrdc.dm_sales_utm_attribution_reverse_mishop_di t2 ON t1.stats_date = t2.stats_date\n" +
+                "                            AND t1.utm = t2.utm\n" +
+                "                        WHERE\n" +
+                "                            t1.stats_date >= '2023-01-01'\n" +
+                "                            AND t1.stats_date <= '2023-01-02'\n" +
+                "                            AND t1.endpoint = '-'\n" +
+                "                            AND t1.utm NOT RLIKE '\n" +
+                "d'\n" +
+                "                            AND t0.period_type = 1\n" +
+                "                        GROUP BY\n" +
+                "                            1,\n" +
+                "                            2,\n" +
+                "                            3,\n" +
+                "                            4,\n" +
+                "                            5\n" +
+                "                    )\n" +
+                "                WHERE\n" +
+                "                    attribution_type = '正向'\n" +
+                "                GROUP BY\n" +
+                "                    1,\n" +
+                "                    2,\n" +
+                "                    3,\n" +
+                "                    4,\n" +
+                "                    5,\n" +
+                "                    6,\n" +
+                "                    7,\n" +
+                "                    8,\n" +
+                "                    9\n" +
+                "            ) sql_model_virtual_table_new_70606_12885\n" +
+                "        WHERE\n" +
+                "            1 = 1\n" +
+                "        GROUP BY\n" +
+                "            stats_date,\n" +
+                "            utm_source,\n" +
+                "            utm_medium,\n" +
+                "            utm_campaign,\n" +
+                "            utm_term,\n" +
+                "            utm_content,\n" +
+                "            utm,\n" +
+                "            attribution_type\n" +
+                "    ) orderBy_nested\n" +
+                "ORDER BY\n" +
+                "    A_70606_262_1668537250628 desc,\n" +
+                "    A_70606_536_1668537250628 asc\n" +
+                "LIMIT\n" +
+                "    5000";
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+
     /**
      * sql中包含自定义变量
      */
