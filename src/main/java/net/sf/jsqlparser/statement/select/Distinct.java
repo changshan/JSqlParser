@@ -48,7 +48,7 @@ public class Distinct {
         String sql = useUnique ? "UNIQUE" : "DISTINCT";
 
         if (onSelectItems != null && !onSelectItems.isEmpty()) {
-            sql += " ON (" + PlainSelect.getStringList(onSelectItems) + ")";
+            sql += " " + PlainSelect.getStringList(onSelectItems) + " ";
         }
 
         return sql;

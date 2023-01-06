@@ -64,7 +64,7 @@ public final class SmartQLEngine {
                     consumer.accept(parser);
                 }
                 statement = parseStatement(parser);
-            }else{
+            }else {
                 throw ex;
             }
         }
@@ -87,7 +87,7 @@ public final class SmartQLEngine {
         SmartQLParser parser = newParser(sql);
         try {
             parser.Statement();
-            return parser.jjtree.rootNode();
+            return parser.getASTRoot();
         } catch (Exception ex) {
             throw new JSQLParserException(ex);
         }

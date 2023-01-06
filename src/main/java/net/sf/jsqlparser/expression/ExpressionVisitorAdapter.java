@@ -279,7 +279,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     public void visit(ExistsExpression expr) {
         expr.getRightExpression().accept(this);
     }
-   
+
     @Override
     public void visit(AnyComparisonExpression expr) {
 
@@ -339,14 +339,22 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
         if (expr.getKeep() != null) {
             expr.getKeep().accept(this);
         }
-        for (OrderByElement element : expr.getOrderByElements()) {
-            element.getExpression().accept(this);
+        if (expr.getOrderByElements() != null){
+            for (OrderByElement element : expr.getOrderByElements()) {
+                element.getExpression().accept(this);
+            }
         }
 
         if (expr.getWindowElement() != null) {
-            expr.getWindowElement().getRange().getStart().getExpression().accept(this);
-            expr.getWindowElement().getRange().getEnd().getExpression().accept(this);
-            expr.getWindowElement().getOffset().getExpression().accept(this);
+            if (expr.getWindowElement().getRange().getStart() != null && expr.getWindowElement().getRange().getStart().getExpression() != null) {
+                expr.getWindowElement().getRange().getStart().getExpression().accept(this);
+            }
+            if (expr.getWindowElement().getRange().getEnd() != null && expr.getWindowElement().getRange().getEnd().getExpression() != null) {
+                expr.getWindowElement().getRange().getEnd().getExpression().accept(this);
+            }
+            if (expr.getWindowElement().getOffset() != null && expr.getWindowElement().getOffset().getExpression() != null) {
+                expr.getWindowElement().getOffset().getExpression().accept(this);
+            }
         }
     }
 
@@ -528,7 +536,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
         if (rowConstructor.getColumnDefinitions().isEmpty()) {
             for (Expression expression: rowConstructor.getExprList().getExpressions()) {
                 expression.accept(this);
-              }
+            }
         } else {
             for (ColumnDefinition columnDefinition : rowConstructor.getColumnDefinitions()) {
                 columnDefinition.accept(this);
@@ -620,7 +628,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
         if (expr!=null) {
             expr.accept(this);
         }
-        
+
         expr = expression.getFilterExpression();
         if (expr!=null) {
             expr.accept(this);
@@ -638,7 +646,7 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     public void visit(ConnectByRootOperator connectByRootOperator) {
         connectByRootOperator.getColumn().accept(this);
     }
-    
+
     @Override
     public void visit(OracleNamedFunctionParameter oracleNamedFunctionParameter) {
         oracleNamedFunctionParameter.getExpression().accept(this);
@@ -650,6 +658,6 @@ public class ExpressionVisitorAdapter implements ExpressionVisitor, ItemsListVis
     }
 
     public void visit(ColumnDefinition columnDefinition) {
-       columnDefinition.accept(this);
-     }
+        columnDefinition.accept(this);
+    }
 }
