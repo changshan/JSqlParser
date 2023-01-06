@@ -340,7 +340,7 @@ public class Join extends ASTNodeAccessImpl {
                 builder.append("INNER ");
             } else if (isSemi()) {
                 builder.append("SEMI ");
-            } else if(isOne2one()){
+            } else if (isOne2one()){
                 builder.append("one to one ");
             }
 

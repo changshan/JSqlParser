@@ -104,7 +104,7 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
                 buffer.append("DISTINCT ");
             }
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
-                buffer.append("ON (");
+                buffer.append(" ");
                 for (Iterator<SelectItem> iter = plainSelect.getDistinct().getOnSelectItems().iterator(); iter
                         .hasNext();) {
                     SelectItem selectItem = iter.next();
@@ -113,7 +113,7 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
                         buffer.append(", ");
                     }
                 }
-                buffer.append(") ");
+                buffer.append(" ");
             }
 
         }
@@ -194,12 +194,9 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
         if (plainSelect.isEmitChanges()) {
             buffer.append(" EMIT CHANGES");
         }
-        if (plainSelect.getLimit() != null) {
-            new LimitDeparser(buffer).deParse(plainSelect.getLimit());
-        }
-        if (plainSelect.getOffset() != null) {
-            deparseOffset(plainSelect.getOffset());
-        }
+        //兼容不同数据源
+        visitLimitWithOffset(plainSelect);
+
         if (plainSelect.getFetch() != null) {
             deparseFetch(plainSelect.getFetch());
         }
@@ -229,6 +226,15 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
             buffer.append(")");
         }
 
+    }
+
+    protected void visitLimitWithOffset(PlainSelect select){
+        if (select.getLimit() != null) {
+            new LimitDeparser(buffer).deParse(select.getLimit());
+        }
+        if (select.getOffset() != null) {
+            deparseOffset(select.getOffset());
+        }
     }
 
     @Override
@@ -322,9 +328,9 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
                 .append(showOptions && includeNulls ? " INCLUDE NULLS" : "")
                 .append(showOptions && !includeNulls ? " EXCLUDE NULLS" : "")
                 .append(" (").append(PlainSelect.getStringList(unPivotClause, true,
-                unPivotClause != null && unPivotClause.size() > 1))
+                        unPivotClause != null && unPivotClause.size() > 1))
                 .append(" FOR ").append(PlainSelect.getStringList(unpivotForClause, true,
-                unpivotForClause != null && unpivotForClause.size() > 1))
+                        unpivotForClause != null && unpivotForClause.size() > 1))
                 .append(" IN ").append(PlainSelect.getStringList(unpivot.getUnPivotInClause(), true, true)).append(")");
         if (unpivot.getAlias() != null) {
             buffer.append(unpivot.getAlias().toString());
@@ -443,9 +449,15 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
             buffer.append(" WITHIN ");
             buffer.append(join.getJoinWindow().toString());
         }
+        int i = 0;
         for (Expression onExpression : join.getOnExpressions()) {
-            buffer.append(" ON ");
+            if (i == 0) {
+                buffer.append(" ON ");
+            } else {
+                buffer.append(" AND ");
+            }
             onExpression.accept(expressionVisitor);
+            i++;
         }
         if (join.getUsingColumns().size() > 0) {
             buffer.append(" USING (");
