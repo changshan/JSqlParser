@@ -1,5 +1,6 @@
 package com.xiaomi.smartql.parser;
 
+import com.xiaomi.smartql.parsercc.*;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.Statement;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("PMD.CyclomaticComplexity")
 public final class SmartQLEngine {
-    public final static int ALLOWED_NESTING_DEPTH = 10;
+    public final static int ALLOWED_NESTING_DEPTH = 20;
     public static final int PARSER_TIMEOUT = 6000;
 
     private SmartQLEngine() {
@@ -155,6 +156,8 @@ public final class SmartQLEngine {
                 } catch (ParseException ex) {
                     throw new JSQLParserException(ex);
                 }
+            }else{
+                throw ex1;
             }
         }
         return expression;
@@ -220,6 +223,8 @@ public final class SmartQLEngine {
                 } catch (ParseException ex) {
                     throw new JSQLParserException(ex);
                 }
+            }else{
+                throw ex1;
             }
         }
         return expression;
@@ -284,6 +289,8 @@ public final class SmartQLEngine {
                     consumer.accept(parser);
                 }
                 statements = parseStatements(parser);
+            }else{
+                throw ex;
             }
         }
         return statements;
