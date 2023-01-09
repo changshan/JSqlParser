@@ -155,7 +155,7 @@ public final class SmartQLEngine {
                 } catch (ParseException ex) {
                     throw new JSQLParserException(ex);
                 }
-            }else{
+            } else {
                 throw ex1;
             }
         }
@@ -222,7 +222,7 @@ public final class SmartQLEngine {
                 } catch (ParseException ex) {
                     throw new JSQLParserException(ex);
                 }
-            }else{
+            } else {
                 throw ex1;
             }
         }
@@ -288,7 +288,7 @@ public final class SmartQLEngine {
                     consumer.accept(parser);
                 }
                 statements = parseStatements(parser);
-            }else{
+            } else {
                 throw ex;
             }
         }
