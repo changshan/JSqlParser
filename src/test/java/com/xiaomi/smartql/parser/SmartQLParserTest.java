@@ -2,6 +2,7 @@ package com.xiaomi.smartql.parser;
 
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
+import net.sf.jsqlparser.util.deparser.StatementDeParser;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
@@ -1536,8 +1537,11 @@ public class SmartQLParserTest {
                 "    )\n" +
                 "LIMIT\n" +
                 "    5000";
-        SmartQLEngine.parse(sql);
-        assertTrue(Boolean.TRUE);
+        Statement stmt = SmartQLEngine.parse(sql);
+        StringBuilder sbd = new StringBuilder();
+        StatementDeParser deParser = new StatementDeParser(sbd);
+        stmt.accept(deParser);
+        assertTrue(sbd.toString().indexOf("one to one") > 0);
     }
 
     /**
@@ -1813,10 +1817,152 @@ public class SmartQLParserTest {
                 "    A_70606_536_1668537250628 asc\n" +
                 "LIMIT\n" +
                 "    5000";
-        SmartQLEngine.parse(sql);
-        assertTrue(Boolean.TRUE);
+        Statement stmt = SmartQLEngine.parse(sql);
+        StringBuilder sbd = new StringBuilder();
+        StatementDeParser deParser = new StatementDeParser(sbd);
+        stmt.accept(deParser);
+        assertTrue(sbd.toString().toLowerCase().indexOf("not rlike") > 0);
     }
 
+
+    /**
+     * like regex
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test_likeReg() throws Exception {
+        String sql = "SELECT `start_date` AS `A_43569_11_1658568114344`,\n" +
+                "       `workflow_type` AS `A_43569_872_1658568114344`,\n" +
+                "       `duration` AS `A_43569_696_1658568459822`\n" +
+                "FROM\n" +
+                "  (SELECT *\n" +
+                "   FROM\n" +
+                "     (SELECT b.date,\n" +
+                "             b.region,\n" +
+                "             b.workflow_type,\n" +
+                "             b.workflow_name,\n" +
+                "             b.car_type,\n" +
+                "             b.car_model,\n" +
+                "             b.car_number,\n" +
+                "             b.car_adrn,\n" +
+                "             b.status,\n" +
+                "             b.failed_stage,\n" +
+                "             b.batch_id,\n" +
+                "             b.dataclip_adrn,\n" +
+                "             b.start_time,\n" +
+                "             b.end_time,\n" +
+                "             b.start_date,\n" +
+                "             b.duration,\n" +
+                "             c.workflow_type_P99_num,\n" +
+                "             c.workflow_type_P999_num,\n" +
+                "             row_number() OVER (PARTITION BY b.workflow_type, b.start_date\n" +
+                "                                ORDER BY b.duration ASC) AS rank\n" +
+                "      FROM\n" +
+                "        (SELECT date, region,\n" +
+                "                      workflow_type,\n" +
+                "                      workflow_name,\n" +
+                "                      car_type,\n" +
+                "                      car_model,\n" +
+                "                      car_number,\n" +
+                "                      CONCAT(car_type, '/', car_model, '/', car_number) AS car_adrn,\n" +
+                "                      status,\n" +
+                "                      failed_stage,\n" +
+                "                      batch_id,\n" +
+                "                      dataclip_adrn,\n" +
+                "                      start_time,\n" +
+                "                      end_time,\n" +
+                "                      start_date,\n" +
+                "                      CAST((UNIX_TIMESTAMP(end_time) - UNIX_TIMESTAMP(start_time)) / 60 / 60 AS float) AS duration\n" +
+                "         FROM\n" +
+                "           (SELECT date, region,\n" +
+                "                         workflow_type,\n" +
+                "                         workflow_name,\n" +
+                "                         car_type,\n" +
+                "                         car_model,\n" +
+                "                         car_number,\n" +
+                "                         CONCAT(car_type, '/', car_model, '/', car_number) AS car_adrn,\n" +
+                "                         status,\n" +
+                "                         failed_stage,\n" +
+                "                         batch_id,\n" +
+                "                         dataclip_adrn,\n" +
+                "                         date_add(start_time, INTERVAL 8 HOUR) AS start_time,\n" +
+                "                         date_add(end_time, INTERVAL 8 HOUR) AS end_time,\n" +
+                "                         date(date_add(start_time, INTERVAL 8 HOUR)) AS start_date,\n" +
+                "                         row_number() OVER (PARTITION BY workflow_name\n" +
+                "                                            ORDER BY date_add(start_time, INTERVAL 8 HOUR)) AS rank\n" +
+                "            FROM workflow_tracking\n" +
+                "            WHERE workflow_type NOT IN (\"None\",\n" +
+                "                                        \"other\")\n" +
+                "              AND region IN (\"c3\",\n" +
+                "                             \"nc4\")\n" +
+                "              AND status IN (\"Succeeded\")\n" +
+                "              AND end_time IS NOT NULL\n" +
+                "              AND car_type != 'None') a1\n" +
+                "         WHERE rank = 1) b\n" +
+                "      LEFT JOIN\n" +
+                "        (SELECT workflow_type,\n" +
+                "                start_date,\n" +
+                "                CEILING(COUNT(*) * 0.99) AS workflow_type_P99_num,\n" +
+                "                CEILING(COUNT(*) * 0.999) AS workflow_type_P999_num\n" +
+                "         FROM\n" +
+                "           (SELECT date, region,\n" +
+                "                         workflow_type,\n" +
+                "                         workflow_name,\n" +
+                "                         car_type,\n" +
+                "                         car_model,\n" +
+                "                         car_number,\n" +
+                "                         CONCAT(car_type, '/', car_model, '/', car_number) AS car_adrn,\n" +
+                "                         status,\n" +
+                "                         failed_stage,\n" +
+                "                         batch_id,\n" +
+                "                         dataclip_adrn,\n" +
+                "                         start_time,\n" +
+                "                         end_time,\n" +
+                "                         start_date,\n" +
+                "                         CAST((UNIX_TIMESTAMP(end_time) - UNIX_TIMESTAMP(start_time)) / 60 / 60 AS float) AS duration\n" +
+                "            FROM\n" +
+                "              (SELECT date, region,\n" +
+                "                            workflow_type,\n" +
+                "                            workflow_name,\n" +
+                "                            car_type,\n" +
+                "                            car_model,\n" +
+                "                            car_number,\n" +
+                "                            CONCAT(car_type, '/', car_model, '/', car_number) AS car_adrn,\n" +
+                "                            status,\n" +
+                "                            failed_stage,\n" +
+                "                            batch_id,\n" +
+                "                            dataclip_adrn,\n" +
+                "                            date_add(start_time, INTERVAL 8 HOUR) AS start_time,\n" +
+                "                            date_add(end_time, INTERVAL 8 HOUR) AS end_time,\n" +
+                "                            date(date_add(start_time, INTERVAL 8 HOUR)) AS start_date,\n" +
+                "                            row_number() OVER (PARTITION BY workflow_name\n" +
+                "                                               ORDER BY date_add(start_time, INTERVAL 8 HOUR)) AS rank\n" +
+                "               FROM workflow_tracking\n" +
+                "               WHERE workflow_type NOT IN (\"None\",\n" +
+                "                                           \"other\")\n" +
+                "                 AND region IN (\"c3\",\n" +
+                "                                \"nc4\")\n" +
+                "                 AND status IN (\"Succeeded\")\n" +
+                "                 AND end_time IS NOT NULL\n" +
+                "                 AND car_type != 'None') a2\n" +
+                "            WHERE rank = 1) a3\n" +
+                "         GROUP BY workflow_type,\n" +
+                "                  start_date) c ON b.workflow_type = c.workflow_type\n" +
+                "      AND b.start_date = c.start_date) d\n" +
+                "   WHERE rank = workflow_type_P99_num) smart_sql_2F4266E4FED0254A35836CC1A1A0E017\n" +
+                "WHERE 1 = 1\n" +
+                "  AND (`start_date` >= '2022-12-26'\n" +
+                "       AND `start_date` < '2023-01-09'\n" +
+                "       AND `region` REGEXP 'c3|nc4') LIMIT 0,\n" +
+                "                                           5000";
+        Statement stmt = SmartQLEngine.parse(sql);
+        StringBuilder sbd = new StringBuilder();
+        StatementDeParser deParser = new StatementDeParser(sbd);
+        stmt.accept(deParser);
+        System.out.println(sbd.toString());
+        assertTrue(Boolean.TRUE);
+    }
 
     /**
      * testcase模版
