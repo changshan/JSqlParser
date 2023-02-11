@@ -27,6 +27,14 @@ public class SmartQLParserTest {
     }
 
     @Test
+    public void testKeyIncrement() throws Exception {
+        String sql = "select abc.increment from abc";
+        printToken(sql);
+        SmartQLEngine.parse(sql);
+        assertTrue(Boolean.TRUE);
+    }
+
+    @Test
     public void testNum() throws Exception {
         String sql = "select abc.1123abc from abc";
         printToken(sql);
