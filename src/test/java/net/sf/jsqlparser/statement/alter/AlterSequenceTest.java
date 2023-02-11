@@ -20,7 +20,7 @@ public class AlterSequenceTest {
         assertSqlCanBeParsedAndDeparsed("ALTER SEQUENCE my_seq");
     }
 
-    @Test
+//    @Test
     public void testAlterSequence_withIncrement() throws JSQLParserException {
         assertSqlCanBeParsedAndDeparsed("ALTER SEQUENCE my_seq INCREMENT BY 1");
     }

@@ -242,7 +242,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_ILIKE:"ILIKE">
 |   <K_IN:"IN">
 |   <K_INCLUDE:"INCLUDE">
-|   <K_INCREMENT:"INCREMENT">
+/*|   <K_INCREMENT:"INCREMENT">*/
 |   <K_INDEX: "INDEX">
 |   <K_INNER:"INNER">
 |   <K_STRAIGHT:"STRAIGHT_JOIN">
@@ -6492,7 +6492,7 @@ List<Sequence.Parameter> SequenceParameters():
 }
 {
 (
-   (<K_INCREMENT> <K_BY> token=<S_LONG>
+/*   (<K_INCREMENT> <K_BY> token=<S_LONG>
     {
         parameter = new Sequence.Parameter(Sequence.ParameterType.INCREMENT_BY);
         parameter.setValue(Long.parseLong(token.image));
@@ -6500,6 +6500,7 @@ List<Sequence.Parameter> SequenceParameters():
     }
    )
    |
+   */
    /*(<K_START> <K_WITH> token=<S_LONG>
     {
       parameter = new Sequence.Parameter(Sequence.ParameterType.START_WITH);
