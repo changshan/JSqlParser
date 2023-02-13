@@ -432,7 +432,7 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
             } else if (join.isSemi()) {
                 buffer.append(" SEMI");
             } else if (join.isOne2one()){
-                buffer.append("one to one ");
+                buffer.append(" one to one ");
             }
 
             if (join.isStraight()) {
