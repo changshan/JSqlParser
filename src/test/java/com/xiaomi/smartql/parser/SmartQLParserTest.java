@@ -29,7 +29,6 @@ public class SmartQLParserTest {
     @Test
     public void testKeyIncrement() throws Exception {
         String sql = "select abc.increment from abc";
-        printToken(sql);
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -37,7 +36,6 @@ public class SmartQLParserTest {
     @Test
     public void testNum() throws Exception {
         String sql = "select abc.1123abc from abc";
-        printToken(sql);
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -53,13 +51,11 @@ public class SmartQLParserTest {
     public void testDigitalField() throws Exception {
         Statements result = SmartQLEngine.parseStatements("select (domainQueryCount.time) A_39634_793_1657099508271, (domainQueryCount.http_host) A_39634_630_1657099508271, (SUM(domainQueryCount.count)) A_39634_883_1657099508271, (SUM(domainQueryCount.`5xx_count`)) A_39634_872_1657099508271, (domainQueryCount.count) A_39634_823_1657099590046, (domainQueryCount.xx_count) A_39634_763_1657099612818, (1 - domainQueryCount.xx_count/domainQueryCount.count) A_39634_272_1657101240162, (domainQueryCount.xx_count) A_39634_241_1657102108488, (domainQueryCount.count) A_39634_903_1657102134709 from domainQueryCount   group by A_39634_793_1657099508271,A_39634_630_1657099508271,A_39634_823_1657099590046,A_39634_763_1657099612818,A_39634_272_1657101240162,A_39634_241_1657102108488,A_39634_903_1657102134709;\n" +
                 "\n;");
-        System.out.println(result.toString());
     }
 
     @Test
     public void testKeys() throws Exception {
         Statement result = SmartQLEngine.parse("select database,check,current_date from abc");
-        System.out.println(result.toString());
     }
 
     @Test
@@ -92,7 +88,6 @@ public class SmartQLParserTest {
     public void test2() throws Exception {
         Statement result =
                 SmartQLEngine.parse("select * from (SELECT * FROM test) sql_model_virtual_table_4776_98 where abc>100;");
-        System.out.println(result.toString());
     }
 
 
@@ -124,7 +119,6 @@ public class SmartQLParserTest {
                         "WHERE UPPER(substring(`t1_日期`,1,4)) = UPPER('L_59391_500_1663741323109')\n" +
                         "GROUP BY substring(`t1_日期`,1,4)\n" +
                         "ORDER BY ISNULL(`c0`) ASC, `c0` ASC");
-        System.out.println(result.toString());
     }
 
 
@@ -133,7 +127,6 @@ public class SmartQLParserTest {
         String sql = "select #注释内容 \n a,/* 这条SELECT语句，  \n" +
                 "    是一个注释*/ b,c -- 这是一个注释 from dual;#注释内容 \n";
 
-        printToken(sql);
         Statement result =
                 SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
@@ -191,7 +184,6 @@ public class SmartQLParserTest {
                         "                        'YPcomment_Pre',\n" +
                         "                        'SplitCrowd'\n" +
                         "                    ) and date_format(create_time,'%Y') = '2022' and substring_index(name,'',1) not like '测试%' -- 排除画像中的测试数据 \n group by app_name ,concat(date_format(create_time,'%Y'),'',date_format(create_time,'%u'))) e left join ( select d.app_name as app_name, d.owner as owner, c.chinese_app_name as chinese_app_name, d.dept as dept from( select a.app_name as app_name, b.chinese_user_name as owner, concat( ifnull(b.first_dept, ''), '', ifnull(b.second_dept, ''), '', ifnull(b.third_dept, ''), '', ifnull(b.fourth_dept, '')) as dept from ( select app_name, user_name from exp_authority where status = 0 and authority = 4 ) a left join ( select user_name, chinese_user_name, app_name, first_dept, second_dept, third_dept, fourth_dept from exp_user_department where user_name is not null and status = 0 ) b on a.user_name = b.user_name and a.app_name = b.app_name ) d left join ( select domain_name as app_name, chinese_domain_name as chinese_app_name from exp_root_domain_info ) c on c.app_name = d.app_name order by app_name) f on e.app_name = f.app_name ) smart_sql_chu7jm group by A_27701_404_1651806744648,A_27701_635_1651820468876,A_27701_536_1651820468876,A_27701_598_1651820468876,A_27701_133_1651820468876;");
-        System.out.println(result.toString());
     }
 
     /**
@@ -203,7 +195,6 @@ public class SmartQLParserTest {
     public void test4() throws Exception {
         Statement result =
                 SmartQLEngine.parse("select * from abc where 1=1 and abc_1 is True;");
-        System.out.println(result.toString());
     }
 
 
@@ -260,7 +251,6 @@ public class SmartQLParserTest {
 //        printToken(parser);
         SmartQLEngine.parse(sql);
 
-        System.out.println("11");
     }
 
 
@@ -818,7 +808,6 @@ public class SmartQLParserTest {
                 "FROM ads_emi_postback_realtime_statistics t1\n" +
                 "LEFT JOIN holdor('[broadcast]') game_info_all t2\n" +
                 "ON t1.package_name=t2.package_name";
-        printToken(sql);
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
@@ -1968,7 +1957,6 @@ public class SmartQLParserTest {
         StringBuilder sbd = new StringBuilder();
         StatementDeParser deParser = new StatementDeParser(sbd);
         stmt.accept(deParser);
-        System.out.println(sbd.toString());
         assertTrue(Boolean.TRUE);
     }
 
