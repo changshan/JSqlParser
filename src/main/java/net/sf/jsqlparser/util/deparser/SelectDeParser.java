@@ -451,15 +451,14 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect>
             buffer.append(" WITHIN ");
             buffer.append(join.getJoinWindow().toString());
         }
-        int i = 0;
-        for (Expression onExpression : join.getOnExpressions()) {
+        Expression[] exps = join.getOnExpressions().toArray(new Expression[0]);
+        for (int i = 0; i < exps.length; i++) {
             if (i == 0) {
                 buffer.append(" ON ");
             } else {
                 buffer.append(" AND ");
             }
-            onExpression.accept(expressionVisitor);
-            i++;
+            exps[i].accept(expressionVisitor);
         }
         if (join.getUsingColumns().size() > 0) {
             buffer.append(" USING (");

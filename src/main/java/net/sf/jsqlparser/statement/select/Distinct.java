@@ -47,6 +47,11 @@ public class Distinct {
     public String toString() {
         String sql = useUnique ? "UNIQUE" : "DISTINCT";
 
+        /**
+         * smart ql 中，对于distinct a,b,c的逻辑，"借用"了onselectitem属性，并且在distinct toString中更改distinct on 的语法
+         * 保持业务上的逻辑，disable这个testcase
+         * 风险：如果在presto环境中，出现 distinct on (a,b,c)的情况，会导致出错
+         */
         if (onSelectItems != null && !onSelectItems.isEmpty()) {
             sql += " " + PlainSelect.getStringList(onSelectItems) + " ";
         }
