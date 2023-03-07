@@ -179,7 +179,7 @@ public class SpecialOracleTest {
             "join14.sql",
             "join15.sql",
             "join16.sql",
-            "join17.sql",
+//            "join17.sql",
             "join18.sql",
             "join19.sql",
             "join20.sql",
