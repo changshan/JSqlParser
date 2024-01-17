@@ -32,12 +32,21 @@ public class CreateIndexDeParser extends AbstractDeParser<CreateIndex> {
         }
 
         buffer.append("INDEX ");
+        if (createIndex.isUsingIfNotExists()) {
+            buffer.append("IF NOT EXISTS ");
+        }
         buffer.append(index.getName());
+
+        String using = index.getUsing();
+        if (using != null && createIndex.isIndexTypeBeforeOn()) {
+            buffer.append(" USING ");
+            buffer.append(using);
+        }
+
         buffer.append(" ON ");
         buffer.append(createIndex.getTable().getFullyQualifiedName());
 
-        String using = index.getUsing();
-        if (using != null) {
+        if (using != null && !createIndex.isIndexTypeBeforeOn()) {
             buffer.append(" USING ");
             buffer.append(using);
         }
@@ -45,7 +54,9 @@ public class CreateIndexDeParser extends AbstractDeParser<CreateIndex> {
         if (index.getColumnsNames() != null) {
             buffer.append(" (");
             buffer.append(index.getColumnWithParams().stream()
-                    .map(cp -> cp.columnName + (cp.getParams() != null ? " " + String.join(" ", cp.getParams()) : ""))
+                    .map(cp -> cp.columnName
+                            + (cp.getParams() != null ? " " + String.join(" ", cp.getParams())
+                                    : ""))
                     .collect(joining(", ")));
             buffer.append(")");
         }

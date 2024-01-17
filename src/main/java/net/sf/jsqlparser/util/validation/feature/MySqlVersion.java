@@ -32,11 +32,13 @@ public enum MySqlVersion implements Version {
                     // https://dev.mysql.com/doc/refman/8.0/en/select.html
                     Feature.select,
                     Feature.selectGroupBy, Feature.selectHaving,
-                    Feature.limit, Feature.limitOffset, Feature.offset, Feature.offsetParam, Feature.orderBy,
+                    Feature.limit, Feature.limitOffset, Feature.offset, Feature.offsetParam,
+                    Feature.orderBy,
                     Feature.selectForUpdate,
                     Feature.selectForUpdateOfTable,
                     Feature.selectForUpdateNoWait,
                     Feature.selectForUpdateSkipLocked,
+                    Feature.selectForShare,
                     Feature.distinct,
 
                     Feature.setOperation,
@@ -50,7 +52,8 @@ public enum MySqlVersion implements Version {
                     Feature.function,
 
                     // https://dev.mysql.com/doc/refman/8.0/en/join.html
-                    Feature.join, Feature.joinSimple, Feature.joinLeft, Feature.joinRight, Feature.joinOuter,
+                    Feature.join, Feature.joinSimple, Feature.joinLeft, Feature.joinRight,
+                    Feature.joinOuter,
                     Feature.joinNatural, Feature.joinInner, Feature.joinCross, Feature.joinStraight,
                     Feature.joinUsingColumns,
 
@@ -58,6 +61,7 @@ public enum MySqlVersion implements Version {
                     Feature.insert,
                     Feature.insertValues,
                     Feature.values,
+                    Feature.tableStatement,
                     Feature.insertFromSelect, Feature.insertUseSet, Feature.insertModifierPriority,
                     Feature.insertModifierIgnore, Feature.insertUseDuplicateKeyUpdate,
 
@@ -65,7 +69,7 @@ public enum MySqlVersion implements Version {
                     Feature.update, Feature.updateJoins, Feature.updateOrderBy, Feature.updateLimit,
 
                     // https://dev.mysql.com/doc/refman/8.0/en/replace.html
-                    Feature.replace,
+                    Feature.upsert,
 
                     // https://dev.mysql.com/doc/refman/8.0/en/delete.html
                     Feature.delete, Feature.deleteJoin, Feature.deleteTables, Feature.deleteLimit,
@@ -98,9 +102,11 @@ public enum MySqlVersion implements Version {
                     Feature.createSchema,
                     // https://dev.mysql.com/doc/refman/8.0/en/create-view.html
                     Feature.createView,
+                    Feature.createViewWithComment,
                     Feature.createOrReplaceView,
                     // https://dev.mysql.com/doc/refman/8.0/en/create-table.html
-                    Feature.createTable, Feature.createTableCreateOptionStrings, Feature.createTableTableOptionStrings,
+                    Feature.createTable, Feature.createTableCreateOptionStrings,
+                    Feature.createTableTableOptionStrings,
                     Feature.createTableFromSelect, Feature.createTableIfNotExists,
                     // https://dev.mysql.com/doc/refman/8.0/en/create-index.html
                     Feature.createIndex,
@@ -109,6 +115,7 @@ public enum MySqlVersion implements Version {
 
                     // https://dev.mysql.com/doc/refman/8.0/en/describe.html
                     Feature.describe,
+                    Feature.desc,
                     // https://dev.mysql.com/doc/refman/8.0/en/explain.html
                     Feature.explain,
                     // https://dev.mysql.com/doc/refman/8.0/en/show.html
@@ -117,6 +124,8 @@ public enum MySqlVersion implements Version {
                     Feature.showTables,
                     // https://dev.mysql.com/doc/refman/8.0/en/show-columns.html
                     Feature.showColumns,
+                    // https://dev.mysql.com/doc/refman/8.0/en/show-index.html
+                    Feature.showIndex,
                     // https://dev.mysql.com/doc/refman/8.0/en/grant.html
                     Feature.grant,
                     // https://dev.mysql.com/doc/refman/8.0/en/use.html

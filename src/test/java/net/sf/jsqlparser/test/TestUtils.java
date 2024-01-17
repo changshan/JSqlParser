@@ -9,17 +9,22 @@
  */
 package net.sf.jsqlparser.test;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.MySQLIndexHint;
 import net.sf.jsqlparser.expression.OracleHint;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -27,20 +32,18 @@ import net.sf.jsqlparser.parser.Node;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SetOperationList;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 import net.sf.jsqlparser.util.deparser.SelectDeParser;
 import net.sf.jsqlparser.util.deparser.StatementDeParser;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.MultilineRecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -48,22 +51,23 @@ import org.junit.jupiter.api.Test;
  */
 public class TestUtils {
 
-    private static final Pattern SQL_COMMENT_PATTERN = Pattern.
-            compile("(--.*$)|(/\\*.*?\\*/)", Pattern.MULTILINE);
+    private static final Pattern SQL_COMMENT_PATTERN =
+            Pattern.compile("(--.*$)|(/\\*.*?\\*/)", Pattern.MULTILINE);
 
-    private static final Pattern SQL_SANITATION_PATTERN
-            = Pattern.compile("(\\s+)", Pattern.MULTILINE);
+    private static final Pattern SQL_SANITATION_PATTERN =
+            Pattern.compile("(\\s+)", Pattern.MULTILINE);
 
     // Assure SPACE around Syntax Characters
-    private static final Pattern SQL_SANITATION_PATTERN2
-            = Pattern.compile("\\s*([!/,()=+\\-*|\\]<>:])\\s*", Pattern.MULTILINE);
+    private static final Pattern SQL_SANITATION_PATTERN2 =
+            Pattern.compile("\\s*([!/,()=+\\-*|\\]<>:])\\s*", Pattern.MULTILINE);
 
     /**
      * @param statement
      * @return the parsed {@link Statement}
      * @throws JSQLParserException
      */
-    public static Statement assertSqlCanBeParsedAndDeparsed(String statement) throws JSQLParserException {
+    public static Statement assertSqlCanBeParsedAndDeparsed(String statement)
+            throws JSQLParserException {
         return assertSqlCanBeParsedAndDeparsed(statement, false);
     }
 
@@ -71,26 +75,26 @@ public class TestUtils {
      * Tries to parse and deparse the given statement.
      *
      * @param statement
-     * @param laxDeparsingCheck removes all linefeeds from the original and removes all double spaces. The check is
-     * caseinsensitive.
+     * @param laxDeparsingCheck removes all linefeeds from the original and removes all double
+     *        spaces. The check is caseinsensitive.
      * @return the parsed {@link Statement}
      * @throws JSQLParserException
      */
-    public static Statement assertSqlCanBeParsedAndDeparsed(String statement, boolean laxDeparsingCheck)
-            throws JSQLParserException {
+    public static Statement assertSqlCanBeParsedAndDeparsed(String statement,
+            boolean laxDeparsingCheck) throws JSQLParserException {
         return assertSqlCanBeParsedAndDeparsed(statement, laxDeparsingCheck, null);
     }
 
     /**
      * @param statement
-     * @param laxDeparsingCheck removes all linefeeds from the original and removes all double spaces. The check is
-     * caseinsensitive.
+     * @param laxDeparsingCheck removes all linefeeds from the original and removes all double
+     *        spaces. The check is caseinsensitive.
      * @param consumer - a parser-consumer for parser-configurations from outside
      * @return the parsed {@link Statement}
      * @throws JSQLParserException
      */
-    public static Statement assertSqlCanBeParsedAndDeparsed(String statement, boolean laxDeparsingCheck,
-            Consumer<CCJSqlParser> consumer) throws JSQLParserException {
+    public static Statement assertSqlCanBeParsedAndDeparsed(String statement,
+            boolean laxDeparsingCheck, Consumer<CCJSqlParser> consumer) throws JSQLParserException {
         Statement parsed = CCJSqlParserUtil.parse(statement, consumer);
         assertStatementCanBeDeparsedAs(parsed, statement, laxDeparsingCheck);
         return parsed;
@@ -100,18 +104,62 @@ public class TestUtils {
         assertStatementCanBeDeparsedAs(parsed, statement, false);
     }
 
-    public static void assertStatementCanBeDeparsedAs(Statement parsed, String statement, boolean laxDeparsingCheck) {
+    public static void assertStatementCanBeDeparsedAs(Statement parsed, String statement,
+            boolean laxDeparsingCheck) {
         String sanitizedInputSqlStr = buildSqlString(parsed.toString(), laxDeparsingCheck);
         String sanitizedStatementStr = buildSqlString(statement, laxDeparsingCheck);
 
-        assertEquals(sanitizedStatementStr, sanitizedInputSqlStr);
+        assertEquals(sanitizedStatementStr, sanitizedInputSqlStr,
+                "Output from toString() does not match.");
+
+        // Export all the Test SQLs to /tmp/net/sf/jsqlparser
+        boolean exportToFile = Boolean.parseBoolean(System.getenv("EXPORT_TEST_TO_FILE"));
+        if (exportToFile) {
+            writeTestToFile(sanitizedInputSqlStr);
+        }
 
         StringBuilder builder = new StringBuilder();
-        parsed.accept( new StatementDeParser(builder) );
+        parsed.accept(new StatementDeParser(builder));
 
         String sanitizedDeparsedStr = buildSqlString(builder.toString(), laxDeparsingCheck);
 
-        assertEquals(sanitizedStatementStr, sanitizedDeparsedStr);
+        assertEquals(sanitizedStatementStr, sanitizedDeparsedStr,
+                "Output from Deparser does not match.");
+    }
+
+    private static void writeTestToFile(String sanitizedInputSqlStr) {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        String testMethodName;
+        String testClassName;
+        int i = 1;
+        do {
+            testMethodName = stackTrace[i].getMethodName();
+            testClassName = stackTrace[i].getClassName();
+            i++;
+        } while (testMethodName.equals("writeTestToFile") || testMethodName.startsWith("assert"));
+
+        if (!testMethodName.equals("testRelObjectNameExt")) {
+            int classNameSeparator = testClassName.lastIndexOf(".");
+            String simpleClassName = testClassName.substring(classNameSeparator + 1);
+            String packageName = testClassName.substring(0, classNameSeparator).replace(".",
+                    System.getProperty("file.separator"));
+
+            File file = new File(System.getProperty("java.io.tmpdir")
+                    + System.getProperty("file.separator") + packageName);
+            file.mkdirs();
+            file = new File(file, simpleClassName + ".sql");
+            try (FileWriter fileWriter = new FileWriter(file, true)) {
+                IOUtils.write("-- " + testMethodName + "\n", fileWriter);
+                IOUtils.write(sanitizedInputSqlStr, fileWriter);
+                if (!sanitizedInputSqlStr.trim().endsWith(";")) {
+                    IOUtils.write("\n;", fileWriter);
+                }
+                IOUtils.write("\n\n", fileWriter);
+            } catch (IOException ex) {
+                Logger.getLogger(TestUtils.class.getName()).log(Level.SEVERE,
+                        "Writing SQL to file failed.", ex);
+            }
+        }
     }
 
     /**
@@ -136,7 +184,8 @@ public class TestUtils {
 
     /**
      * @param stmt
-     * @return a {@link String} build by {@link ToStringBuilder} and {@link ObjectTreeToStringStyle#INSTANCE}
+     * @return a {@link String} build by {@link ToStringBuilder} and
+     *         {@link ObjectTreeToStringStyle#INSTANCE}
      */
     public static String toReflectionString(Statement stmt) {
         return toReflectionString(stmt, false);
@@ -144,17 +193,20 @@ public class TestUtils {
 
     /**
      * @param stmt
-     * @return a {@link String} build by {@link ToStringBuilder} and {@link ObjectTreeToStringStyle#INSTANCE}
+     * @return a {@link String} build by {@link ToStringBuilder} and
+     *         {@link ObjectTreeToStringStyle#INSTANCE}
      */
     public static String toReflectionString(Statement stmt, boolean includingASTNode) {
         ReflectionToStringBuilder strb = new ReflectionToStringBuilder(stmt,
-                includingASTNode ? ObjectTreeToStringStyle.INSTANCE_INCLUDING_AST : ObjectTreeToStringStyle.INSTANCE);
+                includingASTNode ? ObjectTreeToStringStyle.INSTANCE_INCLUDING_AST
+                        : ObjectTreeToStringStyle.INSTANCE);
         return strb.build();
     }
 
     /**
-     * Replacement of {@link Arrays#asList(Object...)} which returns java.util.Arrays$ArrayList not java.util.ArrayList,
-     * the internal model uses java.util.ArrayList by default, which supports modification
+     * Replacement of {@link Arrays#asList(Object...)} which returns java.util.Arrays$ArrayList not
+     * java.util.ArrayList, the internal model uses java.util.ArrayList by default, which supports
+     * modification
      *
      * @param <T>
      * @param obj
@@ -175,7 +227,8 @@ public class TestUtils {
         private static final long serialVersionUID = 1L;
 
         public static final ObjectTreeToStringStyle INSTANCE = new ObjectTreeToStringStyle(false);
-        public static final ObjectTreeToStringStyle INSTANCE_INCLUDING_AST = new ObjectTreeToStringStyle(true);
+        public static final ObjectTreeToStringStyle INSTANCE_INCLUDING_AST =
+                new ObjectTreeToStringStyle(true);
 
         private boolean includingASTNode;
 
@@ -205,10 +258,12 @@ public class TestUtils {
         }
 
         /**
-         * empty {@link Collection}'s should be printed as <code>null</code>, otherwise the outcome cannot be compared
+         * empty {@link Collection}'s should be printed as <code>null</code>, otherwise the outcome
+         * cannot be compared
          */
         @Override
-        protected void appendDetail(final StringBuffer buffer, final String fieldName, final Collection<?> coll) {
+        protected void appendDetail(final StringBuffer buffer, final String fieldName,
+                final Collection<?> coll) {
             if (coll.isEmpty()) {
                 appendNullText(buffer, fieldName);
             } else {
@@ -217,10 +272,12 @@ public class TestUtils {
         }
 
         /**
-         * empty {@link Map}'s should be printed as <code>null</code>, otherwise the outcome cannot be compared
+         * empty {@link Map}'s should be printed as <code>null</code>, otherwise the outcome cannot
+         * be compared
          */
         @Override
-        protected void appendDetail(final StringBuffer buffer, final String fieldName, final Map<?, ?> coll) {
+        protected void appendDetail(final StringBuffer buffer, final String fieldName,
+                final Map<?, ?> coll) {
             if (coll.isEmpty()) {
                 appendNullText(buffer, fieldName);
             } else {
@@ -248,8 +305,8 @@ public class TestUtils {
      *
      * @param stmt
      * @param statement
-     * @param laxDeparsingCheck removes all linefeeds from the original and removes all double spaces. The check is
-     * caseinsensitive.
+     * @param laxDeparsingCheck removes all line feeds from the original and removes all double
+     *        spaces. The check is case-insensitive.
      */
     public static void assertDeparse(Statement stmt, String statement, boolean laxDeparsingCheck) {
         StatementDeParser deParser = new StatementDeParser(new StringBuilder());
@@ -268,7 +325,18 @@ public class TestUtils {
 
             // assure spacing around Syntax Characters
             sanitizedSqlStr = SQL_SANITATION_PATTERN2.matcher(sanitizedSqlStr).replaceAll("$1");
-            return sanitizedSqlStr.trim().toLowerCase();
+
+            sanitizedSqlStr = sanitizedSqlStr.trim().toLowerCase();
+
+            // Rewrite statement separators "/" and "GO"
+            if (sanitizedSqlStr.endsWith("/")) {
+                sanitizedSqlStr = sanitizedSqlStr.substring(0, sanitizedSqlStr.length() - 1) + ";";
+            } else if (sanitizedSqlStr.endsWith("go")) {
+                sanitizedSqlStr = sanitizedSqlStr.substring(0, sanitizedSqlStr.length() - 2) + ";";
+            }
+
+            return sanitizedSqlStr;
+
         } else {
             // remove comments only
             return SQL_COMMENT_PATTERN.matcher(originalSql).replaceAll("");
@@ -277,7 +345,8 @@ public class TestUtils {
 
     @Test
     public void testBuildSqlString() {
-        assertEquals("select col from test", buildSqlString("   SELECT   col FROM  \r\n \t  TEST \n", true));
+        assertEquals("select col from test",
+                buildSqlString("   SELECT   col FROM  \r\n \t  TEST \n", true));
         assertEquals("select  col  from test", buildSqlString("select  col  from test", false));
     }
 
@@ -292,7 +361,8 @@ public class TestUtils {
         assertEquals(expression, stringBuilder.toString());
     }
 
-    public static void assertExpressionCanBeParsedAndDeparsed(String expressionStr, boolean laxDeparsingCheck) throws JSQLParserException {
+    public static void assertExpressionCanBeParsedAndDeparsed(String expressionStr,
+            boolean laxDeparsingCheck) throws JSQLParserException {
         Expression expression = CCJSqlParserUtil.parseExpression(expressionStr);
         assertEquals(buildSqlString(expressionStr, laxDeparsingCheck),
                 buildSqlString(expression.toString(), laxDeparsingCheck));
@@ -307,16 +377,15 @@ public class TestUtils {
         Statement statement = CCJSqlParserUtil.parse(sql);
         if (statement instanceof Select) {
             Select stmt = (Select) statement;
-            if (stmt.getSelectBody() instanceof PlainSelect) {
-                PlainSelect ps = (PlainSelect) stmt.getSelectBody();
-                OracleHint hint = ps.getOracleHint();
+            if (stmt instanceof PlainSelect) {
+                OracleHint hint = OracleHint.getHintFromSelectBody(stmt);
                 assertNotNull(hint);
                 assertEquals(hints[0], hint.getValue());
-            } else if (stmt.getSelectBody() instanceof SetOperationList) {
-                SetOperationList setop = (SetOperationList) stmt.getSelectBody();
-                for (int i = 0; i < setop.getSelects().size(); i++) {
-                    PlainSelect pselect = (PlainSelect) setop.getSelects().get(i);
-                    OracleHint hint = pselect.getOracleHint();
+            } else if (stmt instanceof SetOperationList) {
+                SetOperationList setOperationList = (SetOperationList) stmt;
+                for (int i = 0; i < setOperationList.getSelects().size(); i++) {
+                    OracleHint hint =
+                            OracleHint.getHintFromSelectBody(setOperationList.getSelects().get(i));
                     if (hints[i] == null) {
                         assertNull(hint);
                     } else {
@@ -341,5 +410,21 @@ public class TestUtils {
             assertNotNull(hint);
             assertEquals(hints[0], hint.getValue());
         }
+    }
+
+    public static void assertUpdateMysqlHintExists(String sql, boolean assertDeparser,
+            String action, String qualifier, String... indexNames)
+            throws JSQLParserException {
+        if (assertDeparser) {
+            assertSqlCanBeParsedAndDeparsed(sql, true);
+        }
+        Statement statement = CCJSqlParserUtil.parse(sql);
+        assertInstanceOf(Update.class, statement);
+        Update updateStmt = (Update) statement;
+        final MySQLIndexHint indexHint = updateStmt.getTable().getIndexHint();
+        assertNotNull(indexHint);
+        assertEquals(indexHint.getAction(), action);
+        assertEquals(indexHint.getIndexQualifier(), qualifier);
+        assertArrayEquals(indexHint.getIndexNames().toArray(), indexNames);
     }
 }

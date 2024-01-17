@@ -9,12 +9,12 @@
  */
 package net.sf.jsqlparser.util.deparser;
 
+import net.sf.jsqlparser.statement.create.view.AutoRefreshOption;
 import net.sf.jsqlparser.statement.create.view.CreateView;
 import net.sf.jsqlparser.statement.create.view.TemporaryOption;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectVisitor;
-import net.sf.jsqlparser.statement.select.WithItem;
 
 public class CreateViewDeParser extends AbstractDeParser<CreateView> {
 
@@ -42,16 +42,16 @@ public class CreateViewDeParser extends AbstractDeParser<CreateView> {
             buffer.append("OR REPLACE ");
         }
         switch (createView.getForce()) {
-        case FORCE:
-            buffer.append("FORCE ");
-            break;
-        case NO_FORCE:
-            buffer.append("NO FORCE ");
-            break;
-        case NONE:
-            break;
-        default:
-            // nothing
+            case FORCE:
+                buffer.append("FORCE ");
+                break;
+            case NO_FORCE:
+                buffer.append("NO FORCE ");
+                break;
+            case NONE:
+                break;
+            default:
+                // nothing
         }
         if (createView.getTemporary() != TemporaryOption.NONE) {
             buffer.append(createView.getTemporary().name()).append(" ");
@@ -63,27 +63,22 @@ public class CreateViewDeParser extends AbstractDeParser<CreateView> {
         if (createView.isIfNotExists()) {
             buffer.append(" IF NOT EXISTS");
         }
+        if (createView.getAutoRefresh() != AutoRefreshOption.NONE) {
+            buffer.append(" AUTO REFRESH ").append(createView.getAutoRefresh().name());
+        }
         if (createView.getColumnNames() != null) {
-            buffer.append(PlainSelect.getStringList(createView.getColumnNames(), true, true));
+            buffer.append("(");
+            buffer.append(createView.getColumnNames());
+            buffer.append(")");
+        }
+        if (createView.getViewCommentOptions() != null) {
+            buffer.append(
+                    PlainSelect.getStringList(createView.getViewCommentOptions(), false, false));
         }
         buffer.append(" AS ");
 
         Select select = createView.getSelect();
-        if (select.getWithItemsList() != null) {
-            buffer.append("WITH ");
-            boolean first = true;
-            for (WithItem item : select.getWithItemsList()) {
-                if (!first) {
-                    buffer.append(", ");
-                } else {
-                    first = false;
-                }
-
-                item.accept(selectVisitor);
-            }
-            buffer.append(" ");
-        }
-        createView.getSelect().getSelectBody().accept(selectVisitor);
+        select.accept(selectVisitor);
         if (createView.isWithReadOnly()) {
             buffer.append(" WITH READ ONLY");
         }

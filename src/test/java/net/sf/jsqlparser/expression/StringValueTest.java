@@ -9,8 +9,11 @@
  */
 package net.sf.jsqlparser.expression;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.test.TestUtils;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -57,10 +60,37 @@ public class StringValueTest {
         assertEquals(expectedValue, v.getValue());
         assertEquals(expectedPrefix, v.getPrefix());
     }
-    
+
     @Test
     public void testIssue1566EmptyStringValue() {
         StringValue v = new StringValue("'");
         assertEquals("'", v.getValue());
+    }
+
+    @Test
+    public void testOracleAlternativeQuoting() throws JSQLParserException {
+        String sqlStr = "COMMENT ON COLUMN EMP.NAME IS q'{Na'm\\e}'";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+
+        sqlStr = "COMMENT ON COLUMN EMP.NAME IS q'(Na'm\\e)'";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+
+        sqlStr = "COMMENT ON COLUMN EMP.NAME IS q'[Na'm\\e]'";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+
+        sqlStr = "COMMENT ON COLUMN EMP.NAME IS q''Na'm\\e]''";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+
+        sqlStr = "select q'{Its good!}' from dual";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+
+        sqlStr = "select q'{It's good!}' from dual";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+    }
+
+    @Test
+    public void testParseInput_BYTEA() throws Exception {
+        String sqlStr = "VALUES (X'', X'01FF', X'01 bc 2a', X'01' '02')";
+        TestUtils.assertSqlCanBeParsedAndDeparsed(sqlStr, true);
     }
 }

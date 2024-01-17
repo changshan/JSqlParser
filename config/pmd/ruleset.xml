@@ -48,8 +48,8 @@ under the License.
 	<rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
 	<rule ref="category/java/codestyle.xml/UselessParentheses" />
 	<rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
-    
-		<!-- for Codazy -->
+
+	<!-- for Codazy -->
 	<rule ref="category/java/codestyle.xml/MethodNamingConventions">
 		<properties>
 			<property name="methodPattern" value="[a-z][a-zA-Z0-9]*" />
@@ -77,7 +77,12 @@ under the License.
 
 
 	<!-- for Codazy -->
-	<rule ref="category/java/design.xml/CyclomaticComplexity" />
+	<rule ref="category/java/design.xml/CyclomaticComplexity">
+		<properties>
+			<property name="classReportLevel" value="200" />
+			<property name="methodReportLevel" value="120" />
+		</properties>
+	</rule>
 	<rule ref="category/java/design.xml/ExcessiveMethodLength" />
 	<rule ref="category/java/bestpractices.xml/SwitchStmtsShouldHaveDefault" />
 

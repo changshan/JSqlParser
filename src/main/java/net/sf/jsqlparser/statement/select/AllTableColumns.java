@@ -9,20 +9,29 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
-import net.sf.jsqlparser.schema.*;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 
-public class AllTableColumns extends ASTNodeAccessImpl implements SelectItem, Expression {
+import java.util.List;
+
+public class AllTableColumns extends AllColumns {
 
     private Table table;
 
-    public AllTableColumns() {
+    public AllTableColumns(Table table, ExpressionList<Column> exceptColumns,
+            List<SelectItem<?>> replaceExpressions) {
+        super(exceptColumns, replaceExpressions);
+        this.table = table;
     }
 
-    public AllTableColumns(Table tableName) {
-        this.table = tableName;
+    public AllTableColumns(Table table) {
+        this(table, null, null);
+    }
+
+    public AllTableColumns(Table table, AllColumns allColumns) {
+        this(table, allColumns.exceptColumns, allColumns.replaceExpressions);
     }
 
     public Table getTable() {
@@ -33,19 +42,14 @@ public class AllTableColumns extends ASTNodeAccessImpl implements SelectItem, Ex
         this.table = table;
     }
 
-    @Override
-    public void accept(SelectItemVisitor selectItemVisitor) {
-        selectItemVisitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-        return table + ".*";
-    }
-
     public AllTableColumns withTable(Table table) {
         this.setTable(table);
         return this;
+    }
+
+    @Override
+    public StringBuilder appendTo(StringBuilder builder) {
+        return super.appendTo(table.appendTo(builder).append("."));
     }
 
     @Override

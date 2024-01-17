@@ -11,6 +11,7 @@ package net.sf.jsqlparser.util.validation.validator;
 
 import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.update.UpdateSet;
 import net.sf.jsqlparser.statement.upsert.Upsert;
 import net.sf.jsqlparser.util.validation.ValidationCapability;
 
@@ -26,26 +27,25 @@ public class UpsertValidator extends AbstractValidator<Upsert> {
         }
         validateOptionalFromItem(upsert.getTable());
         validateOptionalExpressions(upsert.getColumns());
-        validateOptionalItemsList(upsert.getItemsList());
+        validateOptionalExpressions(upsert.getExpressions());
         validateOptionalSelect(upsert.getSelect());
-        if (upsert.isUseDuplicate()) {
-            validateDuplicate(upsert);
-        }
+        validateDuplicate(upsert);
     }
 
     private void validateOptionalSelect(Select select) {
         if (select != null) {
             SelectValidator v = getValidator(SelectValidator.class);
-            if (isNotEmpty(select.getWithItemsList())) {
-                select.getWithItemsList().forEach(with -> with.accept(v));
-            }
-            select.getSelectBody().accept(v);
+            select.accept(v);
         }
     }
 
     private void validateDuplicate(Upsert upsert) {
-        validateOptionalExpressions(upsert.getDuplicateUpdateColumns());
-        validateOptionalExpressions(upsert.getDuplicateUpdateExpressionList());
+        if (upsert.getDuplicateUpdateSets() != null) {
+            for (UpdateSet updateSet : upsert.getDuplicateUpdateSets()) {
+                validateOptionalExpressions(updateSet.getColumns());
+                validateOptionalExpressions(updateSet.getValues());
+            }
+        }
     }
 
 }

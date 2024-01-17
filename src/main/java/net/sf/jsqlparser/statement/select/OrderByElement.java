@@ -9,16 +9,22 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import java.io.Serializable;
 import net.sf.jsqlparser.expression.Expression;
 
-public class OrderByElement {
+public class OrderByElement implements Serializable {
 
     public enum NullOrdering {
-        NULLS_FIRST,
-        NULLS_LAST
+        NULLS_FIRST, NULLS_LAST;
+
+        public static NullOrdering from(String ordering) {
+            return Enum.valueOf(NullOrdering.class, ordering.toUpperCase());
+        }
     }
 
     private Expression expression;
+    // postgres rollup is an ExpressionList
+    private boolean mysqlWithRollup = false;
     private boolean asc = true;
     private boolean ascDescPresent = false;
     private NullOrdering nullOrdering;
@@ -74,6 +80,9 @@ public class OrderByElement {
             b.append(' ');
             b.append(nullOrdering == NullOrdering.NULLS_FIRST ? "NULLS FIRST" : "NULLS LAST");
         }
+        if (isMysqlWithRollup()) {
+            b.append(" WITH ROLLUP");
+        }
         return b.toString();
     }
 
@@ -99,6 +108,15 @@ public class OrderByElement {
 
     public <E extends Expression> E getExpression(Class<E> type) {
         return type.cast(getExpression());
+    }
+
+    public boolean isMysqlWithRollup() {
+        return mysqlWithRollup;
+    }
+
+    public OrderByElement setMysqlWithRollup(boolean mysqlWithRollup) {
+        this.mysqlWithRollup = mysqlWithRollup;
+        return this;
     }
 
 }

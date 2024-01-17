@@ -9,12 +9,14 @@
  */
 package net.sf.jsqlparser.statement;
 
-import java.util.Collections;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import org.junit.jupiter.api.Test;
+
 import static net.sf.jsqlparser.test.TestUtils.assertSqlCanBeParsedAndDeparsed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -65,19 +67,36 @@ public class SetStatementTest {
     @Test
     public void testObject() {
         SetStatement setStatement = new SetStatement();
-        setStatement.add("standard_conforming_strings", Collections.singletonList(new StringValue("ON")), false);
+        setStatement.add("standard_conforming_strings", new ExpressionList(new StringValue("ON")),
+                false);
         setStatement.withUseEqual(0, true).remove(0);
 
+        assertEquals(0, setStatement.getCount());
+
+        setStatement.addKeyValuePairs(
+                new SetStatement.NameExpr("test", new ExpressionList(new StringValue("1")), false));
+        setStatement.getKeyValuePairs().get(0).setUseEqual(true);
+
+        assertEquals("test", setStatement.getKeyValuePairs().get(0).getName());
+        assertTrue(setStatement.getKeyValuePairs().get(0).isUseEqual());
+
+        setStatement.clear();
         assertEquals(0, setStatement.getCount());
     }
 
     @Test
     public void testSettingUserVariable() throws JSQLParserException {
-        String sqlStr="set @Flag = 1";
+        String sqlStr = "set @Flag = 1";
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
 
         // issue #1237
-        sqlStr="SET @@global.time_zone = '01:00'";
+        sqlStr = "SET @@global.time_zone = '01:00'";
+        assertSqlCanBeParsedAndDeparsed(sqlStr, true);
+    }
+
+    @Test
+    public void testMultiPartVariables() throws JSQLParserException {
+        String sqlStr = "set a.b.c=false";
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
     }
 }
