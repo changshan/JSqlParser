@@ -12,8 +12,9 @@ package net.sf.jsqlparser.util.validation;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statements;
 
 /**
@@ -48,8 +49,8 @@ final class ParseCapability implements ValidationCapability {
     public void validate(ValidationContext context, Consumer<ValidationException> errorConsumer) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         try {
-            this.parsedStatement = CCJSqlParserUtil.parseStatements(
-                    CCJSqlParserUtil.newParser(statements)
+            this.parsedStatement = SmartQLEngine.parseStatements(
+                    SmartQLEngine.newParser(statements)
                             .withConfiguration(context.getConfiguration()),
                     executorService);
         } catch (JSQLParserException e) {

@@ -9,7 +9,8 @@
  */
 package net.sf.jsqlparser.util;
 
-import net.sf.jsqlparser.parser.CCJSqlParser;
+
+import com.xiaomi.smartql.parser.SmartQLParser;
 
 public class PerformanceTest {
     @SuppressWarnings("PMD.ExcessiveMethodLength")
@@ -122,7 +123,7 @@ public class PerformanceTest {
 
         long startMillis = System.currentTimeMillis();
         for (int i = 1; i < 1000; i++) {
-            final CCJSqlParser parser = new CCJSqlParser(sqlStr)
+            final SmartQLParser parser = new SmartQLParser(sqlStr)
                     .withSquareBracketQuotation(false)
                     .withAllowComplexParsing(true)
                     .withBackslashEscapeCharacter(false);

@@ -429,6 +429,11 @@ public class ExpressionVisitorAdapter
     }
 
     @Override
+    public void visit(FuzzyValue value) {
+
+    }
+
+    @Override
     public void visit(BitwiseRightShift expr) {
         visitBinaryExpression(expr);
     }

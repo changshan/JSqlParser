@@ -9,9 +9,9 @@
  */
 package net.sf.jsqlparser.util;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Join;
@@ -37,7 +37,7 @@ public final class SelectUtils {
             throws JSQLParserException {
         SelectItem[] list = new SelectItem[expr.length];
         for (int i = 0; i < expr.length; i++) {
-            list[i] = new SelectItem(CCJSqlParserUtil.parseExpression(expr[i]));
+            list[i] = new SelectItem(SmartQLEngine.parseExpression(expr[i]));
         }
         return buildSelectFromTableAndSelectItems(table, list);
     }

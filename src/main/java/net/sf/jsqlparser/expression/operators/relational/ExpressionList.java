@@ -9,9 +9,9 @@
  */
 package net.sf.jsqlparser.expression.operators.relational;
 
+import com.xiaomi.smartql.parser.SimpleNode;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.parser.SimpleNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;

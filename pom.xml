@@ -32,7 +32,11 @@
             <version>7.0.13</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.xiaomi.smart</groupId>
+            <artifactId>smart-commons</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -252,30 +256,30 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.0.0</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                    <canUpdateDescription>false</canUpdateDescription>
-                    <licenseName>dual_lgpl_ap2</licenseName>
-                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>
-                    <excludes>
-                        <exclude>site/sphinx/**</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>license-maven-plugin</artifactId>-->
+<!--                <version>2.0.0</version>-->
+<!--                <configuration>-->
+<!--                    <verbose>false</verbose>-->
+<!--                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>-->
+<!--                    <canUpdateDescription>false</canUpdateDescription>-->
+<!--                    <licenseName>dual_lgpl_ap2</licenseName>-->
+<!--                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>-->
+<!--                    <excludes>-->
+<!--                        <exclude>site/sphinx/**</exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>first</id>-->
+<!--                        <goals>-->
+<!--                            <goal>update-file-header</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>process-sources</phase>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -615,7 +619,7 @@
                 <maven.test.skip>true</maven.test.skip>
                 <checkstyle.skip>true</checkstyle.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
-                <license.skipUpdateLicense>true</license.skipUpdateLicense>
+<!--                <license.skipUpdateLicense>true</license.skipUpdateLicense>-->
             </properties>
         </profile>
     </profiles>
