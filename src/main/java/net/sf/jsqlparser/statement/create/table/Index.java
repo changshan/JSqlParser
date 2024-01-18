@@ -10,6 +10,8 @@
 package net.sf.jsqlparser.statement.create.table;
 
 import static java.util.stream.Collectors.toList;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,13 +19,14 @@ import java.util.List;
 import java.util.Optional;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-public class Index {
+public class Index implements Serializable {
 
     private String type;
     private String using;
     private List<ColumnParams> columns;
     private final List<String> name = new ArrayList<>();
     private List<String> idxSpec;
+    private String commentText;
 
     public List<String> getColumnsNames() {
         return columns.stream()
@@ -79,12 +82,11 @@ public class Index {
     }
 
     /**
-     * In postgresql, the index type (Btree, GIST, etc.) is indicated
-     * with a USING clause.
-     * Please note that:
-     *  Oracle - the type might be BITMAP, indicating a bitmap kind of index
-     *  MySQL - the type might be FULLTEXT or SPATIAL
-     *  @param using
+     * In postgresql, the index type (Btree, GIST, etc.) is indicated with a USING clause. Please
+     * note that: Oracle - the type might be BITMAP, indicating a bitmap kind of index MySQL - the
+     * type might be FULLTEXT or SPATIAL
+     * 
+     * @param using
      */
     public void setUsing(String using) {
         this.using = using;
@@ -133,8 +135,15 @@ public class Index {
     @Override
     public String toString() {
         String idxSpecText = PlainSelect.getStringList(idxSpec, false, false);
-        return ( type!=null ? type : "") + (!name.isEmpty() ? " " + getName() : "") + " " + PlainSelect.
-                getStringList(columns, true, true) + (!"".equals(idxSpecText) ? " " + idxSpecText : "");
+        String head = (type != null ? type : "") + (!name.isEmpty() ? " " + getName() : "");
+        String tail = PlainSelect.getStringList(columns, true, true)
+                + (!"".equals(idxSpecText) ? " " + idxSpecText : "");
+
+        if ("".equals(tail)) {
+            return head;
+        }
+
+        return head + " " + tail;
     }
 
     public Index withType(String type) {
@@ -157,7 +166,7 @@ public class Index {
         return this;
     }
 
-    public static class ColumnParams {
+    public static class ColumnParams implements Serializable {
         public final String columnName;
         public final List<String> params;
 
@@ -183,5 +192,13 @@ public class Index {
         public String toString() {
             return columnName + (params != null ? " " + String.join(" ", params) : "");
         }
+    }
+
+    public String getCommentText() {
+        return commentText;
+    }
+
+    public void setCommentText(String commentText) {
+        this.commentText = commentText;
     }
 }

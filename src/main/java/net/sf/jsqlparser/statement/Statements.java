@@ -9,56 +9,42 @@
  */
 package net.sf.jsqlparser.statement;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-public class Statements {
+public class Statements extends ArrayList<Statement> implements Serializable {
 
-    private List<Statement> statements;
-
+    @Deprecated
     public List<Statement> getStatements() {
-        return statements;
+        return this;
     }
 
+    @Deprecated
     public void setStatements(List<Statement> statements) {
-        this.statements = statements;
+        this.clear();
+        this.addAll(statements);
     }
 
     public void accept(StatementVisitor statementVisitor) {
         statementVisitor.visit(this);
     }
 
+    public <E extends Statement> E get(Class<E> type, int index) {
+        return type.cast(get(index));
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        for (Statement stmt : statements) {
-            if (stmt instanceof IfElseStatement) {
-                // IfElseStatements print the Semicolons by themselves
+        for (Statement stmt : this) {
+            // IfElseStatements and Blocks control the Semicolons by themselves
+            if (stmt instanceof IfElseStatement || stmt instanceof Block) {
                 b.append(stmt).append("\n");
             } else {
                 b.append(stmt).append(";\n");
             }
         }
         return b.toString();
-    }
-
-    public Statements withStatements(List<Statement> statements) {
-        this.setStatements(statements);
-        return this;
-    }
-
-    public Statements addStatements(Statement... statements) {
-        List<Statement> collection = Optional.ofNullable(getStatements()).orElseGet(ArrayList::new);
-        Collections.addAll(collection, statements);
-        return this.withStatements(collection);
-    }
-
-    public Statements addStatements(Collection<? extends Statement> statements) {
-        List<Statement> collection = Optional.ofNullable(getStatements()).orElseGet(ArrayList::new);
-        collection.addAll(statements);
-        return this.withStatements(collection);
     }
 }

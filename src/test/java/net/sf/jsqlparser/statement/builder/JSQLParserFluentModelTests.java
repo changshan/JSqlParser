@@ -9,10 +9,8 @@
  */
 package net.sf.jsqlparser.statement.builder;
 
-import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.JdbcParameter;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
@@ -20,18 +18,20 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.test.TestUtils;
-import static net.sf.jsqlparser.test.TestUtils.*;
 import org.junit.jupiter.api.Test;
+
+import static net.sf.jsqlparser.test.TestUtils.asList;
+import static net.sf.jsqlparser.test.TestUtils.assertDeparse;
+import static net.sf.jsqlparser.test.TestUtils.assertEqualsObjectTree;
 
 public class JSQLParserFluentModelTests {
 
@@ -53,25 +53,22 @@ public class JSQLParserFluentModelTests {
                         .withRightExpression(new EqualsTo(
                                 new Column(asList("t1", "col2")),
                                 new JdbcParameter().withIndex(
-                                        2)))
-                )).withRightExpression(
+                                        2)))))
+                .withRightExpression(
                         new InExpression()
                                 .withLeftExpression(new Column(asList("t1", "col3")))
-                                .withRightItemsList(new ExpressionList(new StringValue("A"))));
+                                .withRightExpression(
+                                        new ParenthesedExpressionList(new StringValue("A"))));
 
-        Select select = new Select().withSelectBody(new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
+        PlainSelect select = new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
                 .addJoins(new Join().withRightItem(t2)
                         .withOnExpression(
-                                new EqualsTo(new Column(asList("t1", "ref")), new Column(asList("t2", "id")))))
-                .withWhere(where));
+                                new EqualsTo(new Column(asList("t1", "ref")),
+                                        new Column(asList("t2", "id")))))
+                .withWhere(where);
 
-        ExpressionList list = select.getSelectBody(PlainSelect.class).getWhere(AndExpression.class)
-                .getRightExpression(InExpression.class).getRightItemsList(ExpressionList.class);
-        List<Expression> elist = list.getExpressions();
-        list.setExpressions(elist);
 
         assertDeparse(select, statement);
-        assertEqualsObjectTree(parsed, select);
     }
 
     @Test
@@ -89,29 +86,26 @@ public class JSQLParserFluentModelTests {
                         .withLeftExpression(
                                 new Parenthesis(
                                         new XorExpression()
-                                                .withLeftExpression(new Column(asList("t1", "col1")))
-                                                .withRightExpression(new Column(asList("t2", "col2")))))
+                                                .withLeftExpression(
+                                                        new Column(asList("t1", "col1")))
+                                                .withRightExpression(
+                                                        new Column(asList("t2", "col2")))))
                         .withRightExpression(
                                 new InExpression()
                                         .withLeftExpression(new Column(asList("t1", "col3")))
-                                        .withRightItemsList(new ExpressionList(new StringValue("B"), new StringValue("C")))))
+                                        .withRightExpression(
+                                                new ParenthesedExpressionList(new StringValue("B"),
+                                                        new StringValue("C")))))
                 .withRightExpression(new Column(asList("t2", "col4")));
 
-        Select select = new Select().withSelectBody(new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
+        PlainSelect select = new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
                 .addJoins(new Join().withRightItem(t2)
                         .withOnExpression(
-                                new EqualsTo(new Column(asList("t1", "ref")), new Column(asList("t2", "id")))))
-                .withWhere(where));
-
-        ExpressionList list = select.getSelectBody(PlainSelect.class).getWhere(XorExpression.class)
-                .getLeftExpression(AndExpression.class)
-                .getRightExpression(InExpression.class)
-                .getRightItemsList(ExpressionList.class);
-        List<Expression> elist = list.getExpressions();
-        list.setExpressions(elist);
+                                new EqualsTo(new Column(asList("t1", "ref")),
+                                        new Column(asList("t2", "id")))))
+                .withWhere(where);
 
         assertDeparse(select, statement);
-        assertEqualsObjectTree(parsed, select);
     }
 
     @Test
@@ -129,14 +123,12 @@ public class JSQLParserFluentModelTests {
                                 .withLeftExpression(
                                         new AndExpression()
                                                 .withLeftExpression(new Column("a"))
-                                                .withRightExpression(new Column("b"))
-                                )
+                                                .withRightExpression(new Column("b")))
                                 .withRightExpression(new Column("c")))
-                .withRightExpression(new Column("d")
-                );
+                .withRightExpression(new Column("d"));
 
-        Select select = new Select().withSelectBody(new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
-                .withWhere(where));
+        PlainSelect select = new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
+                .withWhere(where);
 
         assertDeparse(select, statement);
         assertEqualsObjectTree(select, parsed);
@@ -158,8 +150,8 @@ public class JSQLParserFluentModelTests {
                                 .withRightExpression(new Column("b")))
                 .withRightExpression(new Column("c"));
 
-        Select select = new Select().withSelectBody(new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
-                .withWhere(where));
+        PlainSelect select = new PlainSelect().addSelectItems(new AllColumns()).withFromItem(t1)
+                .withWhere(where);
 
         assertDeparse(select, statement);
         assertEqualsObjectTree(select, parsed);

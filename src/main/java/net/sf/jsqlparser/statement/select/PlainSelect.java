@@ -9,35 +9,35 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import static java.util.stream.Collectors.joining;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import static java.util.stream.Collectors.joining;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.OracleHierarchicalExpression;
 import net.sf.jsqlparser.expression.OracleHint;
 import net.sf.jsqlparser.expression.WindowDefinition;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.schema.Table;
 
 @SuppressWarnings({"PMD.CyclomaticComplexity"})
-public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
+public class PlainSelect extends Select {
 
     private Distinct distinct = null;
-    private List<SelectItem> selectItems;
+    private List<SelectItem<?>> selectItems;
     private List<Table> intoTables;
     private FromItem fromItem;
+    private List<LateralView> lateralViews;
     private List<Join> joins;
     private Expression where;
     private GroupByElement groupBy;
-    private List<OrderByElement> orderByElements;
     private Expression having;
-    private Limit limit;
-    private Offset offset;
-    private Fetch fetch;
+    private Expression qualify;
     private OptimizeFor optimizeFor;
     private Skip skip;
     private boolean mySqlHintStraightJoin;
@@ -45,10 +45,9 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
     private Top top;
     private OracleHierarchicalExpression oracleHierarchical = null;
     private OracleHint oracleHint = null;
-    private boolean oracleSiblings = false;
-    private boolean forUpdate = false;
+    private ForMode forMode = null;
     private Table forUpdateTable = null;
-    private boolean useBrackets = false;
+    private boolean skipLocked;
     private Wait wait;
     private boolean mySqlSqlCalcFoundRows = false;
     private MySqlSqlCacheFlags mySqlCacheFlag = null;
@@ -56,15 +55,19 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
     private KSQLWindow ksqlWindow = null;
     private boolean noWait = false;
     private boolean emitChanges = false;
-    private WithIsolation withIsolation;
+
     private List<WindowDefinition> windowDefinitions;
 
-    public boolean isUseBrackets() {
-        return useBrackets;
-    }
+    /**
+     * @see <a href=
+     *      'https://clickhouse.com/docs/en/sql-reference/statements/select/from#final-modifier'>Clickhouse
+     *      FINAL</a>
+     */
+    private boolean isUsingFinal = false;
 
-    public void setUseBrackets(boolean useBrackets) {
-        this.useBrackets = useBrackets;
+    @Deprecated
+    public boolean isUseBrackets() {
+        return false;
     }
 
     public FromItem getFromItem() {
@@ -75,8 +78,12 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return intoTables;
     }
 
-    public List<SelectItem> getSelectItems() {
+    public List<SelectItem<?>> getSelectItems() {
         return selectItems;
+    }
+
+    public SelectItem<?> getSelectItem(int index) {
+        return selectItems.get(index);
     }
 
     public Expression getWhere() {
@@ -96,23 +103,73 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         this.intoTables = intoTables;
     }
 
-    public PlainSelect withSelectItems(List<SelectItem> list) {
+    public PlainSelect withSelectItems(List<SelectItem<?>> list) {
         this.setSelectItems(list);
         return this;
     }
 
-    public void setSelectItems(List<SelectItem> list) {
+    public void setSelectItems(List<SelectItem<?>> list) {
         selectItems = list;
     }
 
-    public PlainSelect addSelectItems(SelectItem... items) {
-        List<SelectItem> list = Optional.ofNullable(getSelectItems()).orElseGet(ArrayList::new);
-        Collections.addAll(list, items);
-        return withSelectItems(list);
+    public PlainSelect addSelectItems(SelectItem<?>... items) {
+        selectItems = Optional.ofNullable(selectItems).orElseGet(ArrayList::new);
+        selectItems.addAll(Arrays.asList(items));
+        return this;
+    }
+
+    public PlainSelect addSelectItems(Expression... expressions) {
+        selectItems = Optional.ofNullable(selectItems).orElseGet(ArrayList::new);
+        for (Expression expression : expressions) {
+            selectItems.add(SelectItem.from(expression));
+        }
+        return this;
+    }
+
+    public PlainSelect addSelectItem(Expression expression, Alias alias) {
+        selectItems = Optional.ofNullable(selectItems).orElseGet(ArrayList::new);
+        selectItems.add(new SelectItem<>(expression, alias));
+        return this;
+    }
+
+    public PlainSelect addSelectItem(Expression expression) {
+        return addSelectItem(expression, null);
     }
 
     public void setWhere(Expression where) {
         this.where = where;
+    }
+
+    public List<LateralView> getLateralViews() {
+        return lateralViews;
+    }
+
+    public void setLateralViews(Collection<LateralView> lateralViews) {
+        if (this.lateralViews == null && lateralViews != null) {
+            this.lateralViews = new ArrayList<>();
+        } else {
+            this.lateralViews.clear();
+        }
+
+        if (lateralViews != null) {
+            this.lateralViews.addAll(lateralViews);
+        } else {
+            this.lateralViews = null;
+        }
+    }
+
+    public PlainSelect addLateralView(LateralView lateralView) {
+        if (this.lateralViews == null) {
+            this.lateralViews = new ArrayList<>();
+        }
+
+        this.lateralViews.add(lateralView);
+        return this;
+    }
+
+    public PlainSelect withLateralViews(Collection<LateralView> lateralViews) {
+        this.setLateralViews(lateralViews);
+        return this;
     }
 
     /**
@@ -122,6 +179,10 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
      */
     public List<Join> getJoins() {
         return joins;
+    }
+
+    public Join getJoin(int index) {
+        return joins.get(index);
     }
 
     public PlainSelect addJoins(Join... joins) {
@@ -139,41 +200,22 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         joins = list;
     }
 
+    public boolean isUsingFinal() {
+        return isUsingFinal;
+    }
+
+    public void setUsingFinal(boolean usingFinal) {
+        this.isUsingFinal = usingFinal;
+    }
+
+    public PlainSelect withUsingFinal(boolean usingFinal) {
+        this.setUsingFinal(usingFinal);
+        return this;
+    }
+
     @Override
     public void accept(SelectVisitor selectVisitor) {
         selectVisitor.visit(this);
-    }
-
-    public List<OrderByElement> getOrderByElements() {
-        return orderByElements;
-    }
-
-    public void setOrderByElements(List<OrderByElement> orderByElements) {
-        this.orderByElements = orderByElements;
-    }
-
-    public Limit getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Limit limit) {
-        this.limit = limit;
-    }
-
-    public Offset getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Offset offset) {
-        this.offset = offset;
-    }
-
-    public Fetch getFetch() {
-        return fetch;
-    }
-
-    public void setFetch(Fetch fetch) {
-        this.fetch = fetch;
     }
 
     public OptimizeFor getOptimizeFor() {
@@ -232,8 +274,18 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         having = expression;
     }
 
+    public Expression getQualify() {
+        return qualify;
+    }
+
+    public PlainSelect setQualify(Expression qualify) {
+        this.qualify = qualify;
+        return this;
+    }
+
     /**
-     * A list of {@link Expression}s of the GROUP BY clause. It is null in case there is no GROUP BY clause
+     * A list of {@link Expression}s of the GROUP BY clause. It is null in case there is no GROUP BY
+     * clause
      *
      * @return a list of {@link Expression}s
      */
@@ -246,8 +298,8 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
     }
 
     public PlainSelect addGroupByColumnReference(Expression expr) {
-        groupBy = Optional.ofNullable(groupBy).orElseGet(GroupByElement::new);
-        groupBy.addGroupByExpression(expr);
+        this.groupBy = Optional.ofNullable(groupBy).orElseGet(GroupByElement::new);
+        this.groupBy.addGroupByExpression(expr);
         return this;
     }
 
@@ -259,20 +311,12 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         this.oracleHierarchical = oracleHierarchical;
     }
 
-    public boolean isOracleSiblings() {
-        return oracleSiblings;
+    public ForMode getForMode() {
+        return forMode;
     }
 
-    public void setOracleSiblings(boolean oracleSiblings) {
-        this.oracleSiblings = oracleSiblings;
-    }
-
-    public boolean isForUpdate() {
-        return forUpdate;
-    }
-
-    public void setForUpdate(boolean forUpdate) {
-        this.forUpdate = forUpdate;
+    public void setForMode(ForMode forMode) {
+        this.forMode = forMode;
     }
 
     public Table getForUpdateTable() {
@@ -333,14 +377,6 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return emitChanges;
     }
 
-    public WithIsolation getWithIsolation() {
-        return withIsolation;
-    }
-
-    public void setWithIsolation(WithIsolation withIsolation) {
-        this.withIsolation = withIsolation;
-    }
-
     public List<WindowDefinition> getWindowDefinitions() {
         return windowDefinitions;
     }
@@ -349,236 +385,150 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         this.windowDefinitions = windowDefinitions;
     }
 
-    @Override
-    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength", "PMD.NPathComplexity"})
-    public String toString() {
-        StringBuilder sql = new StringBuilder();
-        if (useBrackets) {
-            sql.append("(");
-        }
-        sql.append("SELECT ");
+    public boolean isSkipLocked() {
+        return skipLocked;
+    }
+
+    public void setSkipLocked(boolean skipLocked) {
+        this.skipLocked = skipLocked;
+    }
+
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
+            "PMD.NPathComplexity"})
+    public StringBuilder appendSelectBodyTo(StringBuilder builder) {
+        builder.append("SELECT ");
 
         if (this.mySqlHintStraightJoin) {
-            sql.append("STRAIGHT_JOIN ");
+            builder.append("STRAIGHT_JOIN ");
         }
 
         if (oracleHint != null) {
-            sql.append(oracleHint).append(" ");
+            builder.append(oracleHint).append(" ");
         }
 
         if (skip != null) {
-            sql.append(skip).append(" ");
+            builder.append(skip).append(" ");
         }
 
         if (first != null) {
-            sql.append(first).append(" ");
+            builder.append(first).append(" ");
         }
 
         if (distinct != null) {
-            sql.append(distinct).append(" ");
+            builder.append(distinct).append(" ");
         }
         if (top != null) {
-            sql.append(top).append(" ");
+            builder.append(top).append(" ");
         }
         if (mySqlCacheFlag != null) {
-            sql.append(mySqlCacheFlag.name()).append(" ");
+            builder.append(mySqlCacheFlag.name()).append(" ");
         }
         if (mySqlSqlCalcFoundRows) {
-            sql.append("SQL_CALC_FOUND_ROWS").append(" ");
+            builder.append("SQL_CALC_FOUND_ROWS").append(" ");
         }
-        sql.append(getStringList(selectItems));
+        builder.append(getStringList(selectItems));
 
         if (intoTables != null) {
-            sql.append(" INTO ");
+            builder.append(" INTO ");
             for (Iterator<Table> iter = intoTables.iterator(); iter.hasNext();) {
-                sql.append(iter.next().toString());
+                builder.append(iter.next().toString());
                 if (iter.hasNext()) {
-                    sql.append(", ");
+                    builder.append(", ");
                 }
             }
         }
 
         if (fromItem != null) {
-            sql.append(" FROM ").append(fromItem);
+            builder.append(" FROM ").append(fromItem);
+            if (lateralViews != null) {
+                for (LateralView lateralView : lateralViews) {
+                    builder.append(" ").append(lateralView);
+                }
+            }
             if (joins != null) {
-                Iterator<Join> it = joins.iterator();
-                while (it.hasNext()) {
-                    Join join = it.next();
+                for (Join join : joins) {
                     if (join.isSimple()) {
-                        sql.append(", ").append(join);
+                        builder.append(", ").append(join);
                     } else {
-                        sql.append(" ").append(join);
+                        builder.append(" ").append(join);
                     }
                 }
             }
 
+            if (isUsingFinal) {
+                builder.append(" FINAL");
+            }
+
             if (ksqlWindow != null) {
-                sql.append(" WINDOW ").append(ksqlWindow.toString());
+                builder.append(" WINDOW ").append(ksqlWindow);
             }
             if (where != null) {
-                sql.append(" WHERE ").append(where);
+                builder.append(" WHERE ").append(where);
             }
             if (oracleHierarchical != null) {
-                sql.append(oracleHierarchical.toString());
+                builder.append(oracleHierarchical);
             }
             if (groupBy != null) {
-                sql.append(" ").append(groupBy.toString());
+                builder.append(" ").append(groupBy);
             }
             if (having != null) {
-                sql.append(" HAVING ").append(having);
+                builder.append(" HAVING ").append(having);
             }
-
+            if (qualify != null) {
+                builder.append(" QUALIFY ").append(qualify);
+            }
             if (windowDefinitions != null) {
-                sql.append(" WINDOW ");
-                sql.append(windowDefinitions.stream().map(WindowDefinition::toString).collect(joining(", ")));
+                builder.append(" WINDOW ");
+                builder.append(windowDefinitions.stream().map(WindowDefinition::toString)
+                        .collect(joining(", ")));
             }
-
-            sql.append(orderByToString(oracleSiblings, orderByElements));
             if (emitChanges) {
-                sql.append(" EMIT CHANGES");
+                builder.append(" EMIT CHANGES");
             }
-            if (limit != null) {
-                sql.append(limit);
-            }
-            if (offset != null) {
-                sql.append(offset);
-            }
-            if (fetch != null) {
-                sql.append(fetch);
-            }
-
-            if (withIsolation != null) {
-                sql.append(withIsolation);
-            }
-            if (isForUpdate()) {
-                sql.append(" FOR UPDATE");
+            if (getForMode() != null) {
+                builder.append(" FOR ");
+                builder.append(getForMode().getValue());
 
                 if (forUpdateTable != null) {
-                    sql.append(" OF ").append(forUpdateTable);
+                    builder.append(" OF ").append(forUpdateTable);
                 }
 
                 if (wait != null) {
                     // Wait's toString will do the formatting for us
-                    sql.append(wait);
+                    builder.append(wait);
                 }
 
                 if (isNoWait()) {
-                    sql.append(" NOWAIT");
+                    builder.append(" NOWAIT");
+                } else if (isSkipLocked()) {
+                    builder.append(" SKIP LOCKED");
                 }
-            }
-            if (optimizeFor != null) {
-                sql.append(optimizeFor);
             }
         } else {
             // without from
             if (where != null) {
-                sql.append(" WHERE ").append(where);
-            }
-
-            if (limit != null) {
-                sql.append(limit);
-            }
-            if (offset != null) {
-                sql.append(offset);
-            }
-            if (fetch != null) {
-                sql.append(fetch);
-            }
-            if (withIsolation != null) {
-                sql.append(withIsolation);
-            }
-        }
-        if (forXmlPath != null) {
-            sql.append(" FOR XML PATH(").append(forXmlPath).append(")");
-        }
-        if (useBrackets) {
-            sql.append(")");
-        }
-        return sql.toString();
-    }
-
-    public static String orderByToString(List<OrderByElement> orderByElements) {
-        return orderByToString(false, orderByElements);
-    }
-
-    public static String orderByToString(boolean oracleSiblings, List<OrderByElement> orderByElements) {
-        return getFormatedList(orderByElements, oracleSiblings ? "ORDER SIBLINGS BY" : "ORDER BY");
-    }
-
-    public static String getFormatedList(List<?> list, String expression) {
-        return getFormatedList(list, expression, true, false);
-    }
-
-    public static String getFormatedList(List<?> list, String expression, boolean useComma, boolean useBrackets) {
-        String sql = getStringList(list, useComma, useBrackets);
-
-        if (sql.length() > 0) {
-            if (expression.length() > 0) {
-                sql = " " + expression + " " + sql;
-            } else {
-                sql = " " + sql;
-            }
-        }
-
-        return sql;
-    }
-
-    /**
-     * List the toString out put of the objects in the List comma separated. If the List is null or empty an empty
-     * string is returned.
-     *
-     * The same as getStringList(list, true, false)
-     *
-     * @see #getStringList(List, boolean, boolean)
-     * @param list list of objects with toString methods
-     * @return comma separated list of the elements in the list
-     */
-    public static String getStringList(List<?> list) {
-        return getStringList(list, true, false);
-    }
-
-    /**
-     * List the toString out put of the objects in the List that can be comma separated. If the List is null or empty an
-     * empty string is returned.
-     *
-     * @param list list of objects with toString methods
-     * @param useComma true if the list has to be comma separated
-     * @param useBrackets true if the list has to be enclosed in brackets
-     * @return comma separated list of the elements in the list
-     */
-    public static String getStringList(List<?> list, boolean useComma, boolean useBrackets) {
-        return appendStringListTo(new StringBuilder(), list, useComma, useBrackets).toString();
-    }
-
-    /**
-     * Append the toString out put of the objects in the List (that can be comma separated). If the List is null or
-     * empty an empty string is returned.
-     *
-     * @param list list of objects with toString methods
-     * @param useComma true if the list has to be comma separated
-     * @param useBrackets true if the list has to be enclosed in brackets
-     * @return comma separated list of the elements in the list
-     */
-    public static StringBuilder appendStringListTo(StringBuilder builder, List<?> list, boolean useComma, boolean useBrackets) {
-        if (list != null) {
-            String comma = useComma ? "," : "";
-
-            if (useBrackets) {
-                builder.append("(");
-            }
-
-            int size = list.size();
-            for (int i = 0; i < size; i++) {
-                builder.append(list.get(i)).append(i < size - 1
-                        ? comma + " "
-                        : "");
-            }
-
-            if (useBrackets) {
-                builder.append(")");
+                builder.append(" WHERE ").append(where);
             }
         }
         return builder;
+    }
+
+    @Override
+    @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.ExcessiveMethodLength",
+            "PMD.NPathComplexity"})
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        super.appendTo(builder);
+
+        if (optimizeFor != null) {
+            builder.append(optimizeFor);
+        }
+
+        if (forXmlPath != null) {
+            builder.append(" FOR XML PATH(").append(forXmlPath).append(")");
+        }
+
+        return builder.toString();
     }
 
     public PlainSelect withMySqlSqlCalcFoundRows(boolean mySqlCalcFoundRows) {
@@ -630,26 +580,6 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return this;
     }
 
-    public PlainSelect withOrderByElements(List<OrderByElement> orderByElements) {
-        this.setOrderByElements(orderByElements);
-        return this;
-    }
-
-    public PlainSelect withLimit(Limit limit) {
-        this.setLimit(limit);
-        return this;
-    }
-
-    public PlainSelect withOffset(Offset offset) {
-        this.setOffset(offset);
-        return this;
-    }
-
-    public PlainSelect withFetch(Fetch fetch) {
-        this.setFetch(fetch);
-        return this;
-    }
-
     public PlainSelect withOptimizeFor(OptimizeFor optimizeFor) {
         this.setOptimizeFor(optimizeFor);
         return this;
@@ -690,18 +620,13 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return this;
     }
 
-    public PlainSelect withForUpdate(boolean forUpdate) {
-        this.setForUpdate(forUpdate);
+    public PlainSelect withForMode(ForMode forMode) {
+        this.setForMode(forMode);
         return this;
     }
 
     public PlainSelect withForUpdateTable(Table forUpdateTable) {
         this.setForUpdateTable(forUpdateTable);
-        return this;
-    }
-
-    public PlainSelect withUseBrackets(boolean useBrackets) {
-        this.setUseBrackets(useBrackets);
         return this;
     }
 
@@ -720,6 +645,11 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return this;
     }
 
+    public PlainSelect withSkipLocked(boolean skipLocked) {
+        this.setSkipLocked(skipLocked);
+        return this;
+    }
+
     public PlainSelect withHaving(Expression having) {
         this.setHaving(having);
         return this;
@@ -730,8 +660,9 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         return this;
     }
 
-    public PlainSelect addSelectItems(Collection<? extends SelectItem> selectItems) {
-        List<SelectItem> collection = Optional.ofNullable(getSelectItems()).orElseGet(ArrayList::new);
+    public PlainSelect addSelectItems(Collection<? extends SelectItem<?>> selectItems) {
+        List<SelectItem<?>> collection =
+                Optional.ofNullable(getSelectItems()).orElseGet(ArrayList::new);
         collection.addAll(selectItems);
         return this.withSelectItems(collection);
     }
@@ -752,18 +683,6 @@ public class PlainSelect extends ASTNodeAccessImpl implements SelectBody {
         List<Join> collection = Optional.ofNullable(getJoins()).orElseGet(ArrayList::new);
         collection.addAll(joins);
         return this.withJoins(collection);
-    }
-
-    public PlainSelect addOrderByElements(OrderByElement... orderByElements) {
-        List<OrderByElement> collection = Optional.ofNullable(getOrderByElements()).orElseGet(ArrayList::new);
-        Collections.addAll(collection, orderByElements);
-        return this.withOrderByElements(collection);
-    }
-
-    public PlainSelect addOrderByElements(Collection<? extends OrderByElement> orderByElements) {
-        List<OrderByElement> collection = Optional.ofNullable(getOrderByElements()).orElseGet(ArrayList::new);
-        collection.addAll(orderByElements);
-        return this.withOrderByElements(collection);
     }
 
     public <E extends FromItem> E getFromItem(Class<E> type) {

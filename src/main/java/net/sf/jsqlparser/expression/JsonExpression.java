@@ -9,17 +9,31 @@
  */
 package net.sf.jsqlparser.expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 
-public class JsonExpression extends ASTNodeAccessImpl implements Expression {
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
+public class JsonExpression extends ASTNodeAccessImpl implements Expression {
     private Expression expr;
 
-    private List<String> idents = new ArrayList<String>();
-    private List<String> operators = new ArrayList<String>();
+    private final List<Map.Entry<String, String>> idents = new ArrayList<>();
+
+    public JsonExpression() {
+
+    }
+
+    public JsonExpression(Expression expr) {
+        this.expr = expr;
+    }
+
+    public JsonExpression(Expression expr, List<Map.Entry<String, String>> idents) {
+        this.expr = expr;
+        this.idents.addAll(idents);
+    }
 
     @Override
     public void accept(ExpressionVisitor expressionVisitor) {
@@ -34,32 +48,47 @@ public class JsonExpression extends ASTNodeAccessImpl implements Expression {
         this.expr = expr;
     }
 
-//    public List<String> getIdents() {
-//        return idents;
-//    }
-//
-//    public void setIdents(List<String> idents) {
-//        this.idents = idents;
-//        operators = new ArrayList<String>();
-//        for (String ident : idents) {
-//            operators.add("->");
-//        }
-//    }
-//
-//    public void addIdent(String ident) {
-//        addIdent(ident, "->");
-//    }
     public void addIdent(String ident, String operator) {
-        idents.add(ident);
-        operators.add(operator);
+        idents.add(new AbstractMap.SimpleEntry<>(ident, operator));
+    }
+
+    public void addAllIdents(Collection<Map.Entry<String, String>> idents) {
+        this.idents.addAll(idents);
+    }
+
+    public List<Map.Entry<String, String>> getIdentList() {
+        return idents;
+    }
+
+    public Map.Entry<String, String> getIdent(int index) {
+        return idents.get(index);
+    }
+
+    @Deprecated
+    public List<String> getIdents() {
+        ArrayList<String> l = new ArrayList<>();
+        for (Map.Entry<String, String> ident : idents) {
+            l.add(ident.getKey());
+        }
+
+        return l;
+    }
+
+    @Deprecated
+    public List<String> getOperators() {
+        ArrayList<String> l = new ArrayList<>();
+        for (Map.Entry<String, String> ident : idents) {
+            l.add(ident.getValue());
+        }
+        return l;
     }
 
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append(expr.toString());
-        for (int i = 0; i < idents.size(); i++) {
-            b.append(operators.get(i)).append(idents.get(i));
+        for (Map.Entry<String, String> ident : idents) {
+            b.append(ident.getValue()).append(ident.getKey());
         }
         return b.toString();
     }

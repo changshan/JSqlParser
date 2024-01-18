@@ -9,16 +9,26 @@
  */
 package net.sf.jsqlparser.expression;
 
+import java.io.Serializable;
 import java.util.List;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 
-public class WindowDefinition {
+public class WindowDefinition implements Serializable {
+
 
     final OrderByClause orderBy = new OrderByClause();
     final PartitionByClause partitionBy = new PartitionByClause();
     WindowElement windowElement = null;
     private String windowName;
+
+    public OrderByClause getOrderBy() {
+        return orderBy;
+    }
+
+    public PartitionByClause getPartitionBy() {
+        return partitionBy;
+    }
 
     public WindowElement getWindowElement() {
         return windowElement;

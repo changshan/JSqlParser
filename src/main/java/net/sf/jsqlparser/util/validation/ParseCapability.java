@@ -9,15 +9,16 @@
  */
 package net.sf.jsqlparser.util.validation;
 
-import com.xiaomi.smartql.parser.SmartQLEngine;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statements;
 
-import java.util.function.Consumer;
-
 /**
- * package - private class for {@link Validation} to parse the statements
- * within it's own {@link ValidationCapability}
+ * package - private class for {@link Validation} to parse the statements within it's own
+ * {@link ValidationCapability}
  *
  * @author gitmotte
  */
@@ -37,8 +38,7 @@ final class ParseCapability implements ValidationCapability {
     }
 
     /**
-     * @return <code>null</code> on parse error, otherwise the {@link Statements}
-     *         parsed.
+     * @return <code>null</code> on parse error, otherwise the {@link Statements} parsed.
      */
     public Statements getParsedStatements() {
         return parsedStatement;
@@ -46,11 +46,17 @@ final class ParseCapability implements ValidationCapability {
 
     @Override
     public void validate(ValidationContext context, Consumer<ValidationException> errorConsumer) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         try {
-            this.parsedStatement = SmartQLEngine.parseStatements(
-                    SmartQLEngine.newParser(statements).withConfiguration(context.getConfiguration()));
+            this.parsedStatement = CCJSqlParserUtil.parseStatements(
+                    CCJSqlParserUtil.newParser(statements)
+                            .withConfiguration(context.getConfiguration()),
+                    executorService);
         } catch (JSQLParserException e) {
-            errorConsumer.accept(new ParseException("Cannot parse statement: " + e.getMessage(), e));
+            errorConsumer
+                    .accept(new ParseException("Cannot parse statement: " + e.getMessage(), e));
+        } finally {
+            executorService.shutdown();
         }
     }
 

@@ -23,4 +23,4 @@ else
 select * from emp
 
 --@FAILURE: Encountered unexpected token: "when" "WHEN" recorded first on Aug 3, 2021, 7:20:08 AM
---@FAILURE: Encountered unexpected token: "=" "=" recorded first on Nov 10, 2022 4:11:13 AM
+--@FAILURE: Encountered unexpected token: "insert" "INSERT" recorded first on Mar 26, 2023, 6:59:20 PM

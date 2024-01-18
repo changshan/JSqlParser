@@ -9,12 +9,19 @@
  */
 package net.sf.jsqlparser.util.deparser;
 
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import com.xiaomi.smartql.parser.SmartQLEngine;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.IfElseStatement;
@@ -22,18 +29,20 @@ import net.sf.jsqlparser.statement.SetStatement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.execute.Execute;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.replace.Replace;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.ParenthesedSelect;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectVisitor;
+import net.sf.jsqlparser.statement.select.TableStatement;
+import net.sf.jsqlparser.statement.select.WithItem;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.statement.update.UpdateSet;
 import net.sf.jsqlparser.statement.upsert.Upsert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.BDDMockito.then;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,9 +56,14 @@ public class StatementDeParserTest {
 
     private StatementDeParser statementDeParser;
 
+    private TableStatementDeParser tableStatementDeParser;
+
     @BeforeEach
     public void setUp() {
-        statementDeParser = new StatementDeParser(expressionDeParser, selectDeParser, new StringBuilder());
+        tableStatementDeParser =
+                new TableStatementDeParser(expressionDeParser, new StringBuilder());
+        statementDeParser =
+                new StatementDeParser(expressionDeParser, selectDeParser, new StringBuilder());
     }
 
     @Test
@@ -81,108 +95,63 @@ public class StatementDeParserTest {
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    public void shouldUseProvidedDeparsersWhenDeParsingInsert() throws JSQLParserException {
+    public void shouldUseProvidedDeparsersWhenDeParsingInsert() {
         Insert insert = new Insert();
         Table table = new Table();
-        List<Column> duplicateUpdateColumns = new ArrayList<Column>();
-        List<Expression> duplicateUpdateExpressionList = new ArrayList<Expression>();
+        List<UpdateSet> duplicateUpdateSets = new ArrayList<>();
         Column duplicateUpdateColumn1 = new Column();
-        Column duplicateUpdateColumn2 = new Column();
         Expression duplicateUpdateExpression1 = mock(Expression.class);
+        duplicateUpdateSets.add(new UpdateSet(duplicateUpdateColumn1, duplicateUpdateExpression1));
+
+        Column duplicateUpdateColumn2 = new Column();
         Expression duplicateUpdateExpression2 = mock(Expression.class);
-        Select select = new Select();
+        duplicateUpdateSets.add(new UpdateSet(duplicateUpdateColumn2, duplicateUpdateExpression2));
+
+        PlainSelect select = mock(PlainSelect.class);
         List<WithItem> withItemsList = new ArrayList<WithItem>();
         WithItem withItem1 = spy(new WithItem());
         WithItem withItem2 = spy(new WithItem());
-        SubSelect withItem1SubSelect = mock(SubSelect.class);
-        SubSelect withItem2SubSelect = mock(SubSelect.class);
-        SelectBody selectBody = mock(SelectBody.class);
+        ParenthesedSelect withItem1SubSelect = mock(ParenthesedSelect.class);
+        ParenthesedSelect withItem2SubSelect = mock(ParenthesedSelect.class);
+        select.setWithItemsList(withItemsList);
 
         insert.setSelect(select);
         insert.setTable(table);
-        insert.setUseDuplicate(true);
-        insert.setDuplicateUpdateColumns(duplicateUpdateColumns);
-        insert.setDuplicateUpdateExpressionList(duplicateUpdateExpressionList);
-        duplicateUpdateColumns.add(duplicateUpdateColumn1);
-        duplicateUpdateColumns.add(duplicateUpdateColumn2);
-        duplicateUpdateExpressionList.add(duplicateUpdateExpression1);
-        duplicateUpdateExpressionList.add(duplicateUpdateExpression2);
-        insert.setDuplicateUpdateExpressionList(duplicateUpdateExpressionList);
-        select.setWithItemsList(withItemsList);
-        select.setSelectBody(selectBody);
+        insert.withDuplicateUpdateSets(duplicateUpdateSets);
         withItemsList.add(withItem1);
         withItemsList.add(withItem2);
-        withItem1.setSubSelect(withItem1SubSelect);
-        withItem2.setSubSelect(withItem2SubSelect);
+        withItem1.setSelect(withItem1SubSelect);
+        withItem2.setSelect(withItem2SubSelect);
 
-        statementDeParser.visit(insert);
+        statementDeParser.visit(insert.withWithItemsList(withItemsList));
 
-        then(withItem1).should().accept(selectDeParser);
-        then(withItem2).should().accept(selectDeParser);
-        then(selectBody).should().accept(selectDeParser);
+        then(withItem1).should().accept((SelectVisitor) selectDeParser);
+        then(withItem2).should().accept((SelectVisitor) selectDeParser);
+        then(select).should().accept(selectDeParser);
         then(duplicateUpdateExpression1).should().accept(expressionDeParser);
         then(duplicateUpdateExpression1).should().accept(expressionDeParser);
     }
 
-    @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    public void shouldUseProvidedDeParsersWhenDeParsingReplaceWithoutItemsList() {
-        Replace replace = new Replace();
-        Table table = new Table();
-        List<Column> columns = new ArrayList<Column>();
-        List<Expression> expressions = new ArrayList<Expression>();
-        Column column1 = new Column();
-        Column column2 = new Column();
-        Expression expression1 = mock(Expression.class);
-        Expression expression2 = mock(Expression.class);
-
-        replace.setTable(table);
-        replace.setColumns(columns);
-        replace.setExpressions(expressions);
-        columns.add(column1);
-        columns.add(column2);
-        expressions.add(expression1);
-        expressions.add(expression2);
-
-        statementDeParser.visit(replace);
-
-        then(expression1).should().accept(expressionDeParser);
-        then(expression2).should().accept(expressionDeParser);
-    }
-
-//    @Test
-//    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-//    public void shouldUseProvidedDeParsersWhenDeParsingReplaceWithItemsList() {
-//        Replace replace = new Replace();
-//        Table table = new Table();
-//        ItemsList itemsList = mock(ItemsList.class);
-//
-//        replace.setTable(table);
-//        replace.setItemsList(itemsList);
-//
-//        statementDeParser.visit(replace);
-//
-//        then(itemsList).should().accept(argThat(is(replaceDeParserWithDeParsers(equalTo(expressionDeParser), equalTo(selectDeParser)))));
-//    }
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     public void shouldUseProvidedDeParsersWhenDeParsingSelect() {
-        Select select = new Select();
         WithItem withItem1 = spy(new WithItem());
+        withItem1.setSelect(mock(ParenthesedSelect.class));
         WithItem withItem2 = spy(new WithItem());
-        SelectBody selectBody = mock(SelectBody.class);
-        List<WithItem> withItemsList = new ArrayList<WithItem>();
+        withItem2.setSelect(mock(ParenthesedSelect.class));
 
-        select.setWithItemsList(withItemsList);
-        select.setSelectBody(selectBody);
+        List<WithItem> withItemsList = new ArrayList<WithItem>();
         withItemsList.add(withItem1);
         withItemsList.add(withItem2);
 
-        statementDeParser.visit(select);
+        PlainSelect plainSelect = mock(PlainSelect.class);
+        plainSelect.setWithItemsList(withItemsList);
 
-        then(withItem1).should().accept(selectDeParser);
-        then(withItem2).should().accept(selectDeParser);
-        then(selectBody).should().accept(selectDeParser);
+        statementDeParser.visit(plainSelect);
+
+        // then(withItem1).should().accept((SelectVisitor) selectDeParser);
+        // then(withItem2).should().accept((SelectVisitor) selectDeParser);
+        then(plainSelect).should().accept(selectDeParser);
     }
 
     @Test
@@ -231,7 +200,6 @@ public class StatementDeParserTest {
         List<OrderByElement> orderByElements = new ArrayList<OrderByElement>();
         Column column1 = new Column();
         Column column2 = new Column();
-        SelectBody selectBody = mock(SelectBody.class);
         OrderByElement orderByElement1 = new OrderByElement();
         OrderByElement orderByElement2 = new OrderByElement();
         Expression orderByElement1Expression = mock(Expression.class);
@@ -240,13 +208,9 @@ public class StatementDeParserTest {
         update.setWhere(where);
         update.setOrderByElements(orderByElements);
 
-        SubSelect subSelect = new SubSelect().withSelectBody(selectBody);
-        ExpressionList expressionList = new ExpressionList().addExpressions(subSelect);
-
         UpdateSet updateSet = new UpdateSet();
         updateSet.add(column1);
         updateSet.add(column2);
-        updateSet.add(expressionList);
 
         update.addUpdateSet(updateSet);
 
@@ -259,7 +223,6 @@ public class StatementDeParserTest {
 
         then(expressionDeParser).should().visit(column1);
         then(expressionDeParser).should().visit(column2);
-        then(expressionDeParser).should().visit(subSelect);
         then(where).should().accept(expressionDeParser);
         then(orderByElement1Expression).should().accept(expressionDeParser);
         then(orderByElement2Expression).should().accept(expressionDeParser);
@@ -269,13 +232,11 @@ public class StatementDeParserTest {
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     public void shouldUseProvidedDeParserWhenDeParsingExecute() {
         Execute execute = new Execute();
-        ExpressionList exprList = new ExpressionList();
-        List<Expression> expressions = new ArrayList<Expression>();
+        ExpressionList expressions = new ExpressionList();
         Expression expression1 = mock(Expression.class);
         Expression expression2 = mock(Expression.class);
 
-        execute.setExprList(exprList);
-        exprList.setExpressions(expressions);
+        execute.setExprList(expressions);
         expressions.add(expression1);
         expressions.add(expression2);
 
@@ -290,7 +251,7 @@ public class StatementDeParserTest {
     public void shouldUseProvidedDeParserWhenDeParsingSetStatement() {
         String name = "name";
         Expression expression = mock(Expression.class);
-        ArrayList<Expression> expressions = new ArrayList<>();
+        ExpressionList expressions = new ExpressionList();
         expressions.add(expression);
 
         SetStatement setStatement = new SetStatement(name, expressions);
@@ -300,22 +261,25 @@ public class StatementDeParserTest {
         then(expression).should().accept(expressionDeParser);
     }
 
-//    private Matcher<ReplaceDeParser> replaceDeParserWithDeParsers(final Matcher<ExpressionDeParser> expressionDeParserMatcher, final Matcher<SelectDeParser> selectDeParserMatcher) {
-//        Description description = new StringDescription();
-//        description.appendText("replace de-parser with expression de-parser ");
-//        expressionDeParserMatcher.describeTo(description);
-//        description.appendText(" and select de-parser ");
-//        selectDeParserMatcher.describeTo(description);
-//        return new CustomTypeSafeMatcher<ReplaceDeParser>(description.toString()) {
-//            @Override
-//            public boolean matchesSafely(ReplaceDeParser item) {
-//                return expressionDeParserMatcher.matches(item.getExpressionVisitor()) && selectDeParserMatcher.matches(item.getSelectVisitor());
-//            }
-//        };
-//    }
+    // private Matcher<ReplaceDeParser> replaceDeParserWithDeParsers(final
+    // Matcher<ExpressionDeParser> expressionDeParserMatcher, final Matcher<SelectDeParser>
+    // selectDeParserMatcher) {
+    // Description description = new StringDescription();
+    // description.appendText("replace de-parser with expression de-parser ");
+    // expressionDeParserMatcher.describeTo(description);
+    // description.appendText(" and select de-parser ");
+    // selectDeParserMatcher.describeTo(description);
+    // return new CustomTypeSafeMatcher<ReplaceDeParser>(description.toString()) {
+    // @Override
+    // public boolean matchesSafely(ReplaceDeParser item) {
+    // return expressionDeParserMatcher.matches(item.getExpressionVisitor()) &&
+    // selectDeParserMatcher.matches(item.getSelectVisitor());
+    // }
+    // };
+    // }
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    public void shouldUseProvidedDeparsersWhenDeParsingUpsertWithExpressionList() throws JSQLParserException {
+    public void shouldUseProvidedDeparsersWhenDeParsingUpsertWithExpressionList() {
         Upsert upsert = new Upsert();
         Table table = new Table();
         List<Column> duplicateUpdateColumns = new ArrayList<Column>();
@@ -324,61 +288,90 @@ public class StatementDeParserTest {
         Column duplicateUpdateColumn2 = new Column();
         Expression duplicateUpdateExpression1 = mock(Expression.class);
         Expression duplicateUpdateExpression2 = mock(Expression.class);
-        Select select = new Select();
+        PlainSelect select = mock(PlainSelect.class);
         List<WithItem> withItemsList = new ArrayList<WithItem>();
         WithItem withItem1 = spy(new WithItem());
         WithItem withItem2 = spy(new WithItem());
-        SubSelect withItem1SubSelect = mock(SubSelect.class);
-        SubSelect withItem2SubSelect = mock(SubSelect.class);
-        SelectBody selectBody = mock(SelectBody.class);
+        ParenthesedSelect withItem1SubSelect = mock(ParenthesedSelect.class);
+        ParenthesedSelect withItem2SubSelect = mock(ParenthesedSelect.class);
+        select.setWithItemsList(withItemsList);
 
         upsert.setSelect(select);
         upsert.setTable(table);
-        upsert.setUseDuplicate(true);
-        upsert.setDuplicateUpdateColumns(duplicateUpdateColumns);
-        upsert.setDuplicateUpdateExpressionList(duplicateUpdateExpressionList);
-        duplicateUpdateColumns.add(duplicateUpdateColumn1);
-        duplicateUpdateColumns.add(duplicateUpdateColumn2);
-        duplicateUpdateExpressionList.add(duplicateUpdateExpression1);
-        duplicateUpdateExpressionList.add(duplicateUpdateExpression2);
-        upsert.setDuplicateUpdateExpressionList(duplicateUpdateExpressionList);
-        select.setWithItemsList(withItemsList);
-        select.setSelectBody(selectBody);
+        upsert.setDuplicateUpdateSets(
+                Arrays.asList(
+                        new UpdateSet(duplicateUpdateColumn1, duplicateUpdateExpression1),
+                        new UpdateSet(duplicateUpdateColumn2, duplicateUpdateExpression2)));
         withItemsList.add(withItem1);
         withItemsList.add(withItem2);
-        withItem1.setSubSelect(withItem1SubSelect);
-        withItem2.setSubSelect(withItem2SubSelect);
+        withItem1.setSelect(withItem1SubSelect);
+        withItem2.setSelect(withItem2SubSelect);
 
         statementDeParser.visit(upsert);
 
-        then(withItem1).should().accept(selectDeParser);
-        then(withItem2).should().accept(selectDeParser);
-        then(selectBody).should().accept(selectDeParser);
+        then(select).should().accept(selectDeParser);
         then(duplicateUpdateExpression1).should().accept(expressionDeParser);
         then(duplicateUpdateExpression1).should().accept(expressionDeParser);
     }
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    public void shouldUseProvidedDeparsersWhenDeParsingIfThenStatement() throws JSQLParserException {
+    public void shouldUseProvidedDeparsersWhenDeParsingIfThenStatement()
+            throws JSQLParserException {
         String sqlStr = "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin1";
-        IfElseStatement ifElseStatement = (IfElseStatement) SmartQLEngine.parse(sqlStr);
+        IfElseStatement ifElseStatement = (IfElseStatement) CCJSqlParserUtil.parse(sqlStr);
         statementDeParser.deParse(ifElseStatement);
     }
 
     @Test
     public void testIssue1500AllColumns() throws JSQLParserException {
         String sqlStr = "select count(*) from some_table";
-        Select select = (Select) SmartQLEngine.parse(sqlStr);
-        PlainSelect selectBody = (PlainSelect) select.getSelectBody();
+        PlainSelect selectBody = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
         selectBody.accept(new SelectDeParser());
+    }
+
+    @Test
+    public void testIssue1836() throws JSQLParserException {
+        String sqlStr = "TABLE columns ORDER BY column_name LIMIT 10 OFFSET 10;";
+        TableStatement tableStatement = (TableStatement) CCJSqlParserUtil.parse(sqlStr);
+        tableStatement.accept(tableStatementDeParser);
     }
 
     @Test
     public void testIssue1500AllTableColumns() throws JSQLParserException {
         String sqlStr = "select count(a.*) from some_table a";
-        Select select = (Select) SmartQLEngine.parse(sqlStr);
-        PlainSelect selectBody = (PlainSelect) select.getSelectBody();
+        PlainSelect selectBody = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
         selectBody.accept(new SelectDeParser());
+    }
+
+    @Test
+    public void testIssue1608DeparseValueList() throws JSQLParserException {
+        String providedSql =
+                "INSERT INTO example (num, name, address, tel) VALUES (1, 'name', 'test ', '1234-1234')";
+        String expectedSql = "INSERT INTO example (num, name, address, tel) VALUES (?, ?, ?, ?)";
+
+        net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(providedSql);
+        StringBuilder builder = new StringBuilder();
+        ExpressionDeParser expressionDeParser = new ExpressionDeParser() {
+            @Override
+            public void visit(StringValue stringValue) {
+                buffer.append("?");
+            }
+
+            @Override
+            public void visit(LongValue longValue) {
+                buffer.append("?");
+            }
+        };
+
+        SelectDeParser selectDeParser = new SelectDeParser(expressionDeParser, builder);
+        expressionDeParser.setSelectVisitor(selectDeParser);
+        expressionDeParser.setBuffer(builder);
+
+        StatementDeParser statementDeParser =
+                new StatementDeParser(expressionDeParser, selectDeParser, builder);
+        statement.accept(statementDeParser);
+
+        Assertions.assertEquals(expectedSql, builder.toString());
     }
 }

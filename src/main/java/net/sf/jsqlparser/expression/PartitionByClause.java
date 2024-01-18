@@ -12,7 +12,9 @@ package net.sf.jsqlparser.expression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-public class PartitionByClause {
+import java.io.Serializable;
+
+public class PartitionByClause implements Serializable {
     ExpressionList partitionExpressionList;
     boolean brackets = false;
 
@@ -29,7 +31,7 @@ public class PartitionByClause {
         this.brackets = brackets;
     }
 
-    void toStringPartitionBy(StringBuilder b) {
+    public void toStringPartitionBy(StringBuilder b) {
         if (partitionExpressionList != null && !partitionExpressionList.getExpressions().isEmpty()) {
             b.append("PARTITION BY ");
             b.append(PlainSelect.

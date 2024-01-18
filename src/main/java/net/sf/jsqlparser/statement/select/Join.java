@@ -9,32 +9,38 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import java.util.*;
-
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.schema.Column;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+@SuppressWarnings({"PMD.CyclomaticComplexity"})
 public class Join extends ASTNodeAccessImpl {
 
     private boolean outer = false;
     private boolean right = false;
     private boolean left = false;
     private boolean natural = false;
+    private boolean global = false;
     private boolean full = false;
     private boolean inner = false;
-    //hana one to one
-    private boolean one2one=false;
     private boolean simple = false;
     private boolean cross = false;
     private boolean semi = false;
     private boolean straight = false;
     private boolean apply = false;
-
-    private FromItem rightItem;
+    private FromItem fromItem;
     private final LinkedList<Expression> onExpressions = new LinkedList<>();
     private final LinkedList<Column> usingColumns = new LinkedList<>();
     private KSQLJoinWindow joinWindow;
+
+    private JoinHint joinHint = null;
 
     public boolean isSimple() {
         return simple;
@@ -49,6 +55,29 @@ public class Join extends ASTNodeAccessImpl {
         simple = b;
     }
 
+    /**
+     * A JOIN means INNER when the INNER keyword is set or when no other qualifier has been set.
+     *
+     * @return Tells, if a JOIN means a qualified INNER JOIN.
+     *
+     */
+    public boolean isInnerJoin() {
+        return inner
+                || !(
+                /* Qualified Joins */
+                left || right || full || outer
+
+                /* Cross Join */
+                        || cross
+
+                        /* Natural Join */
+                        || natural);
+    }
+
+    /**
+     *
+     * @return Tells, if the INNER keyword has been set.
+     */
     public boolean isInner() {
         return inner;
     }
@@ -58,20 +87,18 @@ public class Join extends ASTNodeAccessImpl {
         return this;
     }
 
-    public Join withOne2One(boolean b){
-        this.setOne2one(b);
-        return this;
-    }
-
-    public void setOne2one(boolean b){
-        one2one=b;
-    }
-
-    public boolean isOne2one(){
-        return one2one;
-    }
-
+    /**
+     *
+     * Sets the INNER keyword and switches off any contradicting qualifiers automatically.
+     */
     public void setInner(boolean b) {
+        if (b) {
+            left = false;
+            right = false;
+            outer = false;
+            cross = false;
+            natural = false;
+        }
         inner = b;
     }
 
@@ -102,7 +129,14 @@ public class Join extends ASTNodeAccessImpl {
         return this;
     }
 
+    /**
+     *
+     * Sets the OUTER keyword and switches off any contradicting qualifiers automatically.
+     */
     public void setOuter(boolean b) {
+        if (b) {
+            inner = false;
+        }
         outer = b;
     }
 
@@ -151,7 +185,15 @@ public class Join extends ASTNodeAccessImpl {
         return this;
     }
 
+    /**
+     *
+     * Sets the LEFT keyword and switches off any contradicting qualifiers automatically.
+     */
     public void setLeft(boolean b) {
+        if (b) {
+            inner = false;
+            right = false;
+        }
         left = b;
     }
 
@@ -169,7 +211,15 @@ public class Join extends ASTNodeAccessImpl {
         return this;
     }
 
+    /**
+     *
+     * Sets the RIGHT keyword and switches off any contradicting qualifiers automatically.
+     */
     public void setRight(boolean b) {
+        if (b) {
+            inner = false;
+            left = false;
+        }
         right = b;
     }
 
@@ -182,6 +232,10 @@ public class Join extends ASTNodeAccessImpl {
         return natural;
     }
 
+    public boolean isGlobal() {
+        return global;
+    }
+
     public Join withNatural(boolean b) {
         this.setNatural(b);
         return this;
@@ -189,6 +243,10 @@ public class Join extends ASTNodeAccessImpl {
 
     public void setNatural(boolean b) {
         natural = b;
+    }
+
+    public void setGlobal(boolean b) {
+        global = b;
     }
 
     /**
@@ -224,18 +282,29 @@ public class Join extends ASTNodeAccessImpl {
 
     /**
      * Returns the right item of the join
+     *
      */
     public FromItem getRightItem() {
-        return rightItem;
+        return fromItem;
     }
 
+    @Deprecated
     public Join withRightItem(FromItem item) {
-        this.setRightItem(item);
+        this.setFromItem(item);
         return this;
     }
 
     public void setRightItem(FromItem item) {
-        rightItem = item;
+        fromItem = item;
+    }
+
+    public FromItem getFromItem() {
+        return fromItem;
+    }
+
+    public Join setFromItem(FromItem fromItem) {
+        this.fromItem = fromItem;
+        return this;
     }
 
     /**
@@ -295,7 +364,8 @@ public class Join extends ASTNodeAccessImpl {
 
     /**
      * Return the "WITHIN" join window (if any)
-     * @return 
+     * 
+     * @return
      */
     public KSQLJoinWindow getJoinWindow() {
         return joinWindow;
@@ -310,15 +380,28 @@ public class Join extends ASTNodeAccessImpl {
         this.joinWindow = joinWindow;
     }
 
+    public JoinHint getJoinHint() {
+        return joinHint;
+    }
+
+    public Join setJoinHint(JoinHint joinHint) {
+        this.joinHint = joinHint;
+        return this;
+    }
+
     @Override
     @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
+        if (isGlobal()) {
+            builder.append("GLOBAL ");
+        }
+
         if (isSimple() && isOuter()) {
-            builder.append("OUTER ").append(rightItem);
+            builder.append("OUTER ").append(fromItem);
         } else if (isSimple()) {
-            builder.append(rightItem);
+            builder.append(fromItem);
         } else {
             if (isNatural()) {
                 builder.append("NATURAL ");
@@ -340,8 +423,6 @@ public class Join extends ASTNodeAccessImpl {
                 builder.append("INNER ");
             } else if (isSemi()) {
                 builder.append("SEMI ");
-            } else if (isOne2one()){
-                builder.append("one to one ");
             }
 
             if (isStraight()) {
@@ -349,17 +430,20 @@ public class Join extends ASTNodeAccessImpl {
             } else if (isApply()) {
                 builder.append("APPLY ");
             } else {
+                if (joinHint != null) {
+                    builder.append(joinHint).append(" ");
+                }
                 builder.append("JOIN ");
             }
 
-            builder.append(rightItem).append((joinWindow != null) ? " WITHIN " + joinWindow : "");
+            builder.append(fromItem).append((joinWindow != null) ? " WITHIN " + joinWindow : "");
         }
 
-        for (Expression onExpression: onExpressions) {
+        for (Expression onExpression : onExpressions) {
             builder.append(" ON ").append(onExpression);
         }
-        if (usingColumns.size()>0) {
-            builder.append(PlainSelect.getFormatedList(usingColumns, "USING", true, true));
+        if (usingColumns.size() > 0) {
+            builder.append(PlainSelect.getFormattedList(usingColumns, "USING", true, true));
         }
 
         return builder.toString();

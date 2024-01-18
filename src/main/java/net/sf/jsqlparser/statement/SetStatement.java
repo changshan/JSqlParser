@@ -9,10 +9,15 @@
  */
 package net.sf.jsqlparser.statement;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.select.PlainSelect;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public final class SetStatement implements Statement {
 
@@ -23,11 +28,11 @@ public final class SetStatement implements Statement {
         // empty constructor
     }
 
-    public SetStatement(String name, List<Expression> value) {
+    public SetStatement(Object name, ExpressionList<?> value) {
         add(name, value, true);
     }
 
-    public void add(String name, List<Expression> value, boolean useEqual) {
+    public void add(Object name, ExpressionList<?> value, boolean useEqual) {
         values.add(new NameExpr(name, value, useEqual));
     }
 
@@ -58,19 +63,20 @@ public final class SetStatement implements Statement {
     }
 
     public SetStatement withUseEqual(boolean useEqual) {
-      this.setUseEqual(useEqual);
-      return this;
-  }
+        this.setUseEqual(useEqual);
+        return this;
+    }
 
     public SetStatement setUseEqual(boolean useEqual) {
         return setUseEqual(0, useEqual);
     }
 
-    public String getName() {
+
+    public Object getName() {
         return getName(0);
     }
 
-    public String getName(int idx) {
+    public Object getName(int idx) {
         return values.get(idx).name;
     }
 
@@ -90,17 +96,17 @@ public final class SetStatement implements Statement {
         return getExpressions(0);
     }
 
-    public void setExpressions(int idx, List<Expression> expressions) {
+    public void setExpressions(int idx, ExpressionList<?> expressions) {
         values.get(idx).expressions = expressions;
     }
 
-    public void setExpressions(List<Expression> expressions) {
+    public void setExpressions(ExpressionList<?> expressions) {
         setExpressions(0, expressions);
     }
 
     private String toString(NameExpr ne) {
-        return ne.name + (ne.useEqual ? " = " : " ") +
-                PlainSelect.getStringList(ne.expressions, true, false);
+        return ne.name + (ne.useEqual ? " = " : " ")
+                + PlainSelect.getStringList(ne.expressions, true, false);
     }
 
     @Override
@@ -122,18 +128,58 @@ public final class SetStatement implements Statement {
         return b.toString();
     }
 
+    public List<NameExpr> getKeyValuePairs() {
+        return values;
+    }
+
+    public void addKeyValuePairs(Collection<NameExpr> keyValuePairs) {
+        values.addAll(keyValuePairs);
+    }
+
+    public void addKeyValuePairs(NameExpr... keyValuePairs) {
+        addKeyValuePairs(Arrays.asList(keyValuePairs));
+    }
+
+    public void clear() {
+        values.clear();
+        effectParameter = null;
+    }
+
     @Override
     public void accept(StatementVisitor statementVisitor) {
         statementVisitor.visit(this);
     }
 
-    static class NameExpr {
+    static class NameExpr implements Serializable {
+        Object name;
+        ExpressionList expressions;
+        boolean useEqual;
 
-        private String name;
-        private List<Expression> expressions;
-        private boolean useEqual;
+        public Object getName() {
+            return name;
+        }
 
-        public NameExpr(String name, List<Expression> expressions, boolean useEqual) {
+        public void setName(Object name) {
+            this.name = name;
+        }
+
+        public ExpressionList<?> getExpressions() {
+            return expressions;
+        }
+
+        public void setExpressions(ExpressionList<?> expressions) {
+            this.expressions = expressions;
+        }
+
+        public boolean isUseEqual() {
+            return useEqual;
+        }
+
+        public void setUseEqual(boolean useEqual) {
+            this.useEqual = useEqual;
+        }
+
+        public NameExpr(Object name, ExpressionList<?> expressions, boolean useEqual) {
             this.name = name;
             this.expressions = expressions;
             this.useEqual = useEqual;
@@ -147,6 +193,7 @@ public final class SetStatement implements Statement {
     public void setEffectParameter(String effectParameter) {
         this.effectParameter = effectParameter;
     }
+
     public SetStatement withEffectParameter(String effectParameter) {
         this.effectParameter = effectParameter;
         return this;
