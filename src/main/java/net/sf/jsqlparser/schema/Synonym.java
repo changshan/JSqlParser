@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.schema;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;

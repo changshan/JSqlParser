@@ -12,7 +12,7 @@ package net.sf.jsqlparser.statement.create;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;

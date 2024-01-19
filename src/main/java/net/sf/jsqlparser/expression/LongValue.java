@@ -12,7 +12,7 @@ package net.sf.jsqlparser.expression;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 /**
  * Every number without a point or an exponential format is a LongValue.

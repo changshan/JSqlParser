@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 import static net.sf.jsqlparser.statement.select.KSQLWindow.TimeUnit;
 
 public class KSQLJoinWindow extends ASTNodeAccessImpl {

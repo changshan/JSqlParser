@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.OracleHint;
-import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;

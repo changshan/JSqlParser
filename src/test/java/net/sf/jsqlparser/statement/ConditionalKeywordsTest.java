@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement;
 
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.ParserKeywordsUtils;
+import com.xiaomi.smartql.parser.ParserKeywordsUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 

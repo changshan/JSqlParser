@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.statement.select;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class ForClause extends ASTNodeAccessImpl {
     public enum ForOption {

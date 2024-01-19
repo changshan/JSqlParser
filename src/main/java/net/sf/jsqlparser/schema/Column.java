@@ -13,7 +13,7 @@ import java.util.List;
 import net.sf.jsqlparser.expression.ArrayConstructor;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 /**
  * A column. It can have the table name it belongs to.

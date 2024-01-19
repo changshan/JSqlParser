@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.statement.select;
 
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 import net.sf.jsqlparser.schema.Column;
 
 import java.util.ArrayList;

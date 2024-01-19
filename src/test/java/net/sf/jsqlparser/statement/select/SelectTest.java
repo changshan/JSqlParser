@@ -32,6 +32,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.xiaomi.smartql.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.AllValue;
@@ -58,7 +60,6 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
-import net.sf.jsqlparser.parser.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Database;
 import net.sf.jsqlparser.schema.Server;

@@ -1,13 +1,4 @@
-/*-
- * #%L
- * JSQLParser library
- * %%
- * Copyright (C) 2004 - 2021 JSQLParser
- * %%
- * Dual licensed under GNU LGPL 2.1 or Apache License 2.0
- * #L%
- */
-package net.sf.jsqlparser.parser;
+package com.xiaomi.smartql.parser;
 
 import java.io.File;
 import java.io.FileNotFoundException;

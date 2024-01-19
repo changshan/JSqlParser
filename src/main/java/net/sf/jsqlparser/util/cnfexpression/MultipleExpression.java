@@ -13,7 +13,7 @@ import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.NullValue;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 /**
  * This is a helper class that mainly used for handling the CNF conversion.

@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 public class TimeKeyExpression extends ASTNodeAccessImpl implements Expression {
 

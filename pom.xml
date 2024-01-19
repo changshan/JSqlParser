@@ -127,7 +127,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>net.sf.jsqlparser.parser.ParserKeywordsUtils</mainClass>
+                    <mainClass>com.xiaomi.smartql.parser.ParserKeywordsUtils</mainClass>
                     <arguments>
                         <argument>src/main/jjtree/net/sf/jsqlparser/parser/JSqlParserCC.jjt</argument>
                         <argument>src/site/sphinx/keywords.rst</argument>

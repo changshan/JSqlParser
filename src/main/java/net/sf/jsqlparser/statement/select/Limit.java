@@ -13,7 +13,7 @@ import net.sf.jsqlparser.expression.AllValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 import java.util.Arrays;
 

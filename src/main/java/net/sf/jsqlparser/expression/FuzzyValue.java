@@ -10,7 +10,7 @@
 package net.sf.jsqlparser.expression;
 
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 /**
  * 兼容[${...}$],$#@[...]@#$特殊值函数

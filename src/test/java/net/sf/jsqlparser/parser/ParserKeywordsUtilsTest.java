@@ -9,6 +9,7 @@
  */
 package net.sf.jsqlparser.parser;
 
+import com.xiaomi.smartql.parser.ParserKeywordsUtils;
 import org.javacc.jjtree.JJTree;
 import org.javacc.parser.JavaCCGlobals;
 import org.javacc.parser.JavaCCParser;

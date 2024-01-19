@@ -9,7 +9,7 @@
  */
 package net.sf.jsqlparser.expression;
 
-import net.sf.jsqlparser.parser.ASTNodeAccessImpl;
+import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
 
 /**
  * A basic class for binary expressions, that is expressions having a left member and a right member
