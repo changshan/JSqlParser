@@ -251,12 +251,16 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
         if (plainSelect.getJoins() != null) {
             for (Join join : plainSelect.getJoins()) {
+                join.getFromItem().accept(this);
                 if (join.getRightItem() != null) {
                     join.getRightItem().accept(this);
                 }
                 List<Column> columnList = join.getUsingColumns();
                 for (Column column : columnList) {
                     column.accept(this);
+                }
+                for (Expression exp:join.getOnExpressions()){
+                    exp.accept(this);
                 }
             }
         }
@@ -363,10 +367,10 @@ public class TablesNamesFinder implements SelectVisitor, FromItemVisitor, Expres
 
     @Override
     public void visit(InExpression inExpression) {
-        if(inExpression.getLeftExpression()!=null) {
+        if (inExpression.getLeftExpression()!=null) {
             inExpression.getLeftExpression().accept(this);
         }
-        if(inExpression.getRightExpression()!=null) {
+        if (inExpression.getRightExpression()!=null) {
             inExpression.getRightExpression().accept(this);
         }
     }

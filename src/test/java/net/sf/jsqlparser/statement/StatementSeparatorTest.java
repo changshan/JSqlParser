@@ -9,6 +9,7 @@
  */
 package net.sf.jsqlparser.statement;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.*;
 import net.sf.jsqlparser.parser.*;
 import net.sf.jsqlparser.test.*;
@@ -20,7 +21,7 @@ public class StatementSeparatorTest {
     void testDoubleNewLine() throws JSQLParserException {
         String sqlStr =
                 "SELECT * FROM DUAL\n\n\nSELECT * FROM DUAL\n\n\n\nSELECT * FROM dual\n\n\n\n\nSELECT * FROM dual";
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(4, statements.size());
     }
 
@@ -28,7 +29,7 @@ public class StatementSeparatorTest {
     void testNewLineSlash() throws JSQLParserException {
         String sqlStr =
                 "SELECT * FROM DUAL\n\n\nSELECT * FROM DUAL\n/\nSELECT * FROM dual\n/\n\nSELECT * FROM dual";
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(4, statements.size());
     }
 
@@ -36,7 +37,7 @@ public class StatementSeparatorTest {
     void testNewLineGo() throws JSQLParserException {
         String sqlStr =
                 "SELECT * FROM DUAL\n\n\nSELECT * FROM DUAL\nGO\nSELECT * FROM dual\ngo\n\nSELECT * FROM dual\ngo";
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(4, statements.size());
     }
 
@@ -44,7 +45,7 @@ public class StatementSeparatorTest {
     void testNewLineNotGoIssue() throws JSQLParserException {
         String sqlStr =
                 "select name,\ngoods from test_table";
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(1, statements.size());
     }
 
@@ -59,7 +60,7 @@ public class StatementSeparatorTest {
     void testMSSQLBlock() throws JSQLParserException {
         String sqlStr = "create view MyView1 as\n" + "select Id,Name from table1\n" + "go\n"
                 + "create view MyView2 as\n" + "select Id,Name from table1\n" + "go";
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(2, statements.size());
     }
 }

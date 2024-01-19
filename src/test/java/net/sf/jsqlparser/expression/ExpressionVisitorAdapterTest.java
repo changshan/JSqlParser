@@ -9,11 +9,11 @@
  */
 package net.sf.jsqlparser.expression;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.operators.conditional.XorExpression;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -38,7 +38,7 @@ public class ExpressionVisitorAdapterTest {
     public void testInExpressionProblem() throws JSQLParserException {
         final List<Object> exprList = new ArrayList<>();
         PlainSelect plainSelect =
-                (PlainSelect) CCJSqlParserUtil.parse("select * from foo where x in (?,?,?)");
+                (PlainSelect) SmartQLEngine.parse("select * from foo where x in (?,?,?)");
         Expression where = plainSelect.getWhere();
         where.accept(new ExpressionVisitorAdapter() {
 
@@ -57,7 +57,7 @@ public class ExpressionVisitorAdapterTest {
     @Test
     public void testInExpression() throws JSQLParserException {
         final List<Object> exprList = new ArrayList<>();
-        PlainSelect plainSelect = (PlainSelect) CCJSqlParserUtil
+        PlainSelect plainSelect = (PlainSelect) SmartQLEngine
                 .parse("select * from foo where (a,b) in (select a,b from foo2)");
         Expression where = plainSelect.getWhere();
         where.accept(new ExpressionVisitorAdapter() {
@@ -78,7 +78,7 @@ public class ExpressionVisitorAdapterTest {
     public void testXorExpression() throws JSQLParserException {
         final List<Expression> exprList = new ArrayList<>();
         PlainSelect plainSelect =
-                (PlainSelect) CCJSqlParserUtil.parse("SELECT * FROM table WHERE foo XOR bar");
+                (PlainSelect) SmartQLEngine.parse("SELECT * FROM table WHERE foo XOR bar");
         Expression where = plainSelect.getWhere();
         where.accept(new ExpressionVisitorAdapter() {
 
@@ -105,7 +105,7 @@ public class ExpressionVisitorAdapterTest {
 
     public static void testOracleHintExpression(String sql, String hint, boolean singleLine)
             throws JSQLParserException {
-        PlainSelect plainSelect = (PlainSelect) CCJSqlParserUtil.parse(sql);
+        PlainSelect plainSelect = (PlainSelect) SmartQLEngine.parse(sql);
         final OracleHint[] holder = new OracleHint[1];
         assertNotNull(plainSelect.getOracleHint());
         plainSelect.getOracleHint().accept(new ExpressionVisitorAdapter() {
@@ -125,7 +125,7 @@ public class ExpressionVisitorAdapterTest {
     @Test
     public void testCurrentTimestampExpression() throws JSQLParserException {
         final List<String> columnList = new ArrayList<String>();
-        PlainSelect plainSelect = (PlainSelect) CCJSqlParserUtil
+        PlainSelect plainSelect = (PlainSelect) SmartQLEngine
                 .parse("select * from foo where bar < CURRENT_TIMESTAMP");
         Expression where = plainSelect.getWhere();
         where.accept(new ExpressionVisitorAdapter() {
@@ -145,7 +145,7 @@ public class ExpressionVisitorAdapterTest {
     public void testCurrentDateExpression() throws JSQLParserException {
         final List<String> columnList = new ArrayList<String>();
         PlainSelect plainSelect =
-                (PlainSelect) CCJSqlParserUtil.parse("select * from foo where bar < CURRENT_DATE");
+                (PlainSelect) SmartQLEngine.parse("select * from foo where bar < CURRENT_DATE");
         Expression where = plainSelect.getWhere();
         where.accept(new ExpressionVisitorAdapter() {
 
@@ -162,7 +162,7 @@ public class ExpressionVisitorAdapterTest {
 
     @Test
     public void testSubSelectExpressionProblem() throws JSQLParserException {
-        PlainSelect plainSelect = (PlainSelect) CCJSqlParserUtil
+        PlainSelect plainSelect = (PlainSelect) SmartQLEngine
                 .parse("SELECT * FROM t1 WHERE EXISTS (SELECT * FROM t2 WHERE t2.col2 = t1.col1)");
         Expression where = plainSelect.getWhere();
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
@@ -176,35 +176,35 @@ public class ExpressionVisitorAdapterTest {
 
     @Test
     public void testCaseWithoutElse() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("CASE WHEN 1 then 0 END");
+        Expression expr = SmartQLEngine.parseExpression("CASE WHEN 1 then 0 END");
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
         expr.accept(adapter);
     }
 
     @Test
     public void testCaseWithoutElse2() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("CASE WHEN 1 then 0 ELSE -1 END");
+        Expression expr = SmartQLEngine.parseExpression("CASE WHEN 1 then 0 ELSE -1 END");
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
         expr.accept(adapter);
     }
 
     @Test
     public void testCaseWithoutElse3() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("CASE 3+4 WHEN 1 then 0 END");
+        Expression expr = SmartQLEngine.parseExpression("CASE 3+4 WHEN 1 then 0 END");
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
         expr.accept(adapter);
     }
 
     @Test
     public void testAnalyticFunctionWithoutExpression502() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("row_number() over (order by c)");
+        Expression expr = SmartQLEngine.parseExpression("row_number() over (order by c)");
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
         expr.accept(adapter);
     }
 
     @Test
     public void testAtTimeZoneExpression() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil
+        Expression expr = SmartQLEngine
                 .parseExpression("DATE(date1 AT TIME ZONE 'UTC' AT TIME ZONE 'australia/sydney')");
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
         expr.accept(adapter);
@@ -213,18 +213,18 @@ public class ExpressionVisitorAdapterTest {
     @Test
     public void testJsonFunction() throws JSQLParserException {
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
-        CCJSqlParserUtil.parseExpression("JSON_OBJECT( KEY 'foo' VALUE bar, KEY 'foo' VALUE bar)")
+        SmartQLEngine.parseExpression("JSON_OBJECT( KEY 'foo' VALUE bar, KEY 'foo' VALUE bar)")
                 .accept(adapter);
-        CCJSqlParserUtil.parseExpression("JSON_ARRAY( (SELECT * from dual) )").accept(adapter);
+        SmartQLEngine.parseExpression("JSON_ARRAY( (SELECT * from dual) )").accept(adapter);
     }
 
     @Test
     public void testJsonAggregateFunction() throws JSQLParserException {
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
-        CCJSqlParserUtil.parseExpression(
+        SmartQLEngine.parseExpression(
                 "JSON_OBJECTAGG( KEY foo VALUE bar NULL ON NULL WITH UNIQUE KEYS ) FILTER( WHERE name = 'Raj' ) OVER( PARTITION BY name )")
                 .accept(adapter);
-        CCJSqlParserUtil.parseExpression(
+        SmartQLEngine.parseExpression(
                 "JSON_ARRAYAGG( a FORMAT JSON ABSENT ON NULL ) FILTER( WHERE name = 'Raj' ) OVER( PARTITION BY name )")
                 .accept(adapter);
     }
@@ -232,20 +232,20 @@ public class ExpressionVisitorAdapterTest {
     @Test
     public void testConnectedByRootExpression() throws JSQLParserException {
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
-        CCJSqlParserUtil.parseExpression("CONNECT_BY_ROOT last_name as name").accept(adapter);
+        SmartQLEngine.parseExpression("CONNECT_BY_ROOT last_name as name").accept(adapter);
     }
 
     @Test
     public void testRowConstructor() throws JSQLParserException {
         ExpressionVisitorAdapter adapter = new ExpressionVisitorAdapter();
-        CCJSqlParserUtil.parseExpression(
+        SmartQLEngine.parseExpression(
                 "CAST(ROW(dataid, value, calcMark) AS ROW(datapointid CHAR, value CHAR, calcMark CHAR))")
                 .accept(adapter);
     }
 
     @Test
     public void testAllTableColumns() throws JSQLParserException {
-        PlainSelect plainSelect = (PlainSelect) CCJSqlParserUtil.parse("select a.* from foo a");
+        PlainSelect plainSelect = (PlainSelect) SmartQLEngine.parse("select a.* from foo a");
         final AllTableColumns[] holder = new AllTableColumns[1];
         Expression from = plainSelect.getSelectItems().get(0).getExpression();
         from.accept(new ExpressionVisitorAdapter() {

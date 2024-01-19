@@ -20,10 +20,11 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Set;
+
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.OracleHint;
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.DescribeStatement;
@@ -258,7 +259,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testOracleHint() throws JSQLParserException {
         String sql = "select --+ HINT\ncol2 from mytable";
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sql);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sql);
         final OracleHint[] holder = new OracleHint[1];
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder() {
 
@@ -346,7 +347,7 @@ public class TablesNamesFinderTest {
     public void testExpressionIssue515() throws JSQLParserException {
         TablesNamesFinder finder = new TablesNamesFinder();
         Set<String> tableList = finder
-                .getTables(CCJSqlParserUtil.parseCondExpression("SOME_TABLE.COLUMN = 'A'"));
+                .getTables(SmartQLEngine.parseCondExpression("SOME_TABLE.COLUMN = 'A'"));
         assertEquals(1, tableList.size());
         assertTrue(tableList.contains("SOME_TABLE"));
     }
@@ -416,7 +417,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCreateSequence_throwsException() throws JSQLParserException {
         String sql = "CREATE SEQUENCE my_seq";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTables(stmt))
                 .isInstanceOf(UnsupportedOperationException.class)
@@ -426,7 +427,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testAlterSequence_throwsException() throws JSQLParserException {
         String sql = "ALTER SEQUENCE my_seq";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTables(stmt))
                 .isInstanceOf(UnsupportedOperationException.class)
@@ -436,7 +437,7 @@ public class TablesNamesFinderTest {
     @Test
     public void testCreateSynonym_throwsException() throws JSQLParserException {
         String sql = "CREATE SYNONYM foo FOR bar";
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
         TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
         assertThatThrownBy(() -> tablesNamesFinder.getTables(stmt))
                 .isInstanceOf(UnsupportedOperationException.class)

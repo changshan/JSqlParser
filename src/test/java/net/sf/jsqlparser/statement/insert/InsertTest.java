@@ -9,6 +9,7 @@
  */
 package net.sf.jsqlparser.statement.insert;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -18,7 +19,6 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -227,7 +227,7 @@ public class InsertTest {
         assertThrowsExactly(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                CCJSqlParserUtil.parse("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
+                SmartQLEngine.parse("INSERT INTO mytable (col1, col2) VALUES (a, b), (d, e, c)");
             }
         });
     }
@@ -525,10 +525,10 @@ public class InsertTest {
     public void insertOnConflictObjectsTest() throws JSQLParserException {
         String sqlStr = "WITH a ( a, b , c ) \n" + "AS (SELECT  1 , 2 , 3 )\n"
                 + "insert into test\n" + "select * from a";
-        Insert insert = (Insert) CCJSqlParserUtil.parse(sqlStr);
+        Insert insert = (Insert) SmartQLEngine.parse(sqlStr);
 
-        Expression whereExpression = CCJSqlParserUtil.parseExpression("a=1", false);
-        Expression valueExpression = CCJSqlParserUtil.parseExpression("b/2", false);
+        Expression whereExpression = SmartQLEngine.parseExpression("a=1", false);
+        Expression valueExpression = SmartQLEngine.parseExpression("b/2", false);
 
         InsertConflictTarget conflictTarget = new InsertConflictTarget("a", null, null, null);
         insert.setConflictTarget(conflictTarget);

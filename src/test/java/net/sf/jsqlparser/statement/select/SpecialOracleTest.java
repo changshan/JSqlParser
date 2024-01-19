@@ -9,8 +9,9 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import com.xiaomi.smartql.parser.ParseException;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -135,8 +136,8 @@ public class SpecialOracleTest {
 
                     // strip the Exception Class Name from the Message
                     if (message.startsWith(
-                            net.sf.jsqlparser.parser.ParseException.class.getCanonicalName())) {
-                        message = message.substring(net.sf.jsqlparser.parser.ParseException.class
+                            ParseException.class.getCanonicalName())) {
+                        message = message.substring(ParseException.class
                                 .getCanonicalName().length() + 2);
                     }
 
@@ -242,7 +243,7 @@ public class SpecialOracleTest {
         for (File file : sqlTestFiles) {
             String sql = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
             try {
-                CCJSqlParserUtil.parse(sql);
+                SmartQLEngine.parse(sql);
                 LOG.log(Level.FINE, "EXPECTED SUCCESS: {0}", file.getName());
             } catch (JSQLParserException ex) {
                 regressionFiles.add(file.getName());

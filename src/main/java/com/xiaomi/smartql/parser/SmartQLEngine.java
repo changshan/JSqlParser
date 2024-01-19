@@ -14,18 +14,19 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.xiaomi.smart.exception.SmartException;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 
 /**
- * Toolfunctions to start and use JSqlParser.
- *
- * @author toben
+ * SmartQL Engine
  */
-
 @SuppressWarnings("PMD.CyclomaticComplexity")
 public final class SmartQLEngine {
     public final static Logger LOGGER = Logger.getLogger(SmartQLEngine.class.getName());
@@ -37,6 +38,37 @@ public final class SmartQLEngine {
     public static final int PARSER_TIMEOUT = 6000;
 
     private SmartQLEngine() {}
+
+
+    public Expression parseExpression(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Expression) {
+            return (Expression) obj;
+        }
+
+        if (obj instanceof String) {
+            return new StringValue((String) obj);
+        }
+
+        if (obj instanceof Long) {
+            return new LongValue((Long) obj);
+        }
+        if (obj instanceof Double) {
+            return new DoubleValue(obj.toString());
+        }
+
+        String sql = obj.toString();
+
+        Expression expr = null;
+        try {
+            expr = SmartQLEngine.parseExpression(sql);
+        } catch (SmartException e) {
+            LOGGER.fine(e.getMessage());
+        }
+        return expr;
+    }
 
     public static Statement parse(Reader statementReader) throws JSQLParserException {
         ExecutorService executorService = Executors.newSingleThreadExecutor();

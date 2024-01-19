@@ -42,6 +42,22 @@ public class Join extends ASTNodeAccessImpl {
 
     private JoinHint joinHint = null;
 
+    //hana one to one
+    private boolean one2one=false;
+
+    public Join withOne2One(boolean b){
+        this.setOne2one(b);
+        return this;
+    }
+
+    public void setOne2one(boolean b){
+        one2one=b;
+    }
+
+    public boolean isOne2one(){
+        return one2one;
+    }
+
     public boolean isSimple() {
         return simple;
     }

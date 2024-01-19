@@ -1,6 +1,5 @@
 package com.xiaomi.smartql.parser;
 
-import com.xiaomi.smartql.parser.ParseException;
 import net.sf.jsqlparser.parser.feature.Feature;
 import net.sf.jsqlparser.parser.feature.FeatureConfiguration;
 

@@ -1,8 +1,5 @@
 package com.xiaomi.smartql.parser;
 
-import com.xiaomi.smartql.parser.Provider;
-import com.xiaomi.smartql.parser.StringProvider;
-
 import java.io.IOException;
 
 @SuppressWarnings({"PMD.MethodNamingConventions", "PMD.CyclomaticComplexity"})

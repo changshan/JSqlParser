@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.AllValue;
@@ -294,7 +295,7 @@ public class SelectTest {
 
     @Test
     public void testOperationsWithSigns() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseExpression("1 - -1");
+        Expression expr = SmartQLEngine.parseExpression("1 - -1");
         assertEquals("1 - -1", expr.toString());
         assertTrue(expr instanceof Subtraction);
         Subtraction sub = (Subtraction) expr;
@@ -1254,7 +1255,7 @@ public class SelectTest {
 
     @Test
     public void testEscapedFunctionsIssue753() throws JSQLParserException {
-        Statement stmt = CCJSqlParserUtil.parse("SELECT { fn test(0)} AS COL");
+        Statement stmt = SmartQLEngine.parse("SELECT { fn test(0)} AS COL");
         assertEquals("SELECT {fn test(0)} AS COL", stmt.toString());
         assertSqlCanBeParsedAndDeparsed("SELECT fn FROM fn");
     }
@@ -1550,7 +1551,7 @@ public class SelectTest {
         String statement = "SELECT REPLACE(a, 'b', c) FROM tab1";
         assertSqlCanBeParsedAndDeparsed(statement);
 
-        Statement stmt = CCJSqlParserUtil.parse(statement);
+        Statement stmt = SmartQLEngine.parse(statement);
         Select select = (Select) stmt;
         PlainSelect plainSelect = (PlainSelect) select;
 
@@ -2432,7 +2433,7 @@ public class SelectTest {
     public void testProblemFunction() throws JSQLParserException {
         String stmt = "SELECT test() FROM testtable";
         assertSqlCanBeParsedAndDeparsed(stmt);
-        Statement parsed = CCJSqlParserUtil.parse(stmt);
+        Statement parsed = SmartQLEngine.parse(stmt);
         Select select = (Select) parsed;
         PlainSelect plainSelect = (PlainSelect) select;
         SelectItem item = plainSelect.getSelectItems().get(0);
@@ -2567,7 +2568,7 @@ public class SelectTest {
                 "SELECT to_timestamp(to_char(now() - INTERVAL '45 MINUTE', 'YYYY-MM-DD-HH24:')) AS START_TIME FROM tab1";
         assertSqlCanBeParsedAndDeparsed(stmt);
 
-        Statement st = CCJSqlParserUtil.parse(stmt);
+        Statement st = SmartQLEngine.parse(stmt);
         Select select = (Select) st;
         PlainSelect plainSelect = (PlainSelect) select;
 
@@ -2853,7 +2854,7 @@ public class SelectTest {
         String stmt = "SELECT * FROM mytable WHERE b = :param";
         assertSqlCanBeParsedAndDeparsed(stmt);
 
-        Statement st = CCJSqlParserUtil.parse(stmt);
+        Statement st = SmartQLEngine.parse(stmt);
         Select select = (Select) st;
         PlainSelect plainSelect = (PlainSelect) select;
         Expression exp = ((BinaryExpression) plainSelect.getWhere()).getRightExpression();
@@ -2868,7 +2869,7 @@ public class SelectTest {
         String stmt = "SELECT * FROM mytable WHERE a = :param OR a = :param2 AND b = :param3";
         assertSqlCanBeParsedAndDeparsed(stmt);
 
-        Statement st = CCJSqlParserUtil.parse(stmt);
+        Statement st = SmartQLEngine.parse(stmt);
         Select select = (Select) st;
         PlainSelect plainSelect = (PlainSelect) select;
 
@@ -3434,7 +3435,7 @@ public class SelectTest {
     public void testIssue215_possibleEndlessParsing() throws JSQLParserException {
         String sqlStr =
                 "SELECT (CASE WHEN ((value LIKE '%t1%') OR (value LIKE '%t2%')) THEN 't1s' WHEN ((((((((((((((((((((((((((((value LIKE '%t3%') OR (value LIKE '%t3%')) OR (value LIKE '%t3%')) OR (value LIKE '%t4%')) OR (value LIKE '%t4%')) OR (value LIKE '%t5%')) OR (value LIKE '%t6%')) OR (value LIKE '%t6%')) OR (value LIKE '%t7%')) OR (value LIKE '%t7%')) OR (value LIKE '%t7%')) OR (value LIKE '%t8%')) OR (value LIKE '%t8%')) OR (value LIKE '%CTO%')) OR (value LIKE '%cto%')) OR (value LIKE '%Cto%')) OR (value LIKE '%t9%')) OR (value LIKE '%t9%')) OR (value LIKE '%COO%')) OR (value LIKE '%coo%')) OR (value LIKE '%Coo%')) OR (value LIKE '%t10%')) OR (value LIKE '%t10%')) OR (value LIKE '%CIO%')) OR (value LIKE '%cio%')) OR (value LIKE '%Cio%')) OR (value LIKE '%t11%')) OR (value LIKE '%t11%')) THEN 't' WHEN ((((value LIKE '%t12%') OR (value LIKE '%t12%')) OR (value LIKE '%VP%')) OR (value LIKE '%vp%')) THEN 'Vice t12s' WHEN ((((((value LIKE '% IT %') OR (value LIKE '%t13%')) OR (value LIKE '%t13%')) OR (value LIKE '% it %')) OR (value LIKE '%tech%')) OR (value LIKE '%Tech%')) THEN 'IT' WHEN ((((value LIKE '%Analyst%') OR (value LIKE '%t14%')) OR (value LIKE '%Analytic%')) OR (value LIKE '%analytic%')) THEN 'Analysts' WHEN ((value LIKE '%Manager%') OR (value LIKE '%manager%')) THEN 't15' ELSE 'Other' END) FROM tab1";
-        Statement stmt2 = CCJSqlParserUtil.parse(sqlStr,
+        Statement stmt2 = SmartQLEngine.parse(sqlStr,
                 parser -> parser.withAllowComplexParsing(false).withTimeOut(20000));
     }
 
@@ -3528,7 +3529,7 @@ public class SelectTest {
         Assertions.assertThrows(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                CCJSqlParserUtil.parse("SELECT count(*) FROM mytable WHERE 5");
+                SmartQLEngine.parse("SELECT count(*) FROM mytable WHERE 5");
             }
         });
     }
@@ -3623,7 +3624,7 @@ public class SelectTest {
         String sqls = IOUtils.toString(
                 SelectTest.class.getResourceAsStream("large-sql-with-issue-265.txt"),
                 StandardCharsets.UTF_8);
-        Statements stmts = CCJSqlParserUtil.parseStatements(sqls);
+        Statements stmts = SmartQLEngine.parseStatements(sqls);
         assertEquals(2, stmts.getStatements().size());
     }
 
@@ -4369,7 +4370,7 @@ public class SelectTest {
     public void testDateArithmentic11() throws JSQLParserException {
         String sql = "select CURRENT_DATE + (dayofweek(MY_DUE_DATE) + 5) DAY FROM mytable";
         assertSqlCanBeParsedAndDeparsed(sql, true);
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         final List<SelectItem> list = new ArrayList<>();
         select.accept(new SelectVisitorAdapter() {
             @Override
@@ -4398,7 +4399,7 @@ public class SelectTest {
     public void testDateArithmentic13() throws JSQLParserException {
         String sql = "SELECT INTERVAL 5 MONTH MONTH FROM mytable";
         assertSqlCanBeParsedAndDeparsed(sql);
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         final List<SelectItem> list = new ArrayList<>();
         select.accept(new SelectVisitorAdapter() {
             @Override
@@ -4420,7 +4421,7 @@ public class SelectTest {
     @ValueSource(strings = {"u", "e", "n", "r", "b", "rb"})
     public void testRawStringExpressionIssue656(String prefix) throws JSQLParserException {
         String sql = "select " + prefix + "'test' from foo";
-        Statement statement = CCJSqlParserUtil.parse(sql);
+        Statement statement = SmartQLEngine.parse(sql);
         assertNotNull(statement);
         statement.accept(new StatementVisitorAdapter() {
             @Override
@@ -4468,7 +4469,7 @@ public class SelectTest {
 
     @Test
     public void testLongQualifiedNamesIssue763_2() throws JSQLParserException {
-        Statement parse = CCJSqlParserUtil.parse(new StringReader(
+        Statement parse = SmartQLEngine.parse(new StringReader(
                 "SELECT mongodb.test.test.intField, postgres.test.test.intField, postgres.test.test.datefield FROM mongodb.test.test JOIN postgres.postgres.test.test ON mongodb.test.test.intField = postgres.test.test.intField WHERE mongodb.test.test.intField = 123"));
         System.out.println(parse.toString());
     }
@@ -4629,7 +4630,7 @@ public class SelectTest {
 
     @Test
     public void testLimitClauseDroppedIssue845() throws JSQLParserException {
-        assertEquals("SELECT * FROM employee ORDER BY emp_id LIMIT 10 OFFSET 2", CCJSqlParserUtil
+        assertEquals("SELECT * FROM employee ORDER BY emp_id LIMIT 10 OFFSET 2", SmartQLEngine
                 .parse("SELECT * FROM employee ORDER BY emp_id OFFSET 2 LIMIT 10").toString());
     }
 
@@ -4714,7 +4715,7 @@ public class SelectTest {
 
     @Test
     public void testWrongParseTreeIssue89() throws JSQLParserException {
-        Select unionQuery = (Select) CCJSqlParserUtil
+        Select unionQuery = (Select) SmartQLEngine
                 .parse("SELECT * FROM table1 UNION SELECT * FROM table2 ORDER BY col");
         SetOperationList unionQueries = (SetOperationList) unionQuery;
 
@@ -4999,7 +5000,7 @@ public class SelectTest {
 
     @Test
     public void testMissingLimitKeywordIssue1006() throws JSQLParserException {
-        Statement stmt = CCJSqlParserUtil.parse("SELECT id, name FROM test OFFSET 20 LIMIT 10");
+        Statement stmt = SmartQLEngine.parse("SELECT id, name FROM test OFFSET 20 LIMIT 10");
         assertEquals("SELECT id, name FROM test LIMIT 10 OFFSET 20", stmt.toString());
     }
 
@@ -5069,7 +5070,7 @@ public class SelectTest {
 
     @Test
     public void testColonDelimiterIssue1134() throws JSQLParserException {
-        Statement stmt = CCJSqlParserUtil.parse("SELECT * FROM stores_demo:informix.accounts");
+        Statement stmt = SmartQLEngine.parse("SELECT * FROM stores_demo:informix.accounts");
         assertEquals("SELECT * FROM stores_demo.informix.accounts", stmt.toString());
     }
 
@@ -5568,7 +5569,7 @@ public class SelectTest {
         String sqlStr = "SELECT * from tablename@dblink";
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
 
-        Select select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        Select select = (Select) SmartQLEngine.parse(sqlStr);
         PlainSelect plainSelect = (PlainSelect) select;
         Table table = (Table) plainSelect.getFromItem();
 
@@ -5582,7 +5583,7 @@ public class SelectTest {
         String sql = "SELECT * FROM test FOR UPDATE SKIP LOCKED";
         assertSqlCanBeParsedAndDeparsed(sql);
 
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         PlainSelect plainSelect = (PlainSelect) select;
         assertSame(plainSelect.getForMode(), ForMode.UPDATE);
         assertTrue(plainSelect.isSkipLocked());
@@ -5594,7 +5595,7 @@ public class SelectTest {
         String sql = "SELECT * FROM test FOR UPDATE";
         assertSqlCanBeParsedAndDeparsed(sql);
 
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         PlainSelect plainSelect = (PlainSelect) select;
         assertSame(plainSelect.getForMode(), ForMode.UPDATE);
         assertFalse(plainSelect.isSkipLocked());
@@ -5606,7 +5607,7 @@ public class SelectTest {
         String sql = "SELECT * FROM test";
         assertSqlCanBeParsedAndDeparsed(sql);
 
-        Select select = (Select) CCJSqlParserUtil.parse(sql);
+        Select select = (Select) SmartQLEngine.parse(sql);
         PlainSelect plainSelect = (PlainSelect) select;
         assertNull(plainSelect.getForMode());
         assertFalse(plainSelect.isSkipLocked());
@@ -5657,7 +5658,7 @@ public class SelectTest {
     @Test
     void testSubSelectParsing() throws JSQLParserException {
         String sqlStr = "(SELECT id FROM table1 WHERE find_in_set(100, ancestors))";
-        Select select = (Select) CCJSqlParserUtil.parse(sqlStr);
+        Select select = (Select) SmartQLEngine.parse(sqlStr);
 
         InExpression inExpression = new InExpression();
         inExpression.setLeftExpression(new Column("id"));
@@ -5718,7 +5719,7 @@ public class SelectTest {
     @Test
     void testOracleHavingBeforeGroupBy() throws JSQLParserException {
         String sqlStr = "SELECT id from a having count(*) > 1 group by id";
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
 
         Assertions.assertEquals("count(*) > 1", select.getHaving().toString());
         Assertions.assertEquals("GROUP BY id", select.getGroupBy().toString());
@@ -5738,7 +5739,7 @@ public class SelectTest {
     @Test
     void testInnerJoin() throws JSQLParserException {
         String sqlStr = "SELECT 1 from a inner join b on a.id=b.id";
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
 
         Join join = select.getJoins().get(0);
 
@@ -5782,17 +5783,17 @@ public class SelectTest {
     @Test
     void testBackSlashQuotationIssue1812() throws JSQLParserException {
         String sqlStr = "SELECT ('\\'', 'a')";
-        Statement stmt2 = CCJSqlParserUtil.parse(
+        Statement stmt2 = SmartQLEngine.parse(
                 sqlStr, parser -> parser
                         .withBackslashEscapeCharacter(true));
 
         sqlStr = "INSERT INTO recycle_record (a,f) VALUES ('\\'anything', 'abc');";
-        stmt2 = CCJSqlParserUtil.parse(
+        stmt2 = SmartQLEngine.parse(
                 sqlStr, parser -> parser
                         .withBackslashEscapeCharacter(true));
 
         sqlStr = "INSERT INTO recycle_record (a,f) VALUES ('\\'','83653692186728700711687663398101');";
-        stmt2 = CCJSqlParserUtil.parse(
+        stmt2 = SmartQLEngine.parse(
                 sqlStr, parser -> parser
                         .withBackslashEscapeCharacter(true));
     }

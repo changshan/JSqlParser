@@ -9,8 +9,8 @@
  */
 package net.sf.jsqlparser.statement;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.test.TestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +44,7 @@ public class BlockTest {
 
     @Test
     public void testBlock3() throws JSQLParserException {
-        Statements stmts = CCJSqlParserUtil.parseStatements("begin\nselect * from feature;\nend");
+        Statements stmts = SmartQLEngine.parseStatements("begin\nselect * from feature;\nend");
         Block block = (Block) stmts.getStatements().get(0);
         assertFalse(block.getStatements().getStatements().isEmpty());
     }
@@ -75,7 +75,7 @@ public class BlockTest {
                          + "update table1 set a = 'xx' where b = 'condition2';\n"
                          + "end;";
 
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr2);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr2);
         for (Statement stm : statements.getStatements()) {
             TestUtils.assertDeparse(stm, sqlStr2, true);
         }

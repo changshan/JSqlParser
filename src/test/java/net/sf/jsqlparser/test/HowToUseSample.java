@@ -9,6 +9,10 @@
  */
 package net.sf.jsqlparser.test;
 
+import com.xiaomi.smartql.parser.ParseException;
+import com.xiaomi.smartql.parser.SmartQLEngine;
+import com.xiaomi.smartql.parser.SmartQLParser;
+import com.xiaomi.smartql.parser.Token;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -18,9 +22,6 @@ import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -96,7 +97,7 @@ public class HowToUseSample {
     public void howToParseStatementDeprecated() throws JSQLParserException {
         String sqlStr = "select 1 from dual where a=b";
 
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         if (statement instanceof Select) {
             Select select = (Select) statement;
             PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
@@ -116,7 +117,7 @@ public class HowToUseSample {
     public void howToParseStatement() throws JSQLParserException {
         String sqlStr = "select 1 from dual where a=b";
 
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
 
         SelectItem selectItem =
                 select.getSelectItems().get(0);
@@ -166,7 +167,7 @@ public class HowToUseSample {
         };
 
         String sqlStr = "select 1 from dual where a=b";
-        Statement stmt = CCJSqlParserUtil.parse(sqlStr);
+        Statement stmt = SmartQLEngine.parse(sqlStr);
 
         // Invoke the Statement Visitor
         stmt.accept(statementVisitor);
@@ -179,21 +180,21 @@ public class HowToUseSample {
 
         // T-SQL Square Bracket Quotation
         Statement stmt =
-                CCJSqlParserUtil.parse(sqlStr, parser -> parser.withSquareBracketQuotation(true));
+                SmartQLEngine.parse(sqlStr, parser -> parser.withSquareBracketQuotation(true));
 
         // Set Parser Timeout to 6000 ms
-        Statement stmt1 = CCJSqlParserUtil.parse(sqlStr,
+        Statement stmt1 = SmartQLEngine.parse(sqlStr,
                 parser -> parser.withSquareBracketQuotation(true).withTimeOut(6000));
 
         // Allow Complex Parsing (which allows nested Expressions, but is much slower)
-        Statement stmt2 = CCJSqlParserUtil.parse(sqlStr, parser -> parser
+        Statement stmt2 = SmartQLEngine.parse(sqlStr, parser -> parser
                 .withSquareBracketQuotation(true).withAllowComplexParsing(true).withTimeOut(6000));
     }
 
     @Test
     public void showBracketHandling() throws JSQLParserException {
         String sqlStr = " ( (values(1,2), (3,4)) UNION (values((1,2), (3,4))) )";
-        Statement statement = CCJSqlParserUtil.parse(sqlStr);
+        Statement statement = SmartQLEngine.parse(sqlStr);
         final String reflectionString = TestUtils.toReflectionString(statement);
 
         System.out.println(reflectionString);
@@ -203,7 +204,7 @@ public class HowToUseSample {
     void migrationTest1() throws JSQLParserException {
         String sqlStr = "VALUES ( 1, 2, 3 )";
 
-        Values values = (Values) CCJSqlParserUtil.parse(sqlStr);
+        Values values = (Values) SmartQLEngine.parse(sqlStr);
         Assertions.assertEquals(3, values.getExpressions().size());
     }
 
@@ -212,7 +213,7 @@ public class HowToUseSample {
         String sqlStr = "SELECT *\n" +
                 "        FROM ( VALUES 1, 2, 3 )";
 
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
         ParenthesedSelect subSelect = (ParenthesedSelect) select.getFromItem();
         Values values = (Values) subSelect.getSelect();
         Assertions.assertEquals(3, values.getExpressions().size());
@@ -225,7 +226,7 @@ public class HowToUseSample {
                 "                , b\n" +
                 "                , c ) = ( VALUES 1, 2, 3 )";
 
-        Update update = (Update) CCJSqlParserUtil.parse(sqlStr);
+        Update update = (Update) SmartQLEngine.parse(sqlStr);
         UpdateSet updateSet = update.getUpdateSets().get(0);
         ParenthesedSelect subSelect = (ParenthesedSelect) updateSet.getValues().get(0);
         Values values = (Values) subSelect.getSelect();
@@ -238,7 +239,7 @@ public class HowToUseSample {
                 "        VALUES ( 1, 2, 3 )\n" +
                 "        ;";
 
-        Insert insert = (Insert) CCJSqlParserUtil.parse(sqlStr);
+        Insert insert = (Insert) SmartQLEngine.parse(sqlStr);
         Values values = (Values) insert.getSelect();
         Assertions.assertEquals(3, values.getExpressions().size());
     }
@@ -251,7 +252,7 @@ public class HowToUseSample {
                 "                    , b\n" +
                 "                    , c";
 
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
         Function function = (Function) select.getSelectItem(0).getExpression();
         Assertions.assertEquals(3, function.getParameters().size());
 
@@ -270,7 +271,7 @@ public class HowToUseSample {
                 "    UNION ALL\n" +
                 "    VALUES ( 1, 2, 3 ) )";
 
-        ParenthesedSelect parenthesedSelect = (ParenthesedSelect) CCJSqlParserUtil.parse(sqlStr);
+        ParenthesedSelect parenthesedSelect = (ParenthesedSelect) SmartQLEngine.parse(sqlStr);
         SetOperationList setOperationList = parenthesedSelect.getSetOperationList();
 
         PlainSelect select1 = (PlainSelect) setOperationList.getSelect(0);
@@ -291,7 +292,7 @@ public class HowToUseSample {
                 "                    ON b.d = c.d )\n" +
                 "    ON a.e = b.e";
 
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
         Table aTable = (Table) select.getFromItem();
 
         ParenthesedFromItem fromItem = (ParenthesedFromItem) select.getJoin(0).getFromItem();
@@ -307,7 +308,7 @@ public class HowToUseSample {
     void migrationTest8() throws JSQLParserException {
         String sqlStr = "SELECT ( ( 1, 2, 3 ), ( 4, 5, 6 ), ( 7, 8, 9 ) )";
 
-        PlainSelect select = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect select = (PlainSelect) SmartQLEngine.parse(sqlStr);
         ParenthesedExpressionList<?> expressionList =
                 (ParenthesedExpressionList<?>) select.getSelectItem(0).getExpression();
 
@@ -326,7 +327,7 @@ public class HowToUseSample {
                 "                    , 3 )\n" +
                 "    , d = 4";
 
-        Update update = (Update) CCJSqlParserUtil.parse(sqlStr);
+        Update update = (Update) SmartQLEngine.parse(sqlStr);
         UpdateSet updateSet1 = update.getUpdateSet(0);
         Assertions.assertEquals(3, updateSet1.getColumns().size());
         Assertions.assertEquals(3, updateSet1.getValues().size());
@@ -477,7 +478,7 @@ public class HowToUseSample {
         long startMillis = System.currentTimeMillis();
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         for (int i = 1; i < 1; i++) {
-            final CCJSqlParser parser = new CCJSqlParser(sqlStr)
+            final SmartQLParser parser = new SmartQLParser(sqlStr)
                     .withSquareBracketQuotation(false)
                     .withAllowComplexParsing(true)
                     .withBackslashEscapeCharacter(false);
@@ -499,7 +500,7 @@ public class HowToUseSample {
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ParseException) {
                     ParseException parseException = (ParseException) e.getCause();
-                    net.sf.jsqlparser.parser.Token token = parseException.currentToken.next;
+                    Token token = parseException.currentToken.next;
                     throw new JSQLParserException(
                             "Failed to parse statement at Token " + token.image);
                 }

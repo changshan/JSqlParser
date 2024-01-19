@@ -9,8 +9,8 @@
  */
 package net.sf.jsqlparser.expression;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ public class LikeExpressionTest {
         Assertions.assertThrows(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                CCJSqlParserUtil.parse(
+                SmartQLEngine.parse(
                         sqlStr
                         , parser -> parser.withBackslashEscapeCharacter(true)
                 );

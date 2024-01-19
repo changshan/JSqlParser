@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
+import com.xiaomi.smartql.parser.SmartQLParser;
 import com.xiaomi.smartql.parser.StatementListener;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -43,7 +45,7 @@ import net.sf.jsqlparser.test.MemoryLeakVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class CCJSqlParserUtilTest {
+public class SmartQLEngineTest {
 
     private final static String INVALID_SQL = ""
             + "SELECT * FROM TABLE_1 t1\n"
@@ -84,7 +86,7 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseExpression() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("a+b");
+        Expression result = SmartQLEngine.parseExpression("a+b");
         assertEquals("a + b", result.toString());
         assertTrue(result instanceof Addition);
         Addition add = (Addition) result;
@@ -94,7 +96,7 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseExpression2() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("2*(a+6.0)");
+        Expression result = SmartQLEngine.parseExpression("2*(a+6.0)");
         assertEquals("2 * (a + 6.0)", result.toString());
         assertTrue(result instanceof Multiplication);
         Multiplication mult = (Multiplication) result;
@@ -105,42 +107,42 @@ public class CCJSqlParserUtilTest {
     @Test
     public void testParseExpressionNonPartial() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil.parseExpression("a+", false));
+                () -> SmartQLEngine.parseExpression("a+", false));
 
     }
 
     @Test
     public void testParseExpressionFromStringFail() throws Exception {
-        assertThrows(JSQLParserException.class, () -> CCJSqlParserUtil.parse("whatever$"));
+        assertThrows(JSQLParserException.class, () -> SmartQLEngine.parse("whatever$"));
     }
 
     @Test
     public void testParseExpressionFromRaderFail() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil.parse(new StringReader("whatever$")));
+                () -> SmartQLEngine.parse(new StringReader("whatever$")));
     }
 
     @Test
     public void testParseExpressionNonPartial2() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("a+", true);
+        Expression result = SmartQLEngine.parseExpression("a+", true);
         assertEquals("a", result.toString());
     }
 
     @Test
     public void testParseCondExpression() throws Exception {
-        Expression result = CCJSqlParserUtil.parseCondExpression("a+b>5 and c<3");
+        Expression result = SmartQLEngine.parseCondExpression("a+b>5 and c<3");
         assertEquals("a + b > 5 AND c < 3", result.toString());
     }
 
     @Test
     public void testParseCondExpressionFail() throws Exception {
-        assertThrows(JSQLParserException.class, () -> CCJSqlParserUtil.parseCondExpression(";"));
+        assertThrows(JSQLParserException.class, () -> SmartQLEngine.parseCondExpression(";"));
     }
 
     @Test
     public void testParseFromStreamFail() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil
+                () -> SmartQLEngine
                         .parse(new ByteArrayInputStream("BLA".getBytes(StandardCharsets.UTF_8))));
 
     }
@@ -148,7 +150,7 @@ public class CCJSqlParserUtilTest {
     @Test
     public void testParseFromStreamWithEncodingFail() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil.parse(
+                () -> SmartQLEngine.parse(
                         new ByteArrayInputStream("BLA".getBytes(StandardCharsets.UTF_8)),
                         StandardCharsets.UTF_8.name()));
 
@@ -156,32 +158,32 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseCondExpressionNonPartial() throws Exception {
-        Expression result = CCJSqlParserUtil.parseCondExpression("x=92 and y=29", false);
+        Expression result = SmartQLEngine.parseCondExpression("x=92 and y=29", false);
         assertEquals("x = 92 AND y = 29", result.toString());
     }
 
     @Test
     public void testParseCondExpressionNonPartial2() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil.parseCondExpression("x=92 lasd y=29", false));
+                () -> SmartQLEngine.parseCondExpression("x=92 lasd y=29", false));
     }
 
     @Test
     public void testParseCondExpressionPartial2() throws Exception {
-        Expression result = CCJSqlParserUtil.parseCondExpression("x=92 lasd y=29", true);
+        Expression result = SmartQLEngine.parseCondExpression("x=92 lasd y=29", true);
         assertEquals("x = 92", result.toString());
     }
 
     @Test
     public void testParseCondExpressionIssue471() throws Exception {
-        Expression result = CCJSqlParserUtil
+        Expression result = SmartQLEngine
                 .parseCondExpression("(SSN,SSM) IN ('11111111111111', '22222222222222')");
         assertEquals("(SSN, SSM) IN ('11111111111111', '22222222222222')", result.toString());
     }
 
     @Test
     public void testParseStatementsIssue691() throws Exception {
-        Statements result = CCJSqlParserUtil.parseStatements(
+        Statements result = SmartQLEngine.parseStatements(
                 "select * from dual;\n"
                         + "\n"
                         + "select\n"
@@ -200,7 +202,7 @@ public class CCJSqlParserUtilTest {
     public void testStreamStatementsIssue777() throws Exception {
         final List<Statement> list = new ArrayList<>();
 
-        CCJSqlParserUtil.streamStatements(new StatementListener() {
+        SmartQLEngine.streamStatements(new StatementListener() {
             @Override
             public void accept(Statement statement) {
                 list.add(statement);
@@ -226,7 +228,7 @@ public class CCJSqlParserUtilTest {
         assertDoesNotThrow(new Executable() {
             @Override
             public void execute() throws Throwable {
-                final Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+                final Statements statements = SmartQLEngine.parseStatements(sqlStr);
                 assertEquals(2, statements.size());
                 assertTrue(statements.get(0) instanceof PlainSelect);
                 assertTrue(statements.get(1) instanceof UnsupportedStatement);
@@ -237,12 +239,12 @@ public class CCJSqlParserUtilTest {
     @Test
     public void testParseASTFail() throws Exception {
         assertThrows(JSQLParserException.class,
-                () -> CCJSqlParserUtil.parseAST("select * from dual;WHATEVER!!"));
+                () -> SmartQLEngine.parseAST("select * from dual;WHATEVER!!"));
     }
 
     @Test
     public void testParseStatementsIssue691_2() throws Exception {
-        Statements result = CCJSqlParserUtil.parseStatements(
+        Statements result = SmartQLEngine.parseStatements(
                 "select * from dual;\n"
                         + "---test");
         assertEquals("SELECT * FROM dual;\n", result.toString());
@@ -250,7 +252,7 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseStatementIssue742() throws Exception {
-        Statements result = CCJSqlParserUtil.parseStatements("CREATE TABLE `table_name` (\n"
+        Statements result = SmartQLEngine.parseStatements("CREATE TABLE `table_name` (\n"
                 + "  `id` bigint(20) NOT NULL AUTO_INCREMENT,\n"
                 + "  `another_column_id` bigint(20) NOT NULL COMMENT 'column id as sent by SYSTEM',\n"
                 + "  PRIMARY KEY (`id`),\n"
@@ -265,20 +267,20 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseExpressionIssue982() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("tab.col");
+        Expression result = SmartQLEngine.parseExpression("tab.col");
         assertEquals("tab.col", result.toString());
     }
 
     @Test
     public void testParseExpressionWithBracketsIssue1159() throws Exception {
-        Expression result = CCJSqlParserUtil.parseExpression("[travel_data].[travel_id]", false,
+        Expression result = SmartQLEngine.parseExpression("[travel_data].[travel_id]", false,
                 parser -> parser.withSquareBracketQuotation(true));
         assertEquals("[travel_data].[travel_id]", result.toString());
     }
 
     @Test
     public void testParseExpressionWithBracketsIssue1159_2() throws Exception {
-        Expression result = CCJSqlParserUtil.parseCondExpression("[travel_data].[travel_id]", false,
+        Expression result = SmartQLEngine.parseCondExpression("[travel_data].[travel_id]", false,
                 parser -> parser.withSquareBracketQuotation(true));
         assertEquals("[travel_data].[travel_id]", result.toString());
     }
@@ -286,10 +288,10 @@ public class CCJSqlParserUtilTest {
     @Test
     public void testNestingDepth() throws Exception {
         assertEquals(2,
-                CCJSqlParserUtil.getNestingDepth("SELECT concat(concat('A','B'),'B') FROM mytbl"));
-        assertEquals(20, CCJSqlParserUtil.getNestingDepth(
+                SmartQLEngine.getNestingDepth("SELECT concat(concat('A','B'),'B') FROM mytbl"));
+        assertEquals(20, SmartQLEngine.getNestingDepth(
                 "concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat(concat('A','B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B'),'B') FROM mytbl"));
-        assertEquals(4, CCJSqlParserUtil.getNestingDepth(""
+        assertEquals(4, SmartQLEngine.getNestingDepth(""
                 + "-- MERGE 1\n"
                 + "MERGE INTO cfe.impairment imp\n" + "    USING ( WITH x AS (\n"
                 + "                    SELECT  a.id_instrument\n"
@@ -324,7 +326,7 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testParseStatementIssue1250() throws Exception {
-        Statement result = CCJSqlParserUtil.parse(
+        Statement result = SmartQLEngine.parse(
                 "Select test.* from (Select * from sch.PERSON_TABLE // root test\n) as test");
         assertEquals("SELECT test.* FROM (SELECT * FROM sch.PERSON_TABLE) AS test",
                 result.toString());
@@ -332,21 +334,21 @@ public class CCJSqlParserUtilTest {
 
     @Test
     public void testCondExpressionIssue1482() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil
+        Expression expr = SmartQLEngine
                 .parseCondExpression("test_table_enum.f1_enum IN ('TEST2'::test.test_enum)", false);
         assertEquals("test_table_enum.f1_enum IN ('TEST2'::test.test_enum)", expr.toString());
     }
 
     @Test
     public void testTableStatementIssue1836() throws JSQLParserException {
-        TableStatement expr = (TableStatement) CCJSqlParserUtil
+        TableStatement expr = (TableStatement) SmartQLEngine
                 .parse("TABLE columns ORDER BY column_name LIMIT 10 OFFSET 10");
         assertEquals("TABLE columns ORDER BY column_name LIMIT 10 OFFSET 10", expr.toString());
     }
 
     @Test
     public void testCondExpressionIssue1482_2() throws JSQLParserException {
-        Expression expr = CCJSqlParserUtil.parseCondExpression(
+        Expression expr = SmartQLEngine.parseCondExpression(
                 "test_table_enum.f1_enum IN ('TEST2'::test.\"test_enum\")", false);
         assertEquals("test_table_enum.f1_enum IN ('TEST2'::test.\"test_enum\")", expr.toString());
     }
@@ -372,11 +374,11 @@ public class CCJSqlParserUtilTest {
                 public void run() {
 
                     try {
-                        CCJSqlParser parser =
-                                CCJSqlParserUtil.newParser(INVALID_SQL)
+                        SmartQLParser parser =
+                                SmartQLEngine.newParser(INVALID_SQL)
                                         .withAllowComplexParsing(true);
                         verifier.addObject(parser);
-                        CCJSqlParserUtil.parseStatement(parser, timeOutService);
+                        SmartQLEngine.parseStatement(parser, timeOutService);
                     } catch (JSQLParserException ignore) {
                         // We expected that to happen.
                     }
@@ -423,7 +425,7 @@ public class CCJSqlParserUtilTest {
             @Override
             public void execute() throws Throwable {
                 try {
-                    CCJSqlParserUtil.parse(sqlStr);
+                    SmartQLEngine.parse(sqlStr);
                 } catch (JSQLParserException ex) {
                     assertTrue(ex.getCause() instanceof TimeoutException);
                     throw ex;
@@ -439,7 +441,7 @@ public class CCJSqlParserUtilTest {
             @Override
             public void execute() throws Throwable {
                 try {
-                    CCJSqlParserUtil.parse(sqlStr, parser -> {
+                    SmartQLEngine.parse(sqlStr, parser -> {
                         parser.withTimeOut(60000);
                         parser.withAllowComplexParsing(false);
                     });
@@ -455,18 +457,18 @@ public class CCJSqlParserUtilTest {
     @Test
     void testComplexIssue1792() throws JSQLParserException {
         ExecutorService executorService = Executors.newCachedThreadPool();
-        CCJSqlParserUtil.LOGGER.setLevel(Level.ALL);
+        SmartQLEngine.LOGGER.setLevel(Level.ALL);
 
         // Expect to fail fast with SIMPLE Parsing only when COMPLEX is not allowed
         // No TIMEOUT Exception shall be thrown
-        // CCJSqlParserUtil.LOGGER will report:
+        // SmartQLEngine.LOGGER will report:
         // 1) Allowed Complex Parsing: false
         // 2) Trying SIMPLE parsing only
         assertThrows(JSQLParserException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
                 try {
-                    CCJSqlParserUtil.parse(INVALID_SQL, executorService, parser -> {
+                    SmartQLEngine.parse(INVALID_SQL, executorService, parser -> {
                         parser.withTimeOut(10000);
                         parser.withAllowComplexParsing(false);
                     });
@@ -478,7 +480,7 @@ public class CCJSqlParserUtilTest {
         });
 
         // Expect to time-out with COMPLEX Parsing allowed
-        // CCJSqlParserUtil.LOGGER will report:
+        // SmartQLEngine.LOGGER will report:
         // 1) Allowed Complex Parsing: true
         // 2) Trying SIMPLE parsing first
         // 3) Trying COMPLEX parsing when SIMPLE parsing failed
@@ -486,7 +488,7 @@ public class CCJSqlParserUtilTest {
             @Override
             public void execute() throws Throwable {
                 try {
-                    CCJSqlParserUtil.parse(INVALID_SQL, executorService, parser -> {
+                    SmartQLEngine.parse(INVALID_SQL, executorService, parser -> {
                         parser.withTimeOut(1000);
                         parser.withAllowComplexParsing(true);
                     });
@@ -497,7 +499,7 @@ public class CCJSqlParserUtilTest {
             }
         });
         executorService.shutdownNow();
-        CCJSqlParserUtil.LOGGER.setLevel(Level.OFF);
+        SmartQLEngine.LOGGER.setLevel(Level.OFF);
     }
 
     @Test
@@ -507,6 +509,6 @@ public class CCJSqlParserUtilTest {
                 " concat('{','\"dffs\":\"',if(dffs is null,'',cast(dffs as string),'\",\"djr\":\"',if(djr is null,'',cast(djr as string),'\",\"djrq\":\"',if(djrq is null,'',cast(djrq as string),'\",\"thjssj\":\"',if(thjssj is null,'',cast(thjssj as string),'\",\"thkssj\":\"',if(thkssj is null,'',cast(thkssj as string),'\",\"sjc\":\"',if(sjc is null,'',cast(sjc as string),'\",\"ldhm\":\"',if(ldhm is null,'',cast(ldhm as string),'\",\"lxdh\":\"',if(lxdh is null,'',cast(lxdh as string),'\",\"md\":\"',if(md is null,'',cast(md as string),'\",\"nr\":\"',if(nr is null,'',cast(nr as string),'\",\"nrfl\":\"',if(nrfl is null,'',cast(nrfl as string),'\",\"nrwjid\":\"',if(nrwjid is null,'',cast(nrwjid as string),'\",\"sfbm\":\"',if(sfbm is null,'',cast(sfbm as string),'\",\"sjly\":\"',if(sjly is null,'',cast(sjly as string),'\",\"wtsd\":\"',if(wtsd is null,'',cast(wtsd as string),'\",\"xb\":\"',if(xb is null,'',cast(xb as string),'\",\"xfjbh\":\"',if(xfjbh is null,'',cast(xfjbh as string),'\",\"xfjid\":\"',if(xfjid is null,'',cast(xfjid as string),'\",\"xm\":\"',if(xm is null,'',cast(xm as string),'\",\"zhut\":\"',if(zhut is null,'',cast(zhut as string),'\",\"zt\":\"',if(zt is null,'',cast(zt as string),'\"}')\n"
                 +
                 " from tab";
-        assertEquals(1122, CCJSqlParserUtil.getUnbalancedPosition(sqlStr));
+        assertEquals(1122, SmartQLEngine.getUnbalancedPosition(sqlStr));
     }
 }

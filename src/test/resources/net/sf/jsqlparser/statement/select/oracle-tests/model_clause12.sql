@@ -28,3 +28,4 @@ level4[any] = case when org_level[cv()] = 4 then ename [cv()] end )
 
 --@FAILURE: Encountered unexpected token: "return" <S_IDENTIFIER> recorded first on Aug 3, 2021, 7:20:08 AM
 --@FAILURE: Encountered unexpected token: "return" "RETURN" recorded first on 9 Dec 2023, 18:20:45
+--@FAILURE: Encountered unexpected token: "connect" "CONNECT" recorded first on Jan 19, 2024 10:43:22 PM

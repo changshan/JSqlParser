@@ -16,10 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
+
+import com.xiaomi.smartql.parser.ParseException;
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.view.AutoRefreshOption;
 import net.sf.jsqlparser.statement.create.view.CreateView;
@@ -166,7 +167,7 @@ public class CreateViewTest {
     public void testCreateViewAutoFails() {
         String stmt = "CREATE VIEW myview AUTO AS SELECT * FROM mytab";
 
-        ThrowingCallable throwingCallable = () -> CCJSqlParserUtil.parse(stmt);
+        ThrowingCallable throwingCallable = () -> SmartQLEngine.parse(stmt);
 
         assertThatThrownBy(throwingCallable).isInstanceOf(JSQLParserException.class)
                 .hasRootCauseInstanceOf(ParseException.class).rootCause()
@@ -177,7 +178,7 @@ public class CreateViewTest {
     public void testCreateViewRefreshFails() {
         String stmt = "CREATE VIEW myview REFRESH AS SELECT * FROM mytab";
 
-        ThrowingCallable throwingCallable = () -> CCJSqlParserUtil.parse(stmt);
+        ThrowingCallable throwingCallable = () -> SmartQLEngine.parse(stmt);
 
         assertThatThrownBy(throwingCallable).isInstanceOf(JSQLParserException.class)
                 .hasRootCauseInstanceOf(ParseException.class).rootCause()
@@ -188,7 +189,7 @@ public class CreateViewTest {
     public void testCreateViewAutoRefreshFails() {
         String stmt = "CREATE VIEW myview AUTO REFRESH AS SELECT * FROM mytab";
 
-        ThrowingCallable throwingCallable = () -> CCJSqlParserUtil.parse(stmt);
+        ThrowingCallable throwingCallable = () -> SmartQLEngine.parse(stmt);
 
         assertThatThrownBy(throwingCallable).isInstanceOf(JSQLParserException.class)
                 .hasRootCauseInstanceOf(ParseException.class).rootCause()

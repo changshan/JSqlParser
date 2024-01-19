@@ -9,9 +9,9 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.JsonExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -81,7 +81,7 @@ public class PostgresTest {
                         + "SELECT \"column\"\"with\"\"quotes\" FROM  \"table\"\"with\"\"quotes\"\n"
                         + "WHERE \"column\"\"with\"\"quotes\" IS NOT NULL;";
 
-        Statements statements = CCJSqlParserUtil.parseStatements(sqlStr);
+        Statements statements = SmartQLEngine.parseStatements(sqlStr);
         Assertions.assertEquals(3, statements.size());
 
         Insert insert = statements.get(Insert.class, 0);

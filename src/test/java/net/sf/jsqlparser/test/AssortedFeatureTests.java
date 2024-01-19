@@ -9,10 +9,10 @@
  */
 package net.sf.jsqlparser.test;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.util.deparser.ExpressionDeParser;
 import net.sf.jsqlparser.util.deparser.SelectDeParser;
@@ -44,7 +44,7 @@ public class AssortedFeatureTests {
 
         StatementDeParser stmtDeparser = new StatementDeParser(expr, selectDeparser, buffer);
 
-        Statement stmt = CCJSqlParserUtil.parse(sql);
+        Statement stmt = SmartQLEngine.parse(sql);
 
         stmt.accept(stmtDeparser);
         return stmtDeparser.getBuffer().toString();

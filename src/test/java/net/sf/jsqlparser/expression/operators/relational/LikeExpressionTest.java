@@ -9,10 +9,10 @@
  */
 package net.sf.jsqlparser.expression.operators.relational;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.test.TestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ public class LikeExpressionTest {
     @Test
     public void testSetEscapeAndGetStringExpression() throws JSQLParserException {
         LikeExpression instance =
-                (LikeExpression) CCJSqlParserUtil.parseExpression("name LIKE 'J%$_%'");
+                (LikeExpression) SmartQLEngine.parseExpression("name LIKE 'J%$_%'");
         // escape character should be $
         Expression instance2 = new StringValue("$");
         instance.setEscape(instance2);

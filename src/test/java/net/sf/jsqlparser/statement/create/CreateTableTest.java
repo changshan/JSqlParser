@@ -9,11 +9,11 @@
  */
 package net.sf.jsqlparser.statement.create;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -181,7 +181,7 @@ public class CreateTableTest {
                         + ")";
 
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
-        assertTrue(CCJSqlParserUtil.parseStatements(sqlStr).getStatements()
+        assertTrue(SmartQLEngine.parseStatements(sqlStr).getStatements()
                 .get(0) instanceof CreateTable);
     }
 
@@ -202,7 +202,7 @@ public class CreateTableTest {
         assertSqlCanBeParsedAndDeparsed(sqlStr, true);
 
         CreateTable createTable =
-                (CreateTable) CCJSqlParserUtil.parseStatements(sqlStr).getStatements().get(0);
+                (CreateTable) SmartQLEngine.parseStatements(sqlStr).getStatements().get(0);
 
         assertEquals("PRIMARY KEY", createTable.getIndexes().get(0).getType());
         assertEquals("UNIQUE", createTable.getIndexes().get(1).getType());
@@ -735,7 +735,7 @@ public class CreateTableTest {
         String sql =
                 "CREATE TABLE test (id int (11) NOT NULL, name varchar (64) CHARACTER SET GBK NOT NULL, age int (11) NOT NULL, score decimal (8, 2) DEFAULT NULL, description varchar (64) DEFAULT NULL, creationDate datetime DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4";
         assertSqlCanBeParsedAndDeparsed(sql);
-        CreateTable stmt = (CreateTable) CCJSqlParserUtil.parse(sql);
+        CreateTable stmt = (CreateTable) SmartQLEngine.parse(sql);
 
         ColumnDefinition colName = stmt.getColumnDefinitions().stream()
                 .filter(col -> col.getColumnName().equals("name"))
@@ -808,7 +808,7 @@ public class CreateTableTest {
     public void testEnableRowMovementOption() throws JSQLParserException {
         String sql = "CREATE TABLE test (startdate DATE) ENABLE ROW MOVEMENT";
 
-        CreateTable createTable = (CreateTable) CCJSqlParserUtil.parse(sql);
+        CreateTable createTable = (CreateTable) SmartQLEngine.parse(sql);
         Assertions.assertThat(createTable.getRowMovement()).isNotNull();
         Assertions.assertThat(createTable.getRowMovement().getMode())
                 .isEqualTo(RowMovementMode.ENABLE);
@@ -820,7 +820,7 @@ public class CreateTableTest {
     public void testDisableRowMovementOption() throws JSQLParserException {
         String sql = "CREATE TABLE test (startdate DATE) DISABLE ROW MOVEMENT";
 
-        CreateTable createTable = (CreateTable) CCJSqlParserUtil.parse(sql);
+        CreateTable createTable = (CreateTable) SmartQLEngine.parse(sql);
         Assertions.assertThat(createTable.getRowMovement()).isNotNull();
         Assertions.assertThat(createTable.getRowMovement().getMode())
                 .isEqualTo(RowMovementMode.DISABLE);

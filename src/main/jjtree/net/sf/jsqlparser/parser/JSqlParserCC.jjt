@@ -125,13 +125,13 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 {
     <K_ABSENT: "ABSENT">
 |   <K_ACTION: "ACTION">
-|   <K_ACTIVE: "ACTIVE">
+/*|   <K_ACTIVE: "ACTIVE">*/
 |   <K_ADD:"ADD">
 |   <K_ADVANCE:"ADVANCE">
-|   <K_ADVISE:"ADVISE">
+/*|   <K_ADVISE:"ADVISE">*/
 |   <K_AGAINST:"AGAINST">
 |   <K_ALGORITHM: "ALGORITHM">
-|   <K_ALL:"ALL">
+/*|   <K_ALL:"ALL">*/
 |   <K_ALTER:"ALTER">
 |   <K_ANALYZE:"ANALYZE">
 |   <K_AND:"AND">
@@ -166,7 +166,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CHARACTER:"CHARACTER">
 |   <K_CHANGE:"CHANGE">
 |   <K_CHANGES:"CHANGES">
-|   <K_CHECK:"CHECK">
+/*|   <K_CHECK:"CHECK">*/
 |   <K_CHECKPOINT:"CHECKPOINT">
 |   <K_CHAR:"CHAR">
 |   <K_CLOSE:"CLOSE">
@@ -187,10 +187,11 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_CROSS:"CROSS">
 |   <K_CURRENT: "CURRENT">
 |   <K_CYCLE:"CYCLE">
-|   <K_DATABASE:"DATABASE">
+/*|   <K_DATABASE:"DATABASE">*/
 |   <K_DATA:"DATA">
 |   <K_DECLARE: "DECLARE">
-|   <K_DATETIMELITERAL : ("DATE" | "TIME" | "TIMESTAMP" | "TIMESTAMPTZ") >
+/*|   <K_DATETIMELITERAL : ("DATE" | "TIME" | "TIMESTAMP" | "TIMESTAMPTZ") >*/
+|   <K_DATETIMELITERAL : ("TIME" | "TIMESTAMP" | "TIMESTAMPTZ") >
 |   <K_DATE_LITERAL : ( "YEAR" | "MONTH" | "DAY" | "HOUR" | "MINUTE" | "SECOND" ) >
 |   <K_DBA_RECYCLEBIN: "DBA_RECYCLEBIN">
 |   <K_DEFAULT : "DEFAULT">
@@ -260,7 +261,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_IN:"IN">
 |   <K_INCLUDE:"INCLUDE">
 |   <K_INCLUDE_NULL_VALUES:"INCLUDE_NULL_VALUES">
-|   <K_INCREMENT:"INCREMENT">
+/*|   <K_INCREMENT:"INCREMENT">*/
 |   <K_INDEX: "INDEX">
 |   <K_INNER:"INNER">
 |   <K_STRAIGHT:"STRAIGHT_JOIN">
@@ -403,7 +404,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_SIZE:"SIZE">
 |   <K_SKIP: "SKIP">
 |   <K_SOME:"SOME">
-|   <K_START:"START">
+/*|   <K_START:"START"> */
 |   <K_STORED: "STORED">
 |   <K_STRING: "STRING">
 |   <K_SUSPEND:"SUSPEND">
@@ -418,11 +419,11 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_THEN:"THEN">
 |   <K_TEMP:"TEMP">
 |   <K_TEMPORARY:"TEMPORARY">
-|   <K_TIME_KEY_EXPR : (
+/*|   <K_TIME_KEY_EXPR : (
                          ("CURRENT" ( "_" | (" ")+ ) "TIMESTAMP")
                          | ("CURRENT" ( "_" | (" ")+ ) "TIME")
                          | ("CURRENT" ( "_" | (" ")+ ) "DATE")
-                       ) ( "()" )?>
+                       ) ( "()" )?>*/
 |   <K_TIMEOUT:"TIMEOUT">
 |   <K_TRIM:"TRIM">
 |   <K_TO:"TO">
@@ -435,6 +436,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_TYPE:"TYPE">
 |   <K_UNBOUNDED: "UNBOUNDED">
 |   <K_UNION:"UNION">
+|   <K_UNION_ALL:("UNION")(" ")+("ALL")>
 |   <K_UNIQUE:"UNIQUE">
 |   <K_UNLOGGED: "UNLOGGED">
 |   <K_UNPIVOT:"UNPIVOT">
@@ -478,6 +480,7 @@ TOKEN: /* SQL Keywords. prefixed with K_ to avoid name clashes */
 |   <K_YAML:"YAML">
 |   <K_YES:"YES">
 |   <K_ZONE:"ZONE">
+|   <K_ONE2ONE:("ONE")(" ")+("TO")(" ")+("ONE")>
 }
 
 TOKEN : /* Statement Separators */
@@ -504,7 +507,7 @@ TOKEN : /* Date/Time with time zones */
 
 TOKEN : /* Numeric Constants */
 {
-   < S_DOUBLE: ((<S_LONG>)? "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
+   < S_DOUBLE: ((<S_LONG>) "." <S_LONG> ( ["e","E"] (["+", "-"])? <S_LONG>)?
             |
             <S_LONG> "." (["e","E"] (["+", "-"])? <S_LONG>)?
             |
@@ -974,7 +977,7 @@ ResetStatement Reset(): {
     Token all;
 }
 {
-    <K_RESET> ( LOOKAHEAD(2) <K_DATETIMELITERAL> <K_ZONE> {name = "Time Zone"; } | name = RelObjectName() | all = <K_ALL> {name = all.image; } )
+    <K_RESET> ( LOOKAHEAD(2) <K_DATETIMELITERAL> <K_ZONE> {name = "Time Zone"; } | name = RelObjectName()/* | all = <K_ALL> {name = all.image; } */)
     { reset = new ResetStatement(name);   return reset; }
 }
 
@@ -1832,7 +1835,7 @@ The following tokens are allowed as Names for Schema, Table, Column and Aliases
 String RelObjectNameWithoutValue() :
 {    Token tk = null; }
 {
-    ( tk=<S_IDENTIFIER> | tk=<S_QUOTED_IDENTIFIER> |  tk=<K_DATE_LITERAL> | tk=<K_DATETIMELITERAL> | tk=<K_STRING_FUNCTION_NAME> | tk=<K_ISOLATION> | tk=<K_TIME_KEY_EXPR> 
+    ( tk=<S_IDENTIFIER> | tk=<S_QUOTED_IDENTIFIER> |  tk=<K_DATE_LITERAL> | tk=<K_DATETIMELITERAL> | tk=<K_STRING_FUNCTION_NAME> | tk=<K_ISOLATION> /*| tk=<K_TIME_KEY_EXPR> */
        | tk="ACTION" | tk="ACTIVE" | tk="ADD" | tk="ADVANCE" | tk="ADVISE" | tk="AGAINST" | tk="ALGORITHM" | tk="ALTER" | tk="ANALYZE" | tk="APPLY" | tk="ARCHIVE" | tk="ARRAY" | tk="ASC" | tk="AT" | tk="AUTHORIZATION" | tk="AUTO" | tk="BEGIN" | tk="BERNOULLI" | tk="BINARY" | tk="BIT" | tk="BLOCK" | tk="BROWSE" | tk="BUFFERS" | tk="BY" | tk="BYTE" | tk="BYTES" | tk="CACHE" | tk="CALL" | tk="CASCADE" | tk="CASE" | tk="CAST" | tk="CHANGE" | tk="CHANGES" | tk="CHAR" | tk="CHARACTER" | tk="CHECKPOINT" | tk="CLOSE" | tk="COLLATE" | tk="COLUMN" | tk="COLUMNS" | tk="COMMENT" | tk="COMMIT" | tk="CONCURRENTLY" | tk="CONFLICT" | tk="CONSTRAINTS" | tk="CONVERT" | tk="COSTS" | tk="CS" | tk="CYCLE" | tk="DATA" | tk="DATABASE" | tk="DDL" | tk="DECLARE" | tk="DEFAULT" | tk="DEFERRABLE" | tk="DELAYED" | tk="DELETE" | tk="DESC" | tk="DESCRIBE" | tk="DISABLE" | tk="DISCONNECT" | tk="DIV" | tk="DML" | tk="DO" | tk="DOMAIN" | tk="DROP" | tk="DUMP" | tk="DUPLICATE" | tk="ELEMENTS" | tk="EMIT" | tk="ENABLE" | tk="END" | tk="ESCAPE" | tk="EXCLUDE" | tk="EXEC" | tk="EXECUTE" | tk="EXPLAIN" | tk="EXPLICIT" | tk="EXTENDED" | tk="EXTRACT" | tk="FALSE" | tk="FILTER" | tk="FIRST" | tk="FLUSH" | tk="FN" | tk="FOLLOWING" | tk="FORMAT" | tk="FULLTEXT" | tk="FUNCTION" | tk="GRANT" | tk="GUARD" | tk="HASH" | tk="HISTORY" | tk="HOPPING" | tk="INCLUDE" | tk="INCREMENT" | tk="INDEX" | tk="INSERT" | tk="INTERLEAVE" | tk="INTERPRET" | tk="INVALIDATE" | tk="ISNULL" | tk="JSON" | tk="KEEP" | tk="KEY" | tk="KEYS" | tk="LAST" | tk="LEADING" | tk="LINK" | tk="LOCAL" | tk="LOCKED" | tk="LOG" | tk="LOOP" | tk="MATCH" | tk="MATCHED" | tk="MATERIALIZED" | tk="MAXVALUE" | tk="MEMBER" | tk="MERGE" | tk="MINVALUE" | tk="MODIFY" | tk="MOVEMENT" | tk="NEXT" | tk="NO" | tk="NOCACHE" | tk="NOKEEP" | tk="NOLOCK" | tk="NOMAXVALUE" | tk="NOMINVALUE" | tk="NOORDER" | tk="NOTHING" | tk="NOTNULL" | tk="NOVALIDATE" | tk="NOWAIT" | tk="NULLS" | tk="OF" | tk="OFF" | tk="OPEN" | tk="OVER" | tk="OVERLAPS" | tk="PARALLEL" | tk="PARENT" | tk="PARTITION" | tk="PATH" | tk="PERCENT" | tk="PLACING" | tk="PRECEDING" | tk="PRECISION" | tk="PRIMARY" | tk="PRIOR" | tk="PURGE" | tk="QUERY" | tk="QUICK" | tk="QUIESCE" | tk="RANGE" | tk="RAW" | tk="READ" | tk="RECYCLEBIN" | tk="REFERENCES" | tk="REFRESH" | tk="REGISTER" | tk="REMOTE" | tk="RENAME" | tk="REPEATABLE" | tk="REPLACE" | tk="RESET" | tk="RESTART" | tk="RESTRICT" | tk="RESTRICTED" | tk="RESUMABLE" | tk="RESUME" | tk="RETURN" | tk="RLIKE" | tk="ROLLBACK" | tk="ROLLUP" | tk="ROOT" | tk="ROW" | tk="ROWS" | tk="RR" | tk="RS" | tk="SAVEPOINT" | tk="SCHEMA" | tk="SEED" | tk="SEPARATOR" | tk="SEQUENCE" | tk="SESSION" | tk="SETS" | tk="SHARE" | tk="SHOW" | tk="SHUTDOWN" | tk="SIBLINGS" | tk="SIGNED" | tk="SIMILAR" | tk="SIZE" | tk="SKIP" | tk="STORED" | tk="STRING" | tk="SUSPEND" | tk="SWITCH" | tk="SYNONYM" | tk="SYSTEM" | tk="TABLE" | tk="TABLESPACE" | tk="TEMP" | tk="TEMPORARY" | tk="THEN" | tk="TIMEOUT" | tk="TIMESTAMPTZ" | tk="TO" | tk="TRIGGER" | tk="TRUE" | tk="TRUNCATE" | tk="TUMBLING" | tk="TYPE" | tk="UNLOGGED" | tk="UNQIESCE" | tk="UNSIGNED" | tk="UPDATE" | tk="UPSERT" | tk="UR" | tk="USER" | tk="VALIDATE" | tk="VERBOSE" | tk="VIEW" | tk="WAIT" | tk="WITHIN" | tk="WITHOUT" | tk="WORK" | tk="XML" | tk="XMLAGG" | tk="XMLDATA" | tk="XMLSCHEMA" | tk="XMLTEXT" | tk="XSINIL" | tk="YAML" | tk="YES" | tk="ZONE" )
     { return tk.image; }
 }
@@ -1845,7 +1848,7 @@ String RelObjectName() :
 {    Token tk = null; String result = null; }
 {
     (result = RelObjectNameWithoutValue()
-        | tk=<K_GROUP> | tk=<K_INTERVAL> | tk=<K_ON>  | tk=<K_START> | tk=<K_TOP> | tk=<K_VALUE>
+        | tk=<K_GROUP> | tk=<K_INTERVAL> | tk=<K_ON> | tk=<K_ORDER> |/* tk=<K_START> |*/ tk=<K_TOP> | tk=<K_VALUE>
         | tk=<K_VALUES> | tk=<K_CREATE> | tk=<K_TABLES> | tk=<K_CONNECT> | tk=<K_IGNORE >
         | tk=<K_QUALIFY>
         )
@@ -1874,10 +1877,10 @@ String RelObjectNameExt():
   String result=null;
 }
 {
-    ( result=RelObjectName() | tk=<K_ALL> | tk=<K_ANY>  | tk=<K_SOME> | tk=<K_LEFT> | tk=<K_RIGHT> | tk=<K_SET>
+    ( result=RelObjectName() /*| tk=<K_ALL> */| tk=<K_ANY>  | tk=<K_SOME> | tk=<K_LEFT> | tk=<K_RIGHT> | tk=<K_SET>
         | tk=<K_DOUBLE> | tk=<K_IF> | tk=<K_IIF> | tk=<K_OPTIMIZE> | tk=<K_LIMIT>
         | tk=<K_OFFSET> | tk=<K_PROCEDURE> | tk=<K_PUBLIC>
-        | tk=<K_CASEWHEN> | tk=<K_IN> | tk=<K_GROUPING> | tk=<K_ORDER>
+        | tk=<K_CASEWHEN> | tk=<K_IN> | tk=<K_GROUPING> /*| tk=<K_ORDER>*/
         | tk=<K_NEXTVAL>
         | tk=<K_GLOBAL>
         )
@@ -2223,7 +2226,7 @@ PlainSelect PlainSelect() #PlainSelect:
     Top top = null;
     Skip skip = null;
     First first = null;
-    OracleHierarchicalExpression oracleHierarchicalQueryClause = null;
+    /*OracleHierarchicalExpression oracleHierarchicalQueryClause = null;*/
     List<Table> intoTables = null;
     Table updateTable = null;
     Wait wait = null;
@@ -2246,10 +2249,9 @@ PlainSelect PlainSelect() #PlainSelect:
     [ LOOKAHEAD(2) first = First() { plainSelect.setFirst(first); } ]
 
     [ LOOKAHEAD(2)
-        (
-        <K_ALL>
+        ( /*<K_ALL>
         |
-        (
+        */(
             <K_DISTINCT> { Distinct distinct = new Distinct(); plainSelect.setDistinct(distinct); }
             [ LOOKAHEAD(2) "ON" "(" distinctOn=SelectItemsList() { plainSelect.getDistinct().setOnSelectItems(distinctOn); } ")" ]
         )
@@ -2279,7 +2281,7 @@ PlainSelect PlainSelect() #PlainSelect:
 
     [ LOOKAHEAD(2) ksqlWindow=KSQLWindowClause() { plainSelect.setKsqlWindow(ksqlWindow); } ]
     [ LOOKAHEAD(2) where=WhereClause() { plainSelect.setWhere(where); }]
-    [ LOOKAHEAD(2) oracleHierarchicalQueryClause=OracleHierarchicalQueryClause() { plainSelect.setOracleHierarchical(oracleHierarchicalQueryClause); } ]
+    /*[ LOOKAHEAD(2) oracleHierarchicalQueryClause=OracleHierarchicalQueryClause() { plainSelect.setOracleHierarchical(oracleHierarchicalQueryClause); } ]*/
     // Oracle supports "HAVING" before "GROUP BY", we will simply parse that but won't pay special attention to the order
     [ LOOKAHEAD(2) having=Having() { plainSelect.setHaving(having); }]
     [ LOOKAHEAD(2) groupBy=GroupByColumnReferences() { plainSelect.setGroupByElement(groupBy); }]
@@ -2347,8 +2349,9 @@ Select SetOperationList(Select select) #SetOperationList: {
     ( LOOKAHEAD(2) (
             (
                 <K_UNION> { UnionOp union = new UnionOp(); linkAST(union,jjtThis); operations.add(union); }
-                [ <K_ALL> { union.setAll(true); } | <K_DISTINCT> { union.setDistinct(true); } ]
+                [/* <K_ALL> { union.setAll(true); } |*/ <K_DISTINCT> { union.setDistinct(true); } ]
             )
+            | <K_UNION_ALL> { UnionOp union = new UnionOp();linkAST(union,jjtThis);operations.add(union); union.setAll(true); }
             |
             <K_INTERSECT> { operations.add(new IntersectOp()); }
             |
@@ -2844,7 +2847,7 @@ Join JoinerExpression() #JoinerExpression:
 
     [
         (
-            <K_LEFT> { join.setLeft(true); } [ <K_SEMI> { join.setSemi(true); } | <K_OUTER> { join.setOuter(true); } ]
+            <K_LEFT> { join.setLeft(true); } [ <K_SEMI> { join.setSemi(true); } | <K_OUTER> { join.setOuter(true); } | <K_ONE2ONE> { join.setOne2one(true); } ]
             |
             (
                 <K_RIGHT> { join.setRight(true); }
@@ -2974,6 +2977,7 @@ Expression WhereClause():
     { return retval; }
 }
 
+/*
 OracleHierarchicalExpression OracleHierarchicalQueryClause():
 {
     OracleHierarchicalExpression result = new OracleHierarchicalExpression();
@@ -3001,7 +3005,7 @@ OracleHierarchicalExpression OracleHierarchicalQueryClause():
     {
         return result;
     }
-}
+}*/
 
 GroupByElement GroupByColumnReferences():
 {
@@ -4000,7 +4004,7 @@ Expression AnyComparisonExpression() :
     (
         <K_ANY> { anyType = AnyType.ANY; }
         | <K_SOME> { anyType = AnyType.SOME; }
-        | <K_ALL> { anyType = AnyType.ALL; }
+        /*| <K_ALL> { anyType = AnyType.ALL; }*/
     )
     select = Select()
     {
@@ -4257,7 +4261,7 @@ Expression PrimaryExpression() #PrimaryExpression:
         | LOOKAHEAD(2, {!interrupted}) retval=CharacterPrimary()
 
         // support timestamp expressions
-        | LOOKAHEAD(2, {!interrupted}) (token=<K_TIME_KEY_EXPR> | token=<K_CURRENT>) { retval = new TimeKeyExpression(token.image); }
+        | LOOKAHEAD(2, {!interrupted}) (/*token=<K_TIME_KEY_EXPR> | */token=<K_CURRENT>) { retval = new TimeKeyExpression(token.image); }
 
         | LOOKAHEAD(2, {!interrupted}) retval=DateTimeLiteralExpression()
 
@@ -4267,7 +4271,7 @@ Expression PrimaryExpression() #PrimaryExpression:
 
         | retval=ConnectByRootOperator()
 
-        | LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); }
+        /*| LOOKAHEAD(2, {!interrupted}) <K_ALL> { retval = new AllValue(); }*/
 
         | LOOKAHEAD(2, {!interrupted}) retval=Column()
 
@@ -4744,7 +4748,7 @@ IntervalExpression IntervalExpression() : {
 {
 
 { interval = new IntervalExpression(); }
-    <K_INTERVAL> ["-" {signed=true;}] (token=<S_LONG> | token=<S_DOUBLE> | token=<S_CHAR_LITERAL> | LOOKAHEAD(SimpleJdbcParameter()) expr = SimpleJdbcParameter() | expr = JdbcNamedParameter() | LOOKAHEAD(Function()) expr = Function() | expr = Column())
+    <K_INTERVAL> ["-" {signed=true;}] (token=<S_LONG> | token=<S_DOUBLE> | token=<S_CHAR_LITERAL> | LOOKAHEAD(SimpleJdbcParameter()) expr = SimpleJdbcParameter() | expr = JdbcNamedParameter() | LOOKAHEAD(Function()) expr = Function() | expr = Column() | expr=UserVariable())
     {
         if (expr != null) {
             if (signed) expr = new SignedExpression('-', expr);
@@ -4916,7 +4920,7 @@ ExtractExpression ExtractExpression() :
     Expression expr = null;
 }
 {
-    <K_EXTRACT>
+    (<K_INTERVAL>)? <K_EXTRACT>
     "("
         ( fieldName=RelObjectName() { retval.setName(fieldName); } | token=<S_CHAR_LITERAL> { retval.setName(token.image); } )
         <K_FROM>
@@ -5204,8 +5208,8 @@ Function InternalFunction(boolean escaped):
         LOOKAHEAD(2) [
             LOOKAHEAD(2) (
                 <K_DISTINCT> { retval.setDistinct(true); }
-                | <K_ALL> { retval.setAllColumns(true); }
-                | <K_UNIQUE> { retval.setUnique(true); }
+                /*| <K_ALL> { retval.setAllColumns(true); }
+                */| <K_UNIQUE> { retval.setUnique(true); }
             )
         ]
         (
@@ -5592,7 +5596,7 @@ CreateTable CreateTable(boolean isUsingOrReplace):
                                       { fkIndex.setReferentialAction(ReferentialAction.Type.from(tk.image), action); }
                                       )]
                     )
-                    |
+                    /*|
                      LOOKAHEAD(3)(
                         [<K_CONSTRAINT>  sk3 = RelObjectName()]
                         {Expression exp = null;}
@@ -5600,7 +5604,7 @@ CreateTable CreateTable(boolean isUsingOrReplace):
                            checkCs = new CheckConstraint().withName(sk3).withExpression(exp);
                            indexes.add(checkCs);
                            }
-                    )
+                    )*/
                     |
                         LOOKAHEAD(2) tk=<K_EXCLUDE> {excludeC = new ExcludeConstraint(); Expression exp = null;}
                         (tk2=<K_WHERE>
@@ -5914,13 +5918,13 @@ List<String> CreateParameter():
             | tk=<K_CONSTRAINT> | tk=<K_WITH> | tk=<K_EXCLUDE> | tk=<K_WHERE> | tk=<K_UNSIGNED>
             | tk=<K_TEMP> | tk=<K_TEMPORARY> | tk=<K_PARTITION> | tk=<K_BY> | tk=<K_IN>
             | tk=<K_TYPE> | tk=<K_COMMENT> | tk=<K_USING> | tk=<K_COLLATE> | tk=<K_ASC>
-            | tk=<K_DESC> | tk=<K_TRUE> | tk=<K_FALSE> | tk=<K_PARALLEL> | tk=<K_BINARY> | tk=<K_START>
-            | tk=<K_TIME_KEY_EXPR> | tk=<K_RAW> | tk=<K_HASH> | tk=<K_FIRST> | tk=<K_LAST>
+            | tk=<K_DESC> | tk=<K_TRUE> | tk=<K_FALSE> | tk=<K_PARALLEL> | tk=<K_BINARY> /*| tk=<K_START>
+            | tk=<K_TIME_KEY_EXPR> */| tk=<K_RAW> | tk=<K_HASH> | tk=<K_FIRST> | tk=<K_LAST>
             | tk="="
         )
         { param.add(tk.image); }
         |
-        ( tk=<K_DEFAULT> | tk=<K_AS> | tk=<K_CHECK> ) [ LOOKAHEAD(2) "(" exp = Expression() ")" ]
+        ( tk=<K_DEFAULT> | tk=<K_AS> /*| tk=<K_CHECK> */) [ LOOKAHEAD(2) "(" exp = Expression() ")" ]
         {
             param.add(tk.image);
             if (exp!=null) {
@@ -6384,14 +6388,14 @@ AlterExpression AlterExpression():
                         [<K_USING> sk4=RelObjectName() { alterExp.addParameters("USING", sk4); }]
                         [ index = IndexWithComment(index) { alterExp.setIndex(index); } ]
                     )
-                    |
+                    /*|
                     (
                         <K_CHECK>  {Expression exp = null;} ("(" exp = Expression() ")")* {
                             CheckConstraint checkCs = new CheckConstraint().withName(sk3).withExpression(exp);
                             alterExp.setIndex(checkCs);
                         }
                     )
-                    |
+                    */|
                     (
                         tk=<K_UNIQUE> (tk2=<K_KEY> { alterExp.setUk(true); } | tk2=<K_INDEX>)?
                           columnNames=ColumnsNamesList()
@@ -6635,7 +6639,7 @@ AlterSession AlterSession():
 }
 {
     <K_SESSION> (
-        (
+        /*(
            <K_ADVISE>   ( <K_COMMIT> { operation = AlterSessionOperation.ADVISE_COMMIT; }
                         | <K_ROLLBACK> { operation = AlterSessionOperation.ADVISE_ROLLBACK; }
                         | <K_NOTHING> { operation = AlterSessionOperation.ADVISE_NOTHING; }
@@ -6645,7 +6649,7 @@ AlterSession AlterSession():
         (
             <K_CLOSE> <K_DATABASE> <K_LINK> { operation = AlterSessionOperation.CLOSE_DATABASE_LINK; }
         )
-        |
+        |*/
         (
             <K_ENABLE>  ( <K_COMMIT> <K_IN> <K_PROCEDURE> { operation = AlterSessionOperation.ENABLE_COMMIT_IN_PROCEDURE; }
                         | <K_GUARD> { operation = AlterSessionOperation.ENABLE_GUARD; }
@@ -6955,7 +6959,7 @@ List<Sequence.Parameter> SequenceParameters():
 }
 {
 (
-   (<K_INCREMENT> <K_BY> token=<S_LONG>
+ /*  (<K_INCREMENT> <K_BY> token=<S_LONG>
     {
         parameter = new Sequence.Parameter(Sequence.ParameterType.INCREMENT_BY);
         parameter.setValue(Long.parseLong(token.image));
@@ -6970,7 +6974,7 @@ List<Sequence.Parameter> SequenceParameters():
       sequenceParameters.add(parameter);
     }
    )
-   |
+   |*/
    (<K_RESTART> [<K_WITH> token=<S_LONG>]
     {
       parameter = new Sequence.Parameter(Sequence.ParameterType.RESTART_WITH);

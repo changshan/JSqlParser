@@ -16,12 +16,13 @@ import static org.mockito.Mockito.spy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.IfElseStatement;
@@ -319,28 +320,28 @@ public class StatementDeParserTest {
     public void shouldUseProvidedDeparsersWhenDeParsingIfThenStatement()
             throws JSQLParserException {
         String sqlStr = "IF OBJECT_ID('tOrigin', 'U') IS NOT NULL DROP TABLE tOrigin1";
-        IfElseStatement ifElseStatement = (IfElseStatement) CCJSqlParserUtil.parse(sqlStr);
+        IfElseStatement ifElseStatement = (IfElseStatement) SmartQLEngine.parse(sqlStr);
         statementDeParser.deParse(ifElseStatement);
     }
 
     @Test
     public void testIssue1500AllColumns() throws JSQLParserException {
         String sqlStr = "select count(*) from some_table";
-        PlainSelect selectBody = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect selectBody = (PlainSelect) SmartQLEngine.parse(sqlStr);
         selectBody.accept(new SelectDeParser());
     }
 
     @Test
     public void testIssue1836() throws JSQLParserException {
         String sqlStr = "TABLE columns ORDER BY column_name LIMIT 10 OFFSET 10;";
-        TableStatement tableStatement = (TableStatement) CCJSqlParserUtil.parse(sqlStr);
+        TableStatement tableStatement = (TableStatement) SmartQLEngine.parse(sqlStr);
         tableStatement.accept(tableStatementDeParser);
     }
 
     @Test
     public void testIssue1500AllTableColumns() throws JSQLParserException {
         String sqlStr = "select count(a.*) from some_table a";
-        PlainSelect selectBody = (PlainSelect) CCJSqlParserUtil.parse(sqlStr);
+        PlainSelect selectBody = (PlainSelect) SmartQLEngine.parse(sqlStr);
         selectBody.accept(new SelectDeParser());
     }
 
@@ -350,7 +351,7 @@ public class StatementDeParserTest {
                 "INSERT INTO example (num, name, address, tel) VALUES (1, 'name', 'test ', '1234-1234')";
         String expectedSql = "INSERT INTO example (num, name, address, tel) VALUES (?, ?, ?, ?)";
 
-        net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(providedSql);
+        net.sf.jsqlparser.statement.Statement statement = SmartQLEngine.parse(providedSql);
         StringBuilder builder = new StringBuilder();
         ExpressionDeParser expressionDeParser = new ExpressionDeParser() {
             @Override

@@ -9,8 +9,8 @@
  */
 package net.sf.jsqlparser.statement.select;
 
+import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -55,7 +55,7 @@ public class ClickHouseTest {
                 JSQLParserException.class, new Executable() {
                     @Override
                     public void execute() throws Throwable {
-                        CCJSqlParserUtil.parse("select a.* from  a global");
+                        SmartQLEngine.parse("select a.* from  a global");
                     }
                 }, "Fail when restricted keyword GLOBAL is used as an Alias.");
     }
