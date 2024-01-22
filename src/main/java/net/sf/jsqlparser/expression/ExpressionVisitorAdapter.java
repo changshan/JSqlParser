@@ -384,9 +384,15 @@ public class ExpressionVisitorAdapter
         }
 
         if (expr.getWindowElement() != null) {
-            expr.getWindowElement().getRange().getStart().getExpression().accept(this);
-            expr.getWindowElement().getRange().getEnd().getExpression().accept(this);
-            expr.getWindowElement().getOffset().getExpression().accept(this);
+            if (expr.getWindowElement().getRange().getStart() != null && expr.getWindowElement().getRange().getStart().getExpression() != null) {
+                expr.getWindowElement().getRange().getStart().getExpression().accept(this);
+            }
+            if (expr.getWindowElement().getRange().getEnd() != null && expr.getWindowElement().getRange().getEnd().getExpression() != null) {
+                expr.getWindowElement().getRange().getEnd().getExpression().accept(this);
+            }
+            if (expr.getWindowElement().getOffset() != null && expr.getWindowElement().getOffset().getExpression() != null) {
+                expr.getWindowElement().getOffset().getExpression().accept(this);
+            }
         }
     }
 
