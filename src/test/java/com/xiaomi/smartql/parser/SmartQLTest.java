@@ -20,6 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SmartQLTest {
 
+
+    /**
+     * 支持"."的解析
+     * @throws Exception
+     */
+    @Test
+    public void test_34() throws Exception{
+        SmartQLEngine.parse("select b.sets as seats from b");
+        assertTrue(Boolean.TRUE);
+    }
+
     /**
      * 打印token
      *
@@ -35,52 +46,72 @@ public class SmartQLTest {
         } while (StringUtils.isNotEmpty(tk.toString()));
     }
 
+    /**
+     * increment
+     * @throws Exception
+     */
     @Test
-    public void testKeyIncrement() throws Exception {
+    public void test_5() throws Exception {
         String sql = "select abc.increment from abc";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
     @Test
-    public void testNum() throws Exception {
+    public void test_2() throws Exception {
         String sql = "select abc.1123abc from abc";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
     @Test
-    public void testNum_1() throws Exception {
+    public void test_1() throws Exception {
         String sql = "select (SUM(ads_appstore_shurufa_di.dau)) `A_11561_135_1628671995672`, (SUM(ads_appstore_shurufa_di.7_wakeup_dau)) `A_11561_234_1628671995677`, (SUM(ads_appstore_shurufa_di.14_wakeup_dau)) `A_11561_151_1628671995682` from ads_appstore_shurufa_di   group by `A_11561_63_1628672025663`;";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
     }
 
+    /**
+     * 数值字段
+     * @throws Exception
+     */
     @Test
-    public void testDigitalField() throws Exception {
+    public void test_7() throws Exception {
         Statements result = SmartQLEngine.parseStatements("select (domainQueryCount.time) A_39634_793_1657099508271, (domainQueryCount.http_host) A_39634_630_1657099508271, (SUM(domainQueryCount.count)) A_39634_883_1657099508271, (SUM(domainQueryCount.`5xx_count`)) A_39634_872_1657099508271, (domainQueryCount.count) A_39634_823_1657099590046, (domainQueryCount.xx_count) A_39634_763_1657099612818, (1 - domainQueryCount.xx_count/domainQueryCount.count) A_39634_272_1657101240162, (domainQueryCount.xx_count) A_39634_241_1657102108488, (domainQueryCount.count) A_39634_903_1657102134709 from domainQueryCount   group by A_39634_793_1657099508271,A_39634_630_1657099508271,A_39634_823_1657099590046,A_39634_763_1657099612818,A_39634_272_1657101240162,A_39634_241_1657102108488,A_39634_903_1657102134709;\n" +
                 "\n;");
     }
 
+    /**
+     * 关键词
+     * @throws Exception
+     */
     @Test
-    public void testKeys() throws Exception {
+    public void test_4() throws Exception {
         Statement result = SmartQLEngine.parse("select database,check,current_date from abc");
     }
 
     @Test
-    public void testBaseSQL() throws Exception {
+    public void test_10() throws Exception {
         Statements result = SmartQLEngine.parseStatements("select * from dual;\n");
         assertEquals("SELECT * FROM dual;\n", result.toString());
     }
 
+    /**
+     * comments
+     * @throws Exception
+     */
     @Test
-    public void testComment() throws Exception {
+    public void test_9() throws Exception {
         Statements result = SmartQLEngine.parseStatements("select * from dual;---test");
         assertEquals("SELECT * FROM dual;\n", result.toString());
     }
 
+    /**
+     * 嵌套查询
+     * @throws Exception
+     */
     @Test
-    public void testNest() throws Exception {
+    public void test_3() throws Exception {
         Statement result =
                 SmartQLEngine.parse(
                         "Select test.* from (Select * from sch.PERSON_TABLE // root test\n) as test");
@@ -94,7 +125,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test2() throws Exception {
+    public void test_24() throws Exception {
         Statement result =
                 SmartQLEngine.parse("select * from (SELECT * FROM test) sql_model_virtual_table_4776_98 where abc>100;");
     }
@@ -106,7 +137,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test3() throws Exception {
+    public void test_23() throws Exception {
         Statement result =
                 SmartQLEngine.parse("SELECT substring(`t1_日期`,1,4) AS `c0`\n" +
                         "FROM\n" +
@@ -132,7 +163,7 @@ public class SmartQLTest {
 
 
     @Test
-    public void testAnnotation() throws Exception {
+    public void test_12() throws Exception {
         String sql = "select #注释内容 \n a,/* 这条SELECT语句，  \n" +
                 "    是一个注释*/ b,c -- 这是一个注释 from dual;#注释内容 \n";
 
@@ -141,8 +172,12 @@ public class SmartQLTest {
         assertTrue(Boolean.TRUE);
     }
 
+    /**
+     * annotation
+     * @throws Exception
+     */
     @Test
-    public void testAnnotation2() throws Exception {
+    public void test_11() throws Exception {
         Statement result =
                 SmartQLEngine.parse("select\n" +
                         "    (周数) A_27701_404_1651806744648,\n" +
@@ -201,7 +236,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test4() throws Exception {
+    public void test_22() throws Exception {
         Statement result =
                 SmartQLEngine.parse("select * from abc where 1=1 and abc_1 is True;");
     }
@@ -213,7 +248,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test5() throws Exception {
+    public void test_21() throws Exception {
         SmartQLEngine.parse("select now.zdt, (all.countAll - now.countNow)/all.countAll * 100 as progress\n" +
                 "from(\n" +
                 "    select count(*) as countAll from iceberg_zjyprc_hadoop.iceberg.derora_flink_jobs \n" +
@@ -234,7 +269,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test6() throws Exception {
+    public void test_20() throws Exception {
         String sql = "SELECT A_13104_722_1631695157575, A_13104_324_1631695157575 FROM ( SELECT 产品线 AS A_13104_722_1631695157575, SUM(与上个月的用量变化) AS A_13104_324_1631695157575 FROM (SELECT\n" +
                 "date_sub(date_format(now(),'%y-%m-%d'),interval extract(day from now()) day) AS '上月日期', REV.S2 AS '产品线', REV.S3 AS '加速类型',(REV.S1-WIN.S1) AS '与上个月的用量变化',REV.S1 AS '上个月的用量', WIN.S1 AS '上上个月的用量'\n" +
                 "FROM\n" +
@@ -253,7 +288,7 @@ public class SmartQLTest {
 
 
     @Test
-    public void test6_1() throws Exception {
+    public void test_19() throws Exception {
         String sql = "SELECT SUM(resource_cost.usage) AS 'S1',resource_cost.account  AS 'S2', resource_cost.usage_type_cname AS 'S3' FROM resource_cost WHERE resource_cost.period_day = date_sub(date_sub(date_format(now(),'%y-%m-%d'), interval, extract(\n" +
                 "day from now()), day), interval, 1, month)  AND resource_cost.`service_cname` = 'cdn' AND resource_cost.`region1` = '国内' GROUP BY S2, S3";
         SmartQLParser parser = SmartQLEngine.newParser(sql);
@@ -270,7 +305,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test7() throws Exception {
+    public void test_8() throws Exception {
         SmartQLEngine.parse("SELECT\n" +
                 "branch_name,\n" +
                 "org_name,\n" +
@@ -389,7 +424,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test8() throws Exception {
+    public void test_18() throws Exception {
         SmartQLEngine.parse("with a as(\n" +
                 "SELECT year,month,income_type,\n" +
                 "revenue\n" +
@@ -546,7 +581,7 @@ public class SmartQLTest {
      * 特殊字符"%�%"
      */
     @Test
-    public void test9() throws Exception {
+    public void test_17() throws Exception {
         SmartQLEngine.parse("select\n" +
                 "\ta.date\n" +
                 "\t,lower(a.dsp_level2) as dspLevel2\n" +
@@ -632,7 +667,7 @@ public class SmartQLTest {
      * current row
      */
     @Test
-    public void test10() throws Exception {
+    public void test_32() throws Exception {
         SmartQLEngine.parse("WITH polaris AS\n" +
                 "(\n" +
                 "SELECT grow.date\n" +
@@ -783,7 +818,7 @@ public class SmartQLTest {
      * 通过Holdor 函数来解决，即通过holdor占位符做最后替换
      */
     @Test
-    public void test11() throws Exception {
+    public void test_31() throws Exception {
         String sql = "SELECT if(retain2_cnt>0,from_unixtime(basetime,'%Y%m%d'),dt) AS date\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H'),hour) AS hour\n" +
                 ",if(retain2_cnt>0,from_unixtime(basetime,'%Y-%m-%d %H:%i'),minute) AS minute\n" +
@@ -823,7 +858,7 @@ public class SmartQLTest {
 
 
     @Test
-    public void test1() throws Exception {
+    public void test_33() throws Exception {
         String sql = "SELECT abc,edf from abc union all (select edf,addf from efg)";
         SmartQLParser parser = SmartQLEngine.newParser(sql);
         Token tk = null;
@@ -843,7 +878,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test12() throws Exception {
+    public void test_30() throws Exception {
         String sql = "WITH t_domain_total AS(\n" +
                 "    SELECT\n" +
                 "        date,\n" +
@@ -969,7 +1004,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test13() throws Exception {
+    public void test_29() throws Exception {
         String sql = "select t0.*,t1.*\n" +
                 "from \n" +
                 "(select distinct \n" +
@@ -1111,7 +1146,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test14() throws Exception {
+    public void test_28() throws Exception {
         String sql = "select event_day,\n" +
                 "SUM(origin_gain)/100/SUM(query_dau) as ARPU\n" +
                 "from miuiads.media_publisher_stat\n" +
@@ -1138,7 +1173,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test15() throws Exception {
+    public void test_27() throws Exception {
         String sql = "SELECT date AS A_10818_679_1626767695214,start AS A_10818_4_1626767683282,end AS A_10818_153_1626767683282,seq AS A_10818_594_1626767683282,radio AS " +
                 "A_10792_350_1626766351771,radio2 AS A_10792_679_1626766351775,protocol_ver AS A_10792_110_1626766351782,app_ver AS A_10818_519_1626767683282 FROM " +
                 "(select app_ver ,region ,date ,sum(total_count) as total ,sum(`start_b_count`) / sum(total_count) as start ,sum(`end_b_count`) / sum(total_count) " +
@@ -1157,7 +1192,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test17() throws Exception {
+    public void test_26() throws Exception {
         String sql = "with a as(\n" +
                 "SELECT year,month,income_type,\n" +
                 "revenue\n" +
@@ -1318,7 +1353,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test18() throws Exception {
+    public void test_25() throws Exception {
         String sql = "SELECT a.date,\n" +
                 "       IF (ISNULL(b.cnt),\n" +
                 "           0,\n" +
@@ -1345,7 +1380,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test_one2onejoin() throws Exception {
+    public void test_14() throws Exception {
         String sql = "SELECT\n" +
                 "    AVG(\n" +
                 "        CASE\n" +
@@ -1556,7 +1591,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test_interval() throws Exception {
+    public void test_16() throws Exception {
         String sql = "select upload_task_item.id,upload_task_item.batch_id,upload_task_item.slot_id,upload_task_item.source_id,upload_task_item.source_path,upload_task_item.file_count, " +
                 "upload_task_item.file_size, upload_task_item.create_time, case when upload_task_item.status=1 and upload_task_item.create_time<(unix_timestamp()-259200)*1000 " +
                 "then 101 else upload_task_item.status end as status,upload_task_item.timecost, upload_task_item.update_time, from_unixtime(upload_task_item.update_time/1000,'%Y-%m-%d') as upload_date, " +
@@ -1576,7 +1611,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test_RLike() throws Exception {
+    public void test_13() throws Exception {
         String sql = "SELECT\n" +
                 "    A_70606_262_1668537250628,\n" +
                 "    A_70606_568_1668537250628,\n" +
@@ -1837,7 +1872,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void test_likeReg() throws Exception {
+    public void test_15() throws Exception {
         String sql = "SELECT `start_date` AS `A_43569_11_1658568114344`,\n" +
                 "       `workflow_type` AS `A_43569_872_1658568114344`,\n" +
                 "       `duration` AS `A_43569_696_1658568459822`\n" +
@@ -1975,7 +2010,7 @@ public class SmartQLTest {
      * @throws Exception
      */
     @Test
-    public void testTemp() throws Exception {
+    public void test_0() throws Exception {
         String sql = "select * from dual";
         SmartQLEngine.parse(sql);
         assertTrue(Boolean.TRUE);
