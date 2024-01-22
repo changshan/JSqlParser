@@ -45,7 +45,7 @@ import net.sf.jsqlparser.test.MemoryLeakVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-public class SmartQLEngineTest {
+public class CCJSqlParserUtilTest {
 
     private final static String INVALID_SQL = ""
             + "SELECT * FROM TABLE_1 t1\n"
