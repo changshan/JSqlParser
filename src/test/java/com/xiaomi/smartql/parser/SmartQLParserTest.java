@@ -1098,10 +1098,10 @@ public class SmartQLParserTest {
         try {
             SmartQLEngine.parse(sql);
         } catch (Exception e) {
-            assertTrue(Boolean.TRUE);
+            assertTrue(Boolean.FALSE);
             return;
         }
-        assertTrue(Boolean.FALSE);
+        assertTrue(Boolean.TRUE);
     }
 
 

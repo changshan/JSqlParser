@@ -122,7 +122,7 @@ public class ExpressionVisitorAdapterTest {
         assertEquals(hint, holder[0].getValue());
     }
 
-    @Test
+    //    @Test current_ 关键字被剔除
     public void testCurrentTimestampExpression() throws JSQLParserException {
         final List<String> columnList = new ArrayList<String>();
         PlainSelect plainSelect = (PlainSelect) SmartQLEngine
@@ -141,7 +141,7 @@ public class ExpressionVisitorAdapterTest {
         assertEquals("bar", columnList.get(0));
     }
 
-    @Test
+    //    @Test current_ 关键字被剔除
     public void testCurrentDateExpression() throws JSQLParserException {
         final List<String> columnList = new ArrayList<String>();
         PlainSelect plainSelect =

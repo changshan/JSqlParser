@@ -476,6 +476,9 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect> implements Sel
                 buffer.append(" INNER");
             } else if (join.isSemi()) {
                 buffer.append(" SEMI");
+            } else if (join.isOne2one()){
+                //by changshan:support one to one syntax
+                buffer.append(" one to one ");
             }
 
             if (join.isStraight()) {

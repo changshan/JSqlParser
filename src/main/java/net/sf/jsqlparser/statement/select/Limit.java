@@ -11,6 +11,7 @@ package net.sf.jsqlparser.statement.select;
 
 import net.sf.jsqlparser.expression.AllValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import com.xiaomi.smartql.parser.ASTNodeAccessImpl;
@@ -45,7 +46,12 @@ public class Limit extends ASTNodeAccessImpl {
     }
 
     public void setRowCount(Expression l) {
-        rowCount = l;
+        //by Changshan: adapt all value
+        if (l.toString().equalsIgnoreCase("ALL")) {
+            rowCount = new AllValue();
+        } else {
+            rowCount = l;
+        }
     }
 
     @Deprecated
@@ -122,7 +128,12 @@ public class Limit extends ASTNodeAccessImpl {
     }
 
     public <E extends Expression> E getRowCount(Class<E> type) {
-        return type.cast(getRowCount());
+        Expression exp = getRowCount();
+        if (exp instanceof LongValue) {
+            return type.cast(getRowCount());
+        } else {
+            return (E) new AllValue();
+        }
     }
 
     public ExpressionList<?> getByExpressions() {
