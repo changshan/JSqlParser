@@ -69,6 +69,43 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect> implements Sel
         this.expressionVisitor = expressionVisitor;
     }
 
+    protected void visitLimitWithOffset(PlainSelect select) {
+        if (select.getLimit() != null) {
+            new LimitDeparser(expressionVisitor, buffer).deParse(select.getLimit());
+        }
+        if (select.getOffset() != null) {
+            deparseOffset(select.getOffset());
+        }
+    }
+
+    public void deparseOffset(Offset offset) {
+        // OFFSET offset
+        // or OFFSET offset (ROW | ROWS)
+        buffer.append(" OFFSET ");
+        buffer.append(offset.getOffset());
+        if (offset.getOffsetParam() != null) {
+            buffer.append(" ").append(offset.getOffsetParam());
+        }
+
+    }
+
+    public void deparseFetch(Fetch fetch) {
+        // FETCH (FIRST | NEXT) row_count (ROW | ROWS) ONLY
+        buffer.append(" FETCH ");
+        if (fetch.isFetchParamFirst()) {
+            buffer.append("FIRST ");
+        } else {
+            buffer.append("NEXT ");
+        }
+        if (fetch.getFetchJdbcParameter() != null) {
+            buffer.append(fetch.getFetchJdbcParameter().toString());
+        } else {
+            buffer.append(fetch.getRowCount());
+        }
+        buffer.append(" ").append(fetch.getFetchParam()).append(" ONLY");
+
+    }
+
     @Override
     public void visit(ParenthesedSelect selectBody) {
         List<WithItem> withItemsList = selectBody.getWithItemsList();
@@ -162,7 +199,7 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect> implements Sel
             if (plainSelect.getDistinct().getOnSelectItems() != null) {
                 buffer.append("ON (");
                 for (Iterator<SelectItem<?>> iter =
-                        plainSelect.getDistinct().getOnSelectItems().iterator(); iter.hasNext();) {
+                     plainSelect.getDistinct().getOnSelectItems().iterator(); iter.hasNext();) {
                     SelectItem<?> selectItem = iter.next();
                     selectItem.accept(this);
                     if (iter.hasNext()) {
@@ -500,9 +537,14 @@ public class SelectDeParser extends AbstractDeParser<PlainSelect> implements Sel
             buffer.append(" WITHIN ");
             buffer.append(join.getJoinWindow().toString());
         }
-        for (Expression onExpression : join.getOnExpressions()) {
-            buffer.append(" ON ");
-            onExpression.accept(expressionVisitor);
+        Expression[] exps = join.getOnExpressions().toArray(new Expression[0]);
+        for (int i = 0; i < exps.length; i++) {
+            if (i == 0) {
+                buffer.append(" ON ");
+            } else {
+                buffer.append(" AND ");
+            }
+            exps[i].accept(expressionVisitor);
         }
         if (join.getUsingColumns().size() > 0) {
             buffer.append(" USING (");
