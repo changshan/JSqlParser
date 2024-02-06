@@ -5279,6 +5279,7 @@ public class SelectTest {
     @Test
     @Disabled
     public void testJoinWithTrailingOnExpressionIssue1302() throws JSQLParserException {
+        //on ....on  语法不对
         assertSqlCanBeParsedAndDeparsed("SELECT * FROM TABLE1 tb1\n" + "INNER JOIN TABLE2 tb2\n"
                 + "INNER JOIN TABLE3 tb3\n" + "INNER JOIN TABLE4 tb4\n" + "ON (tb3.aaa = tb4.aaa)\n"
                 + "ON (tb2.aaa = tb3.aaa)\n" + "ON (tb1.aaa = tb2.aaa)", true);
