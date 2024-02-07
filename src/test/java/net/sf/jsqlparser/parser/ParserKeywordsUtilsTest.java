@@ -46,7 +46,7 @@ import org.javacc.parser.JavaCCErrors;
 class ParserKeywordsUtilsTest {
     public final static CharsetEncoder CHARSET_ENCODER = StandardCharsets.US_ASCII.newEncoder();
 
-    final static File FILE = new File("src/main/jjtree/net/sf/jsqlparser/parser/JSqlParserCC.jjt");
+    final static File FILE = new File("src/main/jjtree/SmartQLParserCC.jjt");
     final static Logger LOGGER = Logger.getLogger(ParserKeywordsUtilsTest.class.getName());
 
 
@@ -144,7 +144,7 @@ class ParserKeywordsUtilsTest {
                 "-OUTPUT_DIRECTORY=" + jjGrammarOutputDir.toString(),
                 jjtGrammar.toString()
         });
-        Path jjGrammarFile = jjGrammarOutputDir.resolve("JSqlParserCC.jj");
+        Path jjGrammarFile = jjGrammarOutputDir.resolve("SmartQLParserCC.jj");
 
         JavaCCParser parser = new JavaCCParser(new java.io.FileInputStream(jjGrammarFile.toFile()));
         parser.javacc_input();

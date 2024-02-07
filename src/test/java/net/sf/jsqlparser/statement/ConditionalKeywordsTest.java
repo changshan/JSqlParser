@@ -31,7 +31,7 @@ public class ConditionalKeywordsTest {
     public final static Logger LOGGER = Logger.getLogger(ConditionalKeywordsTest.class.getName());
 
     public static Stream<String> keyWords() {
-        File file = new File("src/main/jjtree/net/sf/jsqlparser/parser/JSqlParserCC.jjt");
+        File file = new File("src/main/jjtree/SmartQLParserCC.jjt");
         List<String> keywords = new ArrayList<>();
         try {
             try {

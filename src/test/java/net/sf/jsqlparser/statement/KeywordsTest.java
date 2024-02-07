@@ -32,7 +32,7 @@ public class KeywordsTest {
     public final static Logger LOGGER = Logger.getLogger(KeywordsTest.class.getName());
 
     public static Stream<String> keyWords() {
-        File file = new File("src/main/jjtree/net/sf/jsqlparser/parser/JSqlParserCC.jjt");
+        File file = new File("src/main/jjtree/SmartQLParserCC.jjt");
         List<String> keywords = new ArrayList<>();
         try {
             keywords.addAll( ParserKeywordsUtils.getAllKeywordsUsingRegex(file) );
