@@ -129,7 +129,7 @@
                 <configuration>
                     <mainClass>com.xiaomi.smartql.parser.ParserKeywordsUtils</mainClass>
                     <arguments>
-                        <argument>src/main/jjtree/net/sf/jsqlparser/parser/JSqlParserCC.jjt</argument>
+                        <argument>src/main/resources/SmartQLParserCC.jjt</argument>
                         <argument>src/site/sphinx/keywords.rst</argument>
                     </arguments>
                 </configuration>

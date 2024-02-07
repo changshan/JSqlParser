@@ -9,6 +9,7 @@
  */
 package net.sf.jsqlparser.statement;
 
+import com.xiaomi.smartql.parser.ParseException;
 import com.xiaomi.smartql.parser.SmartQLEngine;
 import com.xiaomi.smartql.parser.SmartQLParser;
 import com.xiaomi.smartql.parser.StringProvider;

@@ -22,39 +22,37 @@ public class ParseException extends SmartException {
   private static final long serialVersionUID = 1L;
 
   private static final String INDENT = "    ";
-  
-  /**
-   * The end of line string (we do not use System.getProperty("") so that we are compatible with Android/GWT);
-   */
-  protected static String EOL = "\n";
 
-  
-  public ParseException(Token currentTokenVal,
-                        int[][] expectedTokenSequencesVal,
-                        String[] tokenImageVal
-         )
-	{
-	  this (currentTokenVal, expectedTokenSequencesVal, tokenImageVal, null);
-	}
-  
-  
-  /**
-   * This constructor is used by the method "generateParseException"
-   * in the generated parser.  Calling this constructor generates
-   * a new object of this type with the fields "currentToken",
-   * "expectedTokenSequences", and "tokenImage" set.
-   */
-  public ParseException(Token currentTokenVal,
-                        int[][] expectedTokenSequencesVal,
-                        String[] tokenImageVal,
-                        String lexicalStateName
-                       )
-  {
-    super(ErrorCode.SMART_PARSER,initialise(currentTokenVal, expectedTokenSequencesVal, tokenImageVal, lexicalStateName));
-    currentToken = currentTokenVal;
-    expectedTokenSequences = expectedTokenSequencesVal;
-    tokenImage = tokenImageVal;
-  }
+    /**
+     * The end of line string (we do not use System.getProperty("") so that we are compatible with Android/GWT);
+     */
+    protected static String EOL = "\n";
+
+
+    public ParseException(Token currentTokenVal,
+                          int[][] expectedTokenSequencesVal,
+                          String[] tokenImageVal
+    ) {
+        this(currentTokenVal, expectedTokenSequencesVal, tokenImageVal, null);
+    }
+
+
+    /**
+     * This constructor is used by the method "generateParseException"
+     * in the generated parser.  Calling this constructor generates
+     * a new object of this type with the fields "currentToken",
+     * "expectedTokenSequences", and "tokenImage" set.
+     */
+    public ParseException(Token currentTokenVal,
+                          int[][] expectedTokenSequencesVal,
+                          String[] tokenImageVal,
+                          String lexicalStateName
+    ) {
+        super(ErrorCode.SMART_PARSER, initialise(currentTokenVal, expectedTokenSequencesVal, tokenImageVal, lexicalStateName));
+        currentToken = currentTokenVal;
+        expectedTokenSequences = expectedTokenSequencesVal;
+        tokenImage = tokenImageVal;
+    }
 
   /**
    * The following constructors are for use by you for whatever
@@ -67,16 +65,18 @@ public class ParseException extends SmartException {
    */
 
   public ParseException() {
-    super(ErrorCode.SMART_PARSER);
+      super(ErrorCode.SMART_PARSER);
   }
 
-  /** Constructor with message. */
-  public ParseException(String message) {
-    super(ErrorCode.SMART_PARSER,message);
-  }
+    /**
+     * Constructor with message.
+     */
+    public ParseException(String message) {
+        super(ErrorCode.SMART_PARSER, message);
+    }
 
 
-  /**
+    /**
    * This is the last token that has been consumed successfully.  If
    * this object has been created due to a parse error, the token
    * following this token will (therefore) be the first error token.
@@ -108,59 +108,59 @@ public class ParseException extends SmartException {
                            int[][] expectedTokenSequences,
                            String[] tokenImage,
                            String lexicalStateName) {
-	StringBuilder sb = new StringBuilder();
-    StringBuilder expected = new StringBuilder();
-    
-    int maxSize = 0;
-    java.util.TreeSet<String> sortedOptions = new java.util.TreeSet<String>();
-    for (int i = 0; i < expectedTokenSequences.length; i++) {
-      if (maxSize < expectedTokenSequences[i].length) {
-        maxSize = expectedTokenSequences[i].length;
+      StringBuilder sb = new StringBuilder();
+      StringBuilder expected = new StringBuilder();
+
+      int maxSize = 0;
+      java.util.TreeSet<String> sortedOptions = new java.util.TreeSet<String>();
+      for (int i = 0; i < expectedTokenSequences.length; i++) {
+          if (maxSize < expectedTokenSequences[i].length) {
+              maxSize = expectedTokenSequences[i].length;
+          }
+          for (int j = 0; j < expectedTokenSequences[i].length; j++) {
+              sortedOptions.add(tokenImage[expectedTokenSequences[i][j]]);
+          }
       }
-      for (int j = 0; j < expectedTokenSequences[i].length; j++) {
-    	  sortedOptions.add(tokenImage[expectedTokenSequences[i][j]]);
+
+      for (String option : sortedOptions) {
+          expected.append(INDENT).append(option).append(EOL);
       }
-    }
-    
-    for (String option : sortedOptions) {
-        expected.append(INDENT).append(option).append(EOL);
+
+      sb.append("Encountered unexpected token:");
+
+      Token tok = currentToken.next;
+      for (int i = 0; i < maxSize; i++) {
+          String tokenText = tok.image;
+          String escapedTokenText = add_escapes(tokenText);
+          if (i != 0) {
+              sb.append(" ");
+          }
+          if (tok.kind == 0) {
+              sb.append(tokenImage[0]);
+              break;
+          }
+          sb.append(" \"");
+          sb.append(escapedTokenText);
+          sb.append("\"");
+          sb.append(" " + tokenImage[tok.kind]);
+          tok = tok.next;
       }
-    
-    sb.append("Encountered unexpected token:");
-    
-    Token tok = currentToken.next;
-    for (int i = 0; i < maxSize; i++) {
-      String tokenText = tok.image;
-  	  String escapedTokenText = add_escapes(tokenText);
-      if (i != 0) {
-      	sb.append(" ");
+      sb.append(EOL).append(INDENT).append("at line " + currentToken.next.beginLine + ", column " + currentToken.next.beginColumn);
+      sb.append(".").append(EOL);
+
+      if (expectedTokenSequences.length == 0) {
+          // Nothing to add here
+      } else {
+          int numExpectedTokens = expectedTokenSequences.length;
+          sb.append(EOL).append("Was expecting" + (numExpectedTokens == 1 ? ":" : " one of:") + EOL + EOL);
+          sb.append(expected.toString());
       }
-      if (tok.kind == 0) {
-      	sb.append(tokenImage[0]);
-        break;
-      }
-      sb.append(" \"");
-	  sb.append(escapedTokenText);
-      sb.append("\"");
-      sb.append(" " + tokenImage[tok.kind]);
-      tok = tok.next;
-    }
-	sb.append(EOL).append(INDENT).append("at line " + currentToken.next.beginLine + ", column " + currentToken.next.beginColumn);
-	sb.append(".").append(EOL);
-    
-    if (expectedTokenSequences.length == 0) {
-        // Nothing to add here
-    } else {
-    	int numExpectedTokens = expectedTokenSequences.length;
-    	sb.append(EOL).append("Was expecting"+ (numExpectedTokens == 1 ? ":" : " one of:") + EOL + EOL);
-    	sb.append(expected.toString());
-    }
-    // 2013/07/30 --> Seems to be inaccurate as represents the readahead state, not the lexical state BEFORE the unknown token
+      // 2013/07/30 --> Seems to be inaccurate as represents the readahead state, not the lexical state BEFORE the unknown token
 //    if (lexicalStateName != null) {
-//    	sb.append(EOL).append("** Lexical State : ").append(lexicalStateName).append(EOL).append(EOL);
+//    sb.append(EOL).append("** Lexical State : ").append(lexicalStateName).append(EOL).append(EOL);
 //    }
-    
-    return sb.toString();
+
+      return sb.toString();
   }
 
 
@@ -173,8 +173,7 @@ public class ParseException extends SmartException {
       StringBuilder retval = new StringBuilder();
       char ch;
       for (int i = 0; i < str.length(); i++) {
-        switch (str.charAt(i))
-        {
+        switch (str.charAt(i)) {
            case '\b':
               retval.append("\\b");
               continue;
