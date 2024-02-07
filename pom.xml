@@ -146,6 +146,7 @@
                     <excludes>
                         <exclude>**/*Bean.java</exclude>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/smartql/parser/*.java</exclude>
                     </excludes>
                     <excludeRoots>
                         <excludeRoot>target/generated-sources</excludeRoot>

@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 
-import com.xiaomi.smartql.parser.ParseException;
 import com.xiaomi.smartql.parser.SmartQLEngine;
 import net.sf.jsqlparser.JSQLParserException;
 import com.xiaomi.smartql.parser.CCJSqlParserManager;
